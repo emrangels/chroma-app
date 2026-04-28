@@ -381,7 +381,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
   const slide = slides[idx];
 
   return (
-    <div className="screen" style={{ background: DS.colors.bg }}>
+    <div className="screen" style={{ background: DS.colors.bg, display: "flex", flexDirection: "column" }}>
       <style>{`
         @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes slideInLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
@@ -389,71 +389,89 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
         .slide-left { animation: slideInLeft 0.35s ease both; }
       `}</style>
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "20px 28px 0" }}>
-        <div
-          key={idx}
-          className={dir > 0 ? "slide-right" : "slide-left"}
-          style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", paddingTop: 32 }}
-        >
-          <div style={{
-            width: 96,
-            height: 96,
-            borderRadius: DS.radius.xl,
-            background: slide.bg,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: 24,
-          }}>
-            <Icon name={slide.icon} size={38} color={slide.accent} strokeWidth={1.5} />
-          </div>
-
-          <h1 style={{
-            fontSize: 28,
-            fontWeight: 700,
-            color: DS.colors.text,
-            textAlign: "center",
-            letterSpacing: "-0.5px",
-            marginBottom: 16,
-          }}>
-            {slide.title}
-          </h1>
-
-          <p style={{
-            fontSize: 16,
-            color: DS.colors.textMuted,
-            textAlign: "center",
-            lineHeight: 1.6,
-            maxWidth: 280,
-          }}>
-            {slide.body}
-          </p>
-        </div>
-
-        <div style={{
+      {/* SLIDE CONTENT — fixed height, never grows */}
+      <div
+        key={idx}
+        className={dir > 0 ? "slide-right" : "slide-left"}
+        style={{
+          flex: 1,
           display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
           justifyContent: "center",
-          gap: 6,
-          marginBottom: 32,
+          padding: "0 28px",
+          minHeight: 0,
+        }}
+      >
+        <div style={{
+          width: 88,
+          height: 88,
+          borderRadius: DS.radius.xl,
+          background: slide.bg,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: 20,
+          flexShrink: 0,
         }}>
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => goTo(i)}
-              style={{
-                width: i === idx ? 24 : 6,
-                height: 6,
-                borderRadius: DS.radius.full,
-                background: i === idx ? DS.colors.accent : DS.colors.border,
-                transition: "all 0.3s ease",
-                cursor: "pointer",
-              }}
-            />
-          ))}
+          <Icon name={slide.icon} size={36} color={slide.accent} strokeWidth={1.5} />
         </div>
+
+        <h1 style={{
+          fontSize: 26,
+          fontWeight: 700,
+          color: DS.colors.text,
+          textAlign: "center",
+          letterSpacing: "-0.5px",
+          marginBottom: 12,
+          flexShrink: 0,
+        }}>
+          {slide.title}
+        </h1>
+
+        <p style={{
+          fontSize: 15,
+          color: DS.colors.textMuted,
+          textAlign: "center",
+          lineHeight: 1.6,
+          maxWidth: 280,
+          flexShrink: 0,
+        }}>
+          {slide.body}
+        </p>
       </div>
 
-      <div style={{ padding: "0 28px 32px", display: "flex", flexDirection: "column", gap: 12 }}>
+      {/* DOTS — fixed */}
+      <div style={{
+        display: "flex",
+        justifyContent: "center",
+        gap: 6,
+        paddingBottom: 16,
+        flexShrink: 0,
+      }}>
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => goTo(i)}
+            style={{
+              width: i === idx ? 24 : 6,
+              height: 6,
+              borderRadius: DS.radius.full,
+              background: i === idx ? DS.colors.accent : DS.colors.border,
+              transition: "all 0.3s ease",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* BUTTONS — always pinned to bottom */}
+      <div style={{
+        padding: "0 28px 48px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+        flexShrink: 0,
+      }}>
         {idx < slides.length - 1 ? (
           <>
             <button
@@ -466,7 +484,6 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
                 color: DS.colors.white,
                 fontSize: 16,
                 fontWeight: 600,
-                letterSpacing: "-0.2px",
               }}
             >
               Continue
@@ -475,7 +492,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
               onClick={onComplete}
               style={{
                 width: "100%",
-                padding: "14px",
+                padding: "12px",
                 fontSize: 14,
                 color: DS.colors.textMuted,
                 fontWeight: 500,
@@ -495,7 +512,6 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
               color: DS.colors.white,
               fontSize: 16,
               fontWeight: 600,
-              letterSpacing: "-0.2px",
             }}
           >
             Get started
@@ -505,6 +521,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
     </div>
   );
 };
+
 
 // ============================================================
 // AUTH SCREEN
