@@ -396,16 +396,16 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
           style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}
         >
           <div style={{
-            width: 120,
-            height: 120,
+            width: 96,
+            height: 96,
             borderRadius: DS.radius.xl,
             background: slide.bg,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            marginBottom: 40,
+            marginBottom: 24,
           }}>
-            <Icon name={slide.icon} size={48} color={slide.accent} strokeWidth={1.5} />
+            <Icon name={slide.icon} size={38} color={slide.accent} strokeWidth={1.5} />
           </div>
 
           <h1 style={{
