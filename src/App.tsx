@@ -1129,28 +1129,31 @@ export default function App() {
   const update = (patch: Partial<AppState>) => setState(s => ({ ...s, ...patch }));
 
   // Session restore
-  useEffect(() => {
-    const token = localStorage.getItem("chroma_token");
-    if (token) {
-      fetch(`${SUPABASE_URL}/auth/v1/user`, {
-        headers: { ...supabaseHeaders, Authorization: `Bearer ${token}` },
+useEffect(() => {
+  const token = localStorage.getItem("chroma_token");
+  const cachedSeason = localStorage.getItem("chroma_season");
+  if (token && cachedSeason) {
+    fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: { ...supabaseHeaders, Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.id) {
+          update({
+            screen: "main",
+            user: {
+              id: data.id,
+              email: data.email,
+              name: data.user_metadata?.name || data.email.split("@")[0],
+              plan: "free",
+            },
+            seasonData: JSON.parse(cachedSeason),
+          });
+        }
       })
-        .then(r => r.json())
-        .then(data => {
-          if (data.id) {
-            update({
-              user: {
-                id: data.id,
-                email: data.email,
-                name: data.user_metadata?.name || data.email.split("@")[0],
-                plan: "free",
-              },
-            });
-          }
-        })
-        .catch(() => {});
-    }
-  }, []);
+      .catch(() => {});
+  }
+}, []);
 
   // Convert image file to base64
   const toBase64 = (file: File): Promise<string> =>
