@@ -855,7 +855,6 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File) => void }) => {
           ref={fileRef}
           type="file"
           accept="image/*"
-          capture="user"
           onChange={handleChange}
           style={{ display: "none" }}
         />
