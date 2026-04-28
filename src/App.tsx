@@ -467,7 +467,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
 
       {/* BUTTONS — always pinned to bottom */}
       <div style={{
-        padding: "0 28px calc(48px + env(safe-area-inset-bottom))",
+        padding: "0 28px calc(64px + env(safe-area-inset-bottom))",
         display: "flex",
         flexDirection: "column",
         gap: 8,
