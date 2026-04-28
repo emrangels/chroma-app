@@ -32,21 +32,6 @@ const DS = {
     lg: "0 8px 32px rgba(0,0,0,0.12)",
   },
 };
-
-const seasonGradients: Record<string, string> = {
-  Spring: "linear-gradient(135deg, #FFF1E6 0%, #FFE0CC 50%, #FECBA1 100%)",
-  Summer: "linear-gradient(135deg, #EEF2FF 0%, #DDE6FF 50%, #C7D7FF 100%)",
-  Autumn: "linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 50%, #FED7AA 100%)",
-  Winter: "linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 50%, #BAE6FD 100%)",
-};
-
-const seasonAccents: Record<string, string> = {
-  Spring: "#E8845A",
-  Summer: "#6B7FD4",
-  Autumn: "#C26B3A",
-  Winter: "#4A90C4",
-};
-
 // ============================================================
 // TYPES
 // ============================================================
