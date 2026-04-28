@@ -364,7 +364,7 @@ const slides = [
     icon: "shirt",
     title: "Check any item",
     body: "Check a single item, a full outfit, or hold swatches against your skin — Chroma reads every colour and tells you what works..",
-    bg: "#000000",
+    bg: "#E8F5EE",
     accent: "#1A9E6E",
   },
 ];
@@ -389,11 +389,11 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
         .slide-left { animation: slideInLeft 0.35s ease both; }
       `}</style>
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "60px 28px 0" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "20px 28px 0" }}>
         <div
           key={idx}
           className={dir > 0 ? "slide-right" : "slide-left"}
-          style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}
+          style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", paddingTop: 32 }}
         >
           <div style={{
             width: 96,
