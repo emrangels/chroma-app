@@ -146,9 +146,10 @@ const GlobalStyles = () => (
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body, #root {
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
+  height: 100%;
+  width: 100%;
+  min-height: 100dvh;
+  overflow: hidden;
       background: ${DS.colors.bg};
       font-family: ${DS.font};
       color: ${DS.colors.text};
@@ -466,7 +467,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
 
       {/* BUTTONS — always pinned to bottom */}
       <div style={{
-        padding: "0 28px 48px",
+        padding: "0 28px calc(48px + env(safe-area-inset-bottom))",
         display: "flex",
         flexDirection: "column",
         gap: 8,
