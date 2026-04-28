@@ -453,7 +453,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
         </div>
       </div>
 
-      <div style={{ padding: "0 28px 48px", display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ padding: "0 28px 32px", display: "flex", flexDirection: "column", gap: 12 }}>
         {idx < slides.length - 1 ? (
           <>
             <button
@@ -659,7 +659,7 @@ const AuthScreen = ({
 
   return (
     <div className="screen fade-in" style={{ background: DS.colors.bg }}>
-      <div style={{ padding: "60px 28px 0", display: "flex", flexDirection: "column", gap: 0 }}>
+      <div style={{ padding: "40px 28px 0", display: "flex", flexDirection: "column", gap: 0 }}>
         <button onClick={() => { setMode("landing"); setError(""); }} style={{ alignSelf: "flex-start", marginBottom: 32, color: DS.colors.textMuted }}>
           <Icon name="chevronLeft" size={20} color={DS.colors.textMuted} />
         </button>
