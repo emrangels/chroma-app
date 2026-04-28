@@ -756,7 +756,7 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File) => void }) => {
 
   return (
     <div className="screen fade-in" style={{ background: DS.colors.bg }}>
-      <div style={{ padding: "60px 28px 0", flex: 1, display: "flex", flexDirection: "column" }}>
+      <div style={{ padding: "40px 28px 0", flex: 1, display: "flex", flexDirection: "column" }}>
         <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>
           Take your selfie
         </h1>
