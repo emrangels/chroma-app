@@ -580,7 +580,8 @@ const AuthScreen = ({
 
       onSignIn({ id: userId, email: userEmail, name: userName, plan });
     } catch (e: any) {
-      setError(e.message || "Something went wrong. Please try again.");
+      } catch (e) {
+  setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
