@@ -1346,21 +1346,34 @@ useEffect(() => {
 }, []);
 
   // Convert image file to base64
-  const toBase64 = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        const result = reader.result as string;
-        resolve(result.split(",")[1]);
-      };
-      reader.onerror = reject;
-    });
-
+const resizeAndEncode = (file: File, maxDimension = 1024, quality = 0.85): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      let { width, height } = img;
+      if (width > height) {
+        if (width > maxDimension) { height = Math.round(height * maxDimension / width); width = maxDimension; }
+      } else {
+        if (height > maxDimension) { width = Math.round(width * maxDimension / height); height = maxDimension; }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { reject(new Error("Canvas unavailable")); return; }
+      ctx.drawImage(img, 0, 0, width, height);
+      const dataUrl = canvas.toDataURL("image/jpeg", quality);
+      resolve(dataUrl.split(",")[1]);
+    };
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error("Image load failed")); };
+    img.src = objectUrl;
+  });
   const handleUpload = async (file: File) => {
     update({ screen: "analysing" });
     try {
-      const base64 = await toBase64(file);
+      const base64 = await resizeAndEncode(file);
       const res = await fetch(`${SUPABASE_URL}/functions/v1/smooth-action`, {
         method: "POST",
         headers: {
