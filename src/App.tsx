@@ -1066,6 +1066,9 @@ const AnalysingScreen = () => {
         {steps[step]}...
       </p>
 
+      <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", marginBottom: 16, maxWidth: 260 }}>
+  This takes 15-20 seconds — please keep this screen open
+</p>
       <div style={{ width: "100%", maxWidth: 280, display: "flex", flexDirection: "column", gap: 12 }}>
         {steps.map((s, i) => (
           <div key={s} style={{ display: "flex", alignItems: "center", gap: 12 }}>
