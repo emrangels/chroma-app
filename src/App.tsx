@@ -1387,6 +1387,8 @@ const resizeAndEncode = (file: File, maxDimension = 1024, quality = 0.85): Promi
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
+      localStorage.setItem("chroma_season", JSON.stringify(data));
+update({ seasonData: data, screen: "main" });
       update({ seasonData: data, screen: "main" });
     } catch (e) {
       // Fall back to main anyway for now — handle gracefully in Phase 3
