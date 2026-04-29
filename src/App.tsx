@@ -511,9 +511,6 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
 // ============================================================
 // AUTH SCREEN
 // ============================================================
-// ============================================================
-// AUTH SCREEN
-// ============================================================
 const AuthScreen = ({
   onSignIn,
   onGuest,
@@ -1169,7 +1166,375 @@ const BottomNav = ({
     })}
   </div>
 );
+// ============================================================
+// SEASON GRADIENTS
+// ============================================================
+const seasonGradients: Record<string, string> = {
+  Spring: "linear-gradient(160deg, #FFF1E6 0%, #FFE0CC 60%, #FECBA1 100%)",
+  Summer: "linear-gradient(160deg, #EEF2FF 0%, #DDE6FF 60%, #C7D7FF 100%)",
+  Autumn: "linear-gradient(160deg, #FFF7ED 0%, #FFEDD5 60%, #FED7AA 100%)",
+  Winter: "linear-gradient(160deg, #F0F9FF 0%, #E0F2FE 60%, #BAE6FD 100%)",
+};
 
+const seasonTextColors: Record<string, string> = {
+  Spring: "#7A3A1E",
+  Summer: "#1a2a4a",
+  Autumn: "#5C2E00",
+  Winter: "#0C2340",
+};
+
+const seasonAccentColors: Record<string, string> = {
+  Spring: "#E8845A",
+  Summer: "#4A6FD4",
+  Autumn: "#C26B3A",
+  Winter: "#2E7DB5",
+};
+
+// ============================================================
+// HOME TAB
+// ============================================================
+const HomeTab = ({
+  seasonData,
+  user,
+  isGuest,
+  activeSheet,
+  onOpenSheet,
+  onCloseSheet,
+  onUpgrade,
+}: {
+  seasonData: SeasonData | null;
+  user: User | null;
+  isGuest: boolean;
+  activeSheet: Sheet;
+  onOpenSheet: (sheet: Sheet) => void;
+  onCloseSheet: () => void;
+  onUpgrade: () => void;
+}) => {
+  const plan = user?.plan || "free";
+
+  if (!seasonData) {
+    return (
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, padding: "40px 28px" }}>
+        <Icon name="sparkles" size={40} color={DS.colors.border} />
+        <p style={{ fontSize: 15, fontWeight: 500, color: DS.colors.textMuted, textAlign: "center" }}>No season data yet</p>
+        <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center" }}>Upload a selfie to discover your colour season</p>
+      </div>
+    );
+  }
+
+  const gradient = seasonGradients[seasonData.season] || seasonGradients.Summer;
+  const textColor = seasonTextColors[seasonData.season] || "#1a2a4a";
+  const accentColor = seasonAccentColors[seasonData.season] || "#4A6FD4";
+
+  const canAccessMakeup = plan === "glow" || plan === "luxe";
+  const canAccessHair = plan === "glow" || plan === "luxe";
+  const canAccessJewellery = plan === "glow" || plan === "luxe";
+  const canAccessStyle = plan === "luxe";
+
+  const categoryCards = [
+    {
+      id: "makeup" as Sheet,
+      icon: "droplet",
+      label: "Makeup",
+      teaser: seasonData.makeup.foundation.split(".")[0] + ".",
+      locked: !canAccessMakeup,
+      requiredPlan: "Glow",
+    },
+    {
+      id: "hair" as Sheet,
+      icon: "scissors",
+      label: "Hair",
+      teaser: seasonData.hair.best_colours.slice(0, 2).join(", ") + " and more...",
+      locked: !canAccessHair,
+      requiredPlan: "Glow",
+    },
+    {
+      id: "jewellery" as Sheet,
+      icon: "gem",
+      label: "Jewellery",
+      teaser: seasonData.jewellery.metals.join(", "),
+      locked: !canAccessJewellery,
+      requiredPlan: "Glow",
+    },
+    {
+      id: "style" as Sheet,
+      icon: "shirt",
+      label: "Style & Fit",
+      teaser: seasonData.style.tip,
+      locked: !canAccessStyle,
+      requiredPlan: "Luxe",
+    },
+  ];
+
+  return (
+    <div style={{ flex: 1, overflowY: "auto", background: DS.colors.bg }}>
+      {/* Hero */}
+      <div style={{ background: gradient, padding: "52px 24px 28px" }}>
+        <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 600, color: accentColor, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+          Your season
+        </p>
+        <h1 style={{ margin: "0 0 4px", fontSize: 42, fontWeight: 700, color: textColor, letterSpacing: "-1.5px", lineHeight: 1 }}>
+          {seasonData.season}
+        </h1>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+          {plan === "free" ? (
+            <button
+              onClick={onUpgrade}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+                padding: "3px 10px",
+                background: "rgba(255,255,255,0.5)",
+                borderRadius: DS.radius.full,
+                fontSize: 12,
+                fontWeight: 500,
+                color: accentColor,
+                border: `1px solid ${accentColor}30`,
+              }}
+            >
+              <Icon name="lock" size={10} color={accentColor} strokeWidth={2} />
+              {seasonData.subseason} — unlock
+            </button>
+          ) : (
+            <span style={{ fontSize: 15, color: accentColor, fontWeight: 500 }}>
+              {seasonData.subseason}
+            </span>
+          )}
+        </div>
+        <p style={{ margin: 0, fontSize: 14, color: textColor, lineHeight: 1.6, opacity: 0.85, maxWidth: 300 }}>
+          {seasonData.headline}
+        </p>
+      </div>
+
+      {/* Daily tip */}
+      <div style={{ margin: "0 16px", transform: "translateY(-1px)", background: DS.colors.bg, borderRadius: `0 0 ${DS.radius.lg} ${DS.radius.lg}`, padding: "12px 16px", borderLeft: `3px solid ${accentColor}`, display: "flex", alignItems: "flex-start", gap: 10 }}>
+        <Icon name="sparkles" size={14} color={accentColor} strokeWidth={2} />
+        <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>
+          {seasonData.daily_tip}
+        </p>
+      </div>
+
+      <div style={{ padding: "20px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
+        {/* Palette card */}
+        <div style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "16px" }}>
+          <p style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 600, color: DS.colors.text }}>
+            Your palette
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+            {seasonData.palette.best.map((colour) => (
+              <div key={colour.hex} style={{ textAlign: "center" }}>
+                <div style={{ width: "100%", aspectRatio: "1", borderRadius: 10, background: colour.hex, marginBottom: 4, border: colour.hex === "#FFFFFF" ? `1px solid ${DS.colors.border}` : "none" }} />
+                <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Colours to avoid */}
+          <div style={{ marginTop: 16, paddingTop: 14, borderTop: `1px solid ${DS.colors.border}` }}>
+            <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 500, color: DS.colors.textMuted }}>
+              Avoid
+            </p>
+            <div style={{ display: "flex", gap: 8 }}>
+              {seasonData.palette.avoid.map((colour) => (
+                <div key={colour.hex} style={{ flex: 1, textAlign: "center" }}>
+                  <div style={{
+                    width: "100%",
+                    aspectRatio: "1",
+                    borderRadius: 8,
+                    background: colour.hex,
+                    marginBottom: 4,
+                    border: `1px solid ${DS.colors.border}`,
+                    position: "relative",
+                    overflow: "hidden",
+                  }}>
+                    <div style={{
+                      position: "absolute",
+                      inset: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}>
+                      <div style={{ width: "70%", height: 1.5, background: DS.colors.danger, transform: "rotate(-45deg)", opacity: 0.7 }} />
+                    </div>
+                  </div>
+                  <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Category cards */}
+        {categoryCards.map((card) => (
+          <button
+            key={card.id}
+            onClick={() => card.locked ? onUpgrade() : onOpenSheet(card.id)}
+            style={{
+              background: card.locked ? DS.colors.surface : DS.colors.bg,
+              borderRadius: DS.radius.lg,
+              border: `1px solid ${DS.colors.border}`,
+              padding: "14px 16px",
+              textAlign: "left",
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: DS.radius.md,
+                  background: card.locked ? DS.colors.border : DS.colors.accentLight,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}>
+                  <Icon name={card.icon} size={16} color={card.locked ? DS.colors.textFaint : DS.colors.accent} strokeWidth={1.5} />
+                </div>
+                <span style={{ fontSize: 14, fontWeight: 600, color: card.locked ? DS.colors.textFaint : DS.colors.text }}>
+                  {card.label}
+                </span>
+              </div>
+              {card.locked ? (
+                <span style={{ fontSize: 11, background: DS.colors.accentLight, color: DS.colors.accentDark, padding: "3px 8px", borderRadius: DS.radius.full, fontWeight: 500 }}>
+                  {card.requiredPlan}
+                </span>
+              ) : (
+                <Icon name="chevronRight" size={16} color={DS.colors.textFaint} />
+              )}
+            </div>
+            <p style={{ margin: 0, fontSize: 13, color: card.locked ? DS.colors.textFaint : DS.colors.textMuted, lineHeight: 1.5, paddingLeft: 38 }}>
+              {card.teaser}
+            </p>
+          </button>
+        ))}
+      </div>
+
+      {/* Sheets */}
+      {activeSheet && activeSheet !== "paywall" && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.4)",
+            zIndex: 100,
+            display: "flex",
+            alignItems: "flex-end",
+          }}
+          onClick={onCloseSheet}
+        >
+          <div
+            className="slide-up"
+            style={{
+              width: "100%",
+              maxHeight: "85vh",
+              background: DS.colors.bg,
+              borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`,
+              overflowY: "auto",
+              padding: "0 0 48px",
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Sheet handle */}
+            <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+              <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
+            </div>
+
+            {activeSheet === "makeup" && (
+              <div style={{ padding: "16px 24px" }}>
+                <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 20 }}>Makeup</h2>
+                {[
+                  { label: "Foundation", value: seasonData.makeup.foundation },
+                  { label: "Blush", value: seasonData.makeup.blush },
+                  { label: "Lips", value: seasonData.makeup.lip },
+                  { label: "Eyes", value: seasonData.makeup.eye },
+                ].map(item => (
+                  <div key={item.label} style={{ marginBottom: 20, paddingBottom: 20, borderBottom: `1px solid ${DS.colors.border}` }}>
+                    <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>{item.label}</p>
+                    <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeSheet === "hair" && (
+              <div style={{ padding: "16px 24px" }}>
+                <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 20 }}>Hair</h2>
+                <div style={{ marginBottom: 20 }}>
+                  <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Best colours</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {seasonData.hair.best_colours.map(c => (
+                      <span key={c} style={{ padding: "6px 14px", background: DS.colors.accentLight, borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.accentDark, fontWeight: 500 }}>{c}</span>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ marginBottom: 20 }}>
+                  <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 600, color: DS.colors.danger, letterSpacing: "0.06em", textTransform: "uppercase" }}>Avoid</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {seasonData.hair.avoid.map(c => (
+                      <span key={c} style={{ padding: "6px 14px", background: "#FEF2F2", borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.danger, fontWeight: 500 }}>{c}</span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p style={{ margin: "0 0 8px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Stylist tip</p>
+                  <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{seasonData.hair.tip}</p>
+                </div>
+              </div>
+            )}
+
+            {activeSheet === "jewellery" && (
+              <div style={{ padding: "16px 24px" }}>
+                <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 20 }}>Jewellery</h2>
+                <div style={{ marginBottom: 20 }}>
+                  <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Metals</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {seasonData.jewellery.metals.map(m => (
+                      <span key={m} style={{ padding: "6px 14px", background: DS.colors.accentLight, borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.accentDark, fontWeight: 500 }}>{m}</span>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ marginBottom: 20 }}>
+                  <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Stones</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {seasonData.jewellery.stones.map(s => (
+                      <span key={s} style={{ padding: "6px 14px", background: DS.colors.surface, borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.textMuted, fontWeight: 500 }}>{s}</span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p style={{ margin: "0 0 8px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Tip</p>
+                  <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{seasonData.jewellery.tip}</p>
+                </div>
+              </div>
+            )}
+
+            {activeSheet === "style" && (
+              <div style={{ padding: "16px 24px" }}>
+                <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 20 }}>Style & Fit</h2>
+                {[
+                  { label: "Silhouettes", value: seasonData.style.silhouettes },
+                  { label: "Patterns", value: seasonData.style.patterns },
+                  { label: "Fabrics", value: seasonData.style.fabrics },
+                  { label: "Philosophy", value: seasonData.style.tip },
+                ].map(item => (
+                  <div key={item.label} style={{ marginBottom: 20, paddingBottom: 20, borderBottom: `1px solid ${DS.colors.border}` }}>
+                    <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>{item.label}</p>
+                    <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 // ============================================================
 // PLACEHOLDER TAB CONTENT
 // ============================================================
@@ -1287,6 +1652,10 @@ const MainApp = ({
   user,
   isGuest,
   onSignUp,
+  activeSheet,
+  onOpenSheet,
+  onCloseSheet,
+  onUpgrade,
 }: {
   activeTab: Tab;
   onTabChange: (tab: Tab) => void;
@@ -1294,15 +1663,30 @@ const MainApp = ({
   user: User | null;
   isGuest: boolean;
   onSignUp: () => void;
+  activeSheet: Sheet;
+  onOpenSheet: (sheet: Sheet) => void;
+  onCloseSheet: () => void;
+  onUpgrade: () => void;
 }) => (
   <div className="screen fade-in" style={{ background: DS.colors.bg }}>
     <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-      <PlaceholderTab tab={activeTab} isGuest={isGuest} onSignUp={onSignUp} />
+      {activeTab === "home" ? (
+        <HomeTab
+          seasonData={seasonData}
+          user={user}
+          isGuest={isGuest}
+          activeSheet={activeSheet}
+          onOpenSheet={onOpenSheet}
+          onCloseSheet={onCloseSheet}
+          onUpgrade={onUpgrade}
+        />
+      ) : (
+        <PlaceholderTab tab={activeTab} isGuest={isGuest} onSignUp={onSignUp} />
+      )}
     </div>
     <BottomNav activeTab={activeTab} onTabChange={onTabChange} />
   </div>
 );
-
 // ============================================================
 // ROOT APP
 // ============================================================
@@ -1389,7 +1773,6 @@ const resizeAndEncode = (file: File, maxDimension = 1024, quality = 0.85): Promi
       if (data.error) throw new Error(data.error);
       localStorage.setItem("chroma_season", JSON.stringify(data));
 update({ seasonData: data, screen: "main" });
-      update({ seasonData: data, screen: "main" });
     } catch (e) {
       // Fall back to main anyway for now — handle gracefully in Phase 3
       update({ screen: "main" });
@@ -1421,14 +1804,18 @@ update({ seasonData: data, screen: "main" });
           <AnalysingScreen />
         )}
         {screen === "main" && (
-          <MainApp
-            activeTab={activeTab}
-            onTabChange={tab => update({ activeTab: tab })}
-            seasonData={seasonData}
-            user={user}
-            isGuest={isGuest}
-             onSignUp={() => update({ screen: "auth" })}
-  />
+        <MainApp
+  activeTab={activeTab}
+  onTabChange={tab => update({ activeTab: tab })}
+  seasonData={seasonData}
+  user={user}
+  isGuest={isGuest}
+  onSignUp={() => update({ screen: "auth" })}
+  activeSheet={state.activeSheet}
+  onOpenSheet={sheet => update({ activeSheet: sheet })}
+  onCloseSheet={() => update({ activeSheet: null })}
+  onUpgrade={() => update({ activeSheet: "paywall" })}
+/>
 )}
       </div>
     </>
