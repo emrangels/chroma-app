@@ -351,6 +351,9 @@ const slides = [
     icon: "shirt",
     title: "Check any item",
     body: "Check a single item, a full outfit, or try colour swatches - Chroma reads every colour and tells you what works.",
+    bg: "#E8F5EE",
+    accent: "#1A9E6E",
+  },
 ];
 
 const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
