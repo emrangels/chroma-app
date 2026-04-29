@@ -343,14 +343,14 @@ const slides = [
   {
     icon: "sparkles",
     title: "Get your full guide",
-    body: "Colours, makeup, hair, jewellery and style — everything personalised to you — so you always look your best.",
+    body: "Colours, makeup, hair, jewellery and style — everything personalised to you — so getting dressed becomes the easy part.",
     bg: "#FFF1E6",
     accent: "#E8845A",
   },
   {
     icon: "shirt",
     title: "Check any item",
-body: "Colours, makeup, hair, jewellery and style — everything personalised to you — so getting dressed becomes the easy part.",  },
+    body: "Check a single item, a full outfit, or try colour swatches — Chroma reads every colour and tells you what works.",
 ];
 
 const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
