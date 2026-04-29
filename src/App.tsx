@@ -343,7 +343,7 @@ const slides = [
   {
     icon: "sparkles",
     title: "Get your full guide",
-    body: "Colours, makeup, hair, jewellery and style — everything personalised to you — so getting dressed becomes the easy part.",
+    body: "Colours, makeup, hair, jewellery and style — everything personalised to you, so getting dressed becomes the easy part.",
     bg: "#FFF1E6",
     accent: "#E8845A",
   },
