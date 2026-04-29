@@ -511,6 +511,9 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
 // ============================================================
 // AUTH SCREEN
 // ============================================================
+// ============================================================
+// AUTH SCREEN
+// ============================================================
 const AuthScreen = ({
   onSignIn,
   onGuest,
@@ -522,6 +525,9 @@ const AuthScreen = ({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [referralCode, setReferralCode] = useState("");
+  const [showReferral, setShowReferral] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -537,7 +543,39 @@ const AuthScreen = ({
     transition: "border-color 0.2s",
   };
 
+  const generateReferralCode = (userName: string): string => {
+    const clean = userName.replace(/[^a-zA-Z]/g, "").toUpperCase().slice(0, 6) || "USER";
+    const digits = Math.floor(1000 + Math.random() * 9000).toString();
+    return clean + digits;
+  };
+
+  const saveProfile = async (userId: string, userName: string, userEmail: string, token: string, referralCode: string, enteredReferralCode: string) => {
+    try {
+      const referred_by = enteredReferralCode ? enteredReferralCode.toUpperCase() : null;
+      await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+        method: "POST",
+        headers: {
+          ...supabaseHeaders,
+          Authorization: `Bearer ${token}`,
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify({
+          id: userId,
+          name: userName,
+          user_plan: "free",
+          referral_code: referralCode,
+          referred_by,
+          referral_count: 0,
+        }),
+      });
+    } catch {}
+  };
+
   const handleAuth = async () => {
+    if (mode === "signup" && !agreedToTerms) {
+      setError("Please agree to the Terms & Privacy Policy to continue.");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -575,12 +613,19 @@ const AuthScreen = ({
         } catch {}
       }
 
+      if (mode === "signup" && userId) {
+        const newReferralCode = generateReferralCode(userName);
+        await saveProfile(userId, userName, userEmail, data.access_token, newReferralCode, referralCode);
+      }
+
+      const userObj: User = { id: userId, email: userEmail, name: userName, plan };
       localStorage.setItem("chroma_token", data.access_token);
       localStorage.setItem("chroma_refresh", data.refresh_token || "");
+      localStorage.setItem("chroma_user", JSON.stringify(userObj));
 
-      onSignIn({ id: userId, email: userEmail, name: userName, plan });
+      onSignIn(userObj);
     } catch (e) {
-  setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
+      setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -660,8 +705,8 @@ const AuthScreen = ({
   }
 
   return (
-    <div className="screen fade-in" style={{ background: DS.colors.bg }}>
-      <div style={{ padding: "40px 28px 0", display: "flex", flexDirection: "column", gap: 0 }}>
+    <div className="screen fade-in" style={{ background: DS.colors.bg, overflowY: "auto" }}>
+      <div style={{ padding: "40px 28px 48px", display: "flex", flexDirection: "column", gap: 0 }}>
         <button onClick={() => { setMode("landing"); setError(""); }} style={{ alignSelf: "flex-start", marginBottom: 32, color: DS.colors.textMuted }}>
           <Icon name="chevronLeft" size={20} color={DS.colors.textMuted} />
         </button>
@@ -696,6 +741,69 @@ const AuthScreen = ({
             value={password}
             onChange={e => setPassword(e.target.value)}
           />
+
+          {mode === "signup" && (
+            <>
+              {/* Referral code */}
+              <button
+                onClick={() => setShowReferral(!showReferral)}
+                style={{
+                  alignSelf: "flex-start",
+                  fontSize: 13,
+                  color: DS.colors.accent,
+                  fontWeight: 500,
+                  padding: "4px 0",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                }}
+              >
+                <Icon name={showReferral ? "chevronDown" : "chevronRight"} size={14} color={DS.colors.accent} />
+                Have a referral code?
+              </button>
+
+              {showReferral && (
+                <input
+                  style={inputStyle}
+                  placeholder="Enter referral code"
+                  value={referralCode}
+                  maxLength={10}
+                  onChange={e => setReferralCode(e.target.value.toUpperCase())}
+                />
+              )}
+
+              {/* Terms checkbox */}
+              <button
+                onClick={() => setAgreedToTerms(!agreedToTerms)}
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 10,
+                  padding: "4px 0",
+                  textAlign: "left",
+                }}
+              >
+                <div style={{
+                  width: 20,
+                  height: 20,
+                  borderRadius: DS.radius.sm,
+                  border: `1.5px solid ${agreedToTerms ? DS.colors.accent : DS.colors.border}`,
+                  background: agreedToTerms ? DS.colors.accent : DS.colors.bg,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  marginTop: 1,
+                  transition: "all 0.2s",
+                }}>
+                  {agreedToTerms && <Icon name="check" size={12} color={DS.colors.white} strokeWidth={2.5} />}
+                </div>
+                <span style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>
+                  I agree to the Terms & Privacy Policy
+                </span>
+              </button>
+            </>
+          )}
 
           {error && (
             <p style={{ fontSize: 13, color: DS.colors.danger, padding: "8px 12px", background: "#FEF2F2", borderRadius: DS.radius.sm }}>
@@ -732,7 +840,6 @@ const AuthScreen = ({
     </div>
   );
 };
-
 // ============================================================
 // UPLOAD SCREEN
 // ============================================================
@@ -1063,14 +1170,110 @@ const BottomNav = ({
 // ============================================================
 // PLACEHOLDER TAB CONTENT
 // ============================================================
-const PlaceholderTab = ({ tab }: { tab: Tab }) => (
-  <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, color: DS.colors.textMuted }}>
-    <Icon name={tabs.find(t => t.id === tab)?.icon || "sparkles"} size={40} color={DS.colors.border} />
-    <p style={{ fontSize: 15, fontWeight: 500 }}>{tab.charAt(0).toUpperCase() + tab.slice(1)} — coming in Phase {tab === "home" ? 3 : tab === "checker" ? 5 : tab === "wardrobe" ? 6 : 6}</p>
-    <p style={{ fontSize: 13, color: DS.colors.textFaint }}>Foundation deployed</p>
-  </div>
-);
+const PlaceholderTab = ({ tab, isGuest, onSignUp }: { 
+  tab: Tab; 
+  isGuest: boolean;
+  onSignUp: () => void;
+}) => {
+  const locked = isGuest && tab !== "home";
 
+  if (locked) {
+    const tabInfo: Record<string, { icon: string; title: string; body: string }> = {
+      checker: { icon: "image", title: "Check your colours", body: "Check any item, outfit or swatches against your season." },
+      wardrobe: { icon: "hanger", title: "Build your wardrobe", body: "Save and manage your colour-approved wardrobe." },
+      me: { icon: "user", title: "Your profile", body: "Manage your profile, plan and preferences." },
+    };
+    const info = tabInfo[tab];
+
+    return (
+      <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
+        {/* Blurred background */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          gap: 12,
+          filter: "blur(4px)",
+          opacity: 0.3,
+        }}>
+          <Icon name={info.icon} size={40} color={DS.colors.border} />
+          <p style={{ fontSize: 15, fontWeight: 500, color: DS.colors.textMuted }}>{info.title}</p>
+        </div>
+
+        {/* Overlay prompt */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "40px 28px",
+        }}>
+          <div style={{
+            width: 64,
+            height: 64,
+            borderRadius: DS.radius.lg,
+            background: DS.colors.accentLight,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: 20,
+          }}>
+            <Icon name="lock" size={28} color={DS.colors.accent} />
+          </div>
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>
+            {info.title}
+          </h2>
+          <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 32, maxWidth: 260 }}>
+            {info.body}
+          </p>
+          <button
+            onClick={onSignUp}
+            style={{
+              width: "100%",
+              padding: "16px",
+              borderRadius: DS.radius.lg,
+              background: DS.colors.accent,
+              color: DS.colors.white,
+              fontSize: 16,
+              fontWeight: 600,
+              marginBottom: 12,
+            }}
+          >
+            Create account
+          </button>
+          <button
+            onClick={onSignUp}
+            style={{
+              width: "100%",
+              padding: "14px",
+              borderRadius: DS.radius.lg,
+              background: DS.colors.bg,
+              color: DS.colors.text,
+              fontSize: 15,
+              fontWeight: 500,
+              border: `1.5px solid ${DS.colors.border}`,
+            }}
+          >
+            Sign in
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, color: DS.colors.textMuted }}>
+      <Icon name={tabs.find(t => t.id === tab)?.icon || "sparkles"} size={40} color={DS.colors.border} />
+      <p style={{ fontSize: 15, fontWeight: 500 }}>{tab.charAt(0).toUpperCase() + tab.slice(1)} - coming in Phase {tab === "home" ? 3 : tab === "checker" ? 5 : 6}</p>
+      <p style={{ fontSize: 13, color: DS.colors.textFaint }}>Foundation deployed</p>
+    </div>
+  );
+};
 // ============================================================
 // MAIN APP (shell)
 // ============================================================
@@ -1080,16 +1283,18 @@ const MainApp = ({
   seasonData,
   user,
   isGuest,
+  onSignUp,
 }: {
   activeTab: Tab;
   onTabChange: (tab: Tab) => void;
   seasonData: SeasonData | null;
   user: User | null;
   isGuest: boolean;
+  onSignUp: () => void;
 }) => (
   <div className="screen fade-in" style={{ background: DS.colors.bg }}>
     <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-      <PlaceholderTab tab={activeTab} />
+      <PlaceholderTab tab={activeTab} isGuest={isGuest} onSignUp={onSignUp} />
     </div>
     <BottomNav activeTab={activeTab} onTabChange={onTabChange} />
   </div>
@@ -1204,8 +1409,9 @@ useEffect(() => {
             seasonData={seasonData}
             user={user}
             isGuest={isGuest}
-          />
-        )}
+             onSignUp={() => update({ screen: "auth" })}
+  />
+)}
       </div>
     </>
   );
