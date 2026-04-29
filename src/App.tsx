@@ -579,8 +579,7 @@ const AuthScreen = ({
       localStorage.setItem("chroma_refresh", data.refresh_token || "");
 
       onSignIn({ id: userId, email: userEmail, name: userName, plan });
-    } catch (e: any) {
-      } catch (e) {
+    } catch (e) {
   setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
