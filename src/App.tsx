@@ -2,26 +2,13 @@ import { useState, useEffect, useRef } from "react";
 
 const DS = {
   colors: {
-    bg: "#FFFFFF",
-    accent: "#7C5CFC",
-    accentLight: "#EDE9FF",
-    accentDark: "#5B3FD4",
-    text: "#0A0A0A",
-    textMuted: "#6B6B6B",
-    textFaint: "#A0A0A0",
-    surface: "#F7F7F7",
-    border: "#EBEBEB",
-    white: "#FFFFFF",
-    success: "#1A9E6E",
-    danger: "#D94F3D",
+    bg: "#FFFFFF", accent: "#7C5CFC", accentLight: "#EDE9FF", accentDark: "#5B3FD4",
+    text: "#0A0A0A", textMuted: "#6B6B6B", textFaint: "#A0A0A0", surface: "#F7F7F7",
+    border: "#EBEBEB", white: "#FFFFFF", success: "#1A9E6E", danger: "#D94F3D",
   },
   font: "'Plus Jakarta Sans', -apple-system, sans-serif",
   radius: { sm: "8px", md: "12px", lg: "16px", xl: "24px", full: "9999px" },
-  shadow: {
-    sm: "0 1px 3px rgba(0,0,0,0.06)",
-    md: "0 4px 16px rgba(0,0,0,0.08)",
-    lg: "0 8px 32px rgba(0,0,0,0.12)",
-  },
+  shadow: { sm: "0 1px 3px rgba(0,0,0,0.06)", md: "0 4px 16px rgba(0,0,0,0.08)", lg: "0 8px 32px rgba(0,0,0,0.12)" },
 };
 
 type Screen = "splash" | "onboarding" | "auth" | "upload" | "analysing" | "main";
@@ -52,21 +39,13 @@ interface AppState {
 
 const SUPABASE_URL = "https://hnbpasabtwafnlxzlppr.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_e14xp3bV8O2Wu-gdC6HiUQ_gRYU5rbp";
-const supabaseHeaders = {
-  "Content-Type": "application/json",
-  apikey: SUPABASE_ANON_KEY,
-  Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-};
+const supabaseHeaders = { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` };
 
 const GlobalStyles = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body, #root {
-      height: 100%; width: 100%; min-height: 100dvh; overflow: hidden;
-      background: ${DS.colors.bg}; font-family: ${DS.font}; color: ${DS.colors.text};
-      -webkit-font-smoothing: antialiased;
-    }
+    html, body, #root { height: 100%; width: 100%; min-height: 100dvh; overflow: hidden; background: ${DS.colors.bg}; font-family: ${DS.font}; color: ${DS.colors.text}; -webkit-font-smoothing: antialiased; }
     button { cursor: pointer; border: none; background: none; font-family: inherit; }
     input { font-family: inherit; }
     ::-webkit-scrollbar { width: 0px; }
@@ -76,13 +55,10 @@ const GlobalStyles = () => (
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    @keyframes spin { to { transform: rotate(360deg); } }
   `}</style>
 );
 
-const Icon = ({ name, size = 24, color = "currentColor", strokeWidth = 1.5 }: {
-  name: string; size?: number; color?: string; strokeWidth?: number;
-}) => {
+const Icon = ({ name, size = 24, color = "currentColor", strokeWidth = 1.5 }: { name: string; size?: number; color?: string; strokeWidth?: number; }) => {
   const paths: Record<string, React.ReactNode> = {
     home: <><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/><path d="M3 12v9h18V12"/></>,
     sparkles: <><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M19 3l.75 2.25L22 6l-2.25.75L19 9l-.75-2.25L16 6l2.25-.75z"/></>,
@@ -113,9 +89,7 @@ const Icon = ({ name, size = 24, color = "currentColor", strokeWidth = 1.5 }: {
     crown: <><path d="M2 20h20"/><path d="M4 20l2-12 6 6 4-8 4 8 6-6-2 12"/></>,
   };
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color}
-      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"
-      style={{ display: "block", flexShrink: 0 }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={{ display: "block", flexShrink: 0 }}>
       {paths[name]}
     </svg>
   );
@@ -135,14 +109,14 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
       `}</style>
       <div style={{ textAlign: "center" }}>
         <div className="logo-anim">
-          <div style={{ width:88, height:88, borderRadius:DS.radius.xl, background:"rgba(255,255,255,0.15)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 24px", backdropFilter:"blur(8px)", border:"1.5px solid rgba(255,255,255,0.3)" }}>
+          <div style={{ width: 88, height: 88, borderRadius: DS.radius.xl, background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", backdropFilter: "blur(8px)", border: "1.5px solid rgba(255,255,255,0.3)" }}>
             <Icon name="sparkles" size={40} color={DS.colors.white} strokeWidth={1.5} />
           </div>
-          <div style={{ fontSize:42, fontWeight:700, color:DS.colors.white, letterSpacing:"-1px" }}>Chroma</div>
+          <div style={{ fontSize: 42, fontWeight: 700, color: DS.colors.white, letterSpacing: "-1px" }}>Chroma</div>
         </div>
-        <div className="tag-anim" style={{ marginTop:12, fontSize:15, color:"rgba(255,255,255,0.75)", fontWeight:400, letterSpacing:"0.02em" }}>Your colour season, revealed</div>
-        <div className="dots-anim" style={{ marginTop:48, display:"flex", gap:6, justifyContent:"center" }}>
-          {[0,1,2].map(i => <div key={i} style={{ width:5, height:5, borderRadius:DS.radius.full, background:DS.colors.white, animation:`pulse 1.2s ease ${i*0.2}s infinite` }} />)}
+        <div className="tag-anim" style={{ marginTop: 12, fontSize: 15, color: "rgba(255,255,255,0.75)", fontWeight: 400, letterSpacing: "0.02em" }}>Your colour season, revealed</div>
+        <div className="dots-anim" style={{ marginTop: 48, display: "flex", gap: 6, justifyContent: "center" }}>
+          {[0, 1, 2].map(i => <div key={i} style={{ width: 5, height: 5, borderRadius: DS.radius.full, background: DS.colors.white, animation: `pulse 1.2s ease ${i * 0.2}s infinite` }} />)}
         </div>
       </div>
     </div>
@@ -150,10 +124,10 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
 };
 
 const slides = [
-  { icon:"camera", title:"Take a selfie", body:"One clear photo in natural light is all we need. No filters, no sunglasses.", bg:"#EDE9FF", accent:DS.colors.accent },
-  { icon:"palette", title:"Discover your season", body:"Our AI analyses your skin tone, undertone, eye and hair colour to find your perfect palette.", bg:"#E8F4FD", accent:"#4A90C4" },
-  { icon:"sparkles", title:"Get your full guide", body:"Colours, makeup, hair, jewellery and style - everything personalised to you, so getting dressed becomes the easy part.", bg:"#FFF1E6", accent:"#E8845A" },
-  { icon:"shirt", title:"Check any item", body:"Check a single item, a full outfit, or try colour swatches - Chroma reads every colour and tells you what works.", bg:"#E8F5EE", accent:"#1A9E6E" },
+  { icon: "camera", title: "Take a selfie", body: "One clear photo in natural light is all we need. No filters, no sunglasses.", bg: "#EDE9FF", accent: DS.colors.accent },
+  { icon: "palette", title: "Discover your season", body: "Our AI analyses your skin tone, undertone, eye and hair colour to find your perfect palette.", bg: "#E8F4FD", accent: "#4A90C4" },
+  { icon: "sparkles", title: "Get your full guide", body: "Colours, makeup, hair, jewellery and style - everything personalised to you, so getting dressed becomes the easy part.", bg: "#FFF1E6", accent: "#E8845A" },
+  { icon: "shirt", title: "Check any item", body: "Check a single item, a full outfit, or try colour swatches - Chroma reads every colour and tells you what works.", bg: "#E8F5EE", accent: "#1A9E6E" },
 ];
 
 const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
@@ -162,31 +136,31 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
   const goTo = (next: number) => { setDir(next > idx ? 1 : -1); setIdx(next); };
   const slide = slides[idx];
   return (
-    <div className="screen" style={{ background:DS.colors.bg, display:"flex", flexDirection:"column" }}>
+    <div className="screen" style={{ background: DS.colors.bg, display: "flex", flexDirection: "column" }}>
       <style>{`
         @keyframes slideInRight { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }
         @keyframes slideInLeft { from { opacity:0; transform:translateX(-30px); } to { opacity:1; transform:translateX(0); } }
         .slide-right { animation: slideInRight 0.35s ease both; }
         .slide-left { animation: slideInLeft 0.35s ease both; }
       `}</style>
-      <div key={idx} className={dir > 0 ? "slide-right" : "slide-left"} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"0 28px", minHeight:0 }}>
-        <div style={{ width:88, height:88, borderRadius:DS.radius.xl, background:slide.bg, display:"flex", alignItems:"center", justifyContent:"center", marginBottom:20, flexShrink:0 }}>
+      <div key={idx} className={dir > 0 ? "slide-right" : "slide-left"} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 28px", minHeight: 0 }}>
+        <div style={{ width: 88, height: 88, borderRadius: DS.radius.xl, background: slide.bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, flexShrink: 0 }}>
           <Icon name={slide.icon} size={36} color={slide.accent} strokeWidth={1.5} />
         </div>
-        <h1 style={{ fontSize:26, fontWeight:700, color:DS.colors.text, textAlign:"center", letterSpacing:"-0.5px", marginBottom:12, flexShrink:0 }}>{slide.title}</h1>
-        <p style={{ fontSize:15, color:DS.colors.textMuted, textAlign:"center", lineHeight:1.6, maxWidth:280, flexShrink:0 }}>{slide.body}</p>
+        <h1 style={{ fontSize: 26, fontWeight: 700, color: DS.colors.text, textAlign: "center", letterSpacing: "-0.5px", marginBottom: 12, flexShrink: 0 }}>{slide.title}</h1>
+        <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 280, flexShrink: 0 }}>{slide.body}</p>
       </div>
-      <div style={{ display:"flex", justifyContent:"center", gap:6, paddingBottom:16, flexShrink:0 }}>
-        {slides.map((_,i) => <button key={i} onClick={() => goTo(i)} style={{ width:i===idx?24:6, height:6, borderRadius:DS.radius.full, background:i===idx?DS.colors.accent:DS.colors.border, transition:"all 0.3s ease" }} />)}
+      <div style={{ display: "flex", justifyContent: "center", gap: 6, paddingBottom: 16, flexShrink: 0 }}>
+        {slides.map((_, i) => <button key={i} onClick={() => goTo(i)} style={{ width: i === idx ? 24 : 6, height: 6, borderRadius: DS.radius.full, background: i === idx ? DS.colors.accent : DS.colors.border, transition: "all 0.3s ease" }} />)}
       </div>
-      <div style={{ padding:"0 28px calc(140px + env(safe-area-inset-bottom))", display:"flex", flexDirection:"column", gap:8, flexShrink:0 }}>
+      <div style={{ padding: "0 28px calc(140px + env(safe-area-inset-bottom))", display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
         {idx < slides.length - 1 ? (
           <>
-            <button onClick={() => goTo(idx+1)} style={{ width:"100%", padding:"16px", borderRadius:DS.radius.lg, background:DS.colors.accent, color:DS.colors.white, fontSize:16, fontWeight:600 }}>Continue</button>
-            <button onClick={onComplete} style={{ width:"100%", padding:"12px", fontSize:14, color:DS.colors.textMuted, fontWeight:500 }}>Skip</button>
+            <button onClick={() => goTo(idx + 1)} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Continue</button>
+            <button onClick={onComplete} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Skip</button>
           </>
         ) : (
-          <button onClick={onComplete} style={{ width:"100%", padding:"16px", borderRadius:DS.radius.lg, background:DS.colors.accent, color:DS.colors.white, fontSize:16, fontWeight:600 }}>Get started</button>
+          <button onClick={onComplete} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Get started</button>
         )}
       </div>
     </div>
@@ -194,114 +168,92 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
 };
 
 const AuthScreen = ({ onSignIn, onGuest }: { onSignIn: (user: User) => void; onGuest: () => void; }) => {
-  const [mode, setMode] = useState<"landing"|"signin"|"signup">("landing");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [referralCode, setReferralCode] = useState("");
-  const [showReferral, setShowReferral] = useState(false);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const inputStyle: React.CSSProperties = { width:"100%", padding:"14px 16px", borderRadius:DS.radius.md, border:`1.5px solid ${DS.colors.border}`, fontSize:15, color:DS.colors.text, background:DS.colors.bg, outline:"none", transition:"border-color 0.2s" };
-
-  const generateReferralCode = (userName: string): string => {
-    const clean = userName.replace(/[^a-zA-Z]/g,"").toUpperCase().slice(0,6) || "USER";
-    return clean + Math.floor(1000 + Math.random() * 9000).toString();
-  };
-
+  const [mode, setMode] = useState<"landing" | "signin" | "signup">("landing");
+  const [email, setEmail] = useState(""); const [password, setPassword] = useState("");
+  const [name, setName] = useState(""); const [referralCode, setReferralCode] = useState("");
+  const [showReferral, setShowReferral] = useState(false); const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [loading, setLoading] = useState(false); const [error, setError] = useState("");
+  const inputStyle: React.CSSProperties = { width: "100%", padding: "14px 16px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 15, color: DS.colors.text, background: DS.colors.bg, outline: "none", transition: "border-color 0.2s" };
+  const generateReferralCode = (u: string) => (u.replace(/[^a-zA-Z]/g, "").toUpperCase().slice(0, 6) || "USER") + Math.floor(1000 + Math.random() * 9000);
   const saveProfile = async (userId: string, userName: string, userEmail: string, token: string, refCode: string, enteredCode: string) => {
     try {
-      await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
-        method:"POST",
-        headers: { ...supabaseHeaders, Authorization:`Bearer ${token}`, Prefer:"return=minimal" },
-        body: JSON.stringify({ id:userId, name:userName, user_plan:"free", referral_code:refCode, referred_by:enteredCode ? enteredCode.toUpperCase() : null, referral_count:0 }),
-      });
+      await fetch(`${SUPABASE_URL}/rest/v1/profiles`, { method: "POST", headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" }, body: JSON.stringify({ id: userId, name: userName, user_plan: "free", referral_code: refCode, referred_by: enteredCode ? enteredCode.toUpperCase() : null, referral_count: 0 }) });
     } catch {}
   };
-
   const handleAuth = async () => {
     if (mode === "signup" && !agreedToTerms) { setError("Please agree to the Terms & Privacy Policy to continue."); return; }
     setLoading(true); setError("");
     try {
       const endpoint = mode === "signup" ? `${SUPABASE_URL}/auth/v1/signup` : `${SUPABASE_URL}/auth/v1/token?grant_type=password`;
       const body = mode === "signup" ? { email, password, data: { name } } : { email, password };
-      const res = await fetch(endpoint, { method:"POST", headers:{ ...supabaseHeaders, "Content-Type":"application/json" }, body:JSON.stringify(body) });
+      const res = await fetch(endpoint, { method: "POST", headers: { ...supabaseHeaders, "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const data = await res.json();
       if (data.error || data.error_description || data.msg) throw new Error(data.error_description || data.msg || data.error || "Auth failed");
-      const userId = data.user?.id;
-      const userEmail = data.user?.email || email;
+      const userId = data.user?.id; const userEmail = data.user?.email || email;
       const userName = data.user?.user_metadata?.name || name || email.split("@")[0];
       let plan: Plan = "free";
       if (userId) {
         try {
-          const profileRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=user_plan`, { headers:{ ...supabaseHeaders, Authorization:`Bearer ${data.access_token}` } });
-          const profiles = await profileRes.json();
+          const pr = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=user_plan`, { headers: { ...supabaseHeaders, Authorization: `Bearer ${data.access_token}` } });
+          const profiles = await pr.json();
           if (profiles?.[0]?.user_plan) plan = profiles[0].user_plan as Plan;
         } catch {}
       }
       if (mode === "signup" && userId) await saveProfile(userId, userName, userEmail, data.access_token, generateReferralCode(userName), referralCode);
-      const userObj: User = { id:userId, email:userEmail, name:userName, plan };
+      const userObj: User = { id: userId, email: userEmail, name: userName, plan };
       localStorage.setItem("chroma_token", data.access_token);
       localStorage.setItem("chroma_refresh", data.refresh_token || "");
       localStorage.setItem("chroma_user", JSON.stringify(userObj));
       onSignIn(userObj);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
-    } finally { setLoading(false); }
+    } catch (e) { setError(e instanceof Error ? e.message : "Something went wrong. Please try again."); }
+    finally { setLoading(false); }
   };
-
   if (mode === "landing") return (
-    <div className="screen fade-in" style={{ background:DS.colors.bg }}>
-      <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 28px" }}>
-        <div style={{ width:72, height:72, borderRadius:DS.radius.lg, background:DS.colors.accentLight, display:"flex", alignItems:"center", justifyContent:"center", marginBottom:24 }}>
+    <div className="screen fade-in" style={{ background: DS.colors.bg }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 28px" }}>
+        <div style={{ width: 72, height: 72, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
           <Icon name="sparkles" size={32} color={DS.colors.accent} />
         </div>
-        <h1 style={{ fontSize:28, fontWeight:700, color:DS.colors.text, letterSpacing:"-0.5px", marginBottom:10, textAlign:"center" }}>Welcome to Chroma</h1>
-        <p style={{ fontSize:15, color:DS.colors.textMuted, textAlign:"center", lineHeight:1.6, maxWidth:260, marginBottom:48 }}>Create an account to save your results and unlock your full colour guide.</p>
-        <div style={{ width:"100%", display:"flex", flexDirection:"column", gap:12 }}>
-          <button onClick={() => setMode("signup")} style={{ width:"100%", padding:"16px", borderRadius:DS.radius.lg, background:DS.colors.accent, color:DS.colors.white, fontSize:16, fontWeight:600 }}>Create account</button>
-          <button onClick={() => setMode("signin")} style={{ width:"100%", padding:"16px", borderRadius:DS.radius.lg, background:DS.colors.bg, color:DS.colors.text, fontSize:15, fontWeight:500, border:`1.5px solid ${DS.colors.border}` }}>Sign in</button>
-          <button onClick={onGuest} style={{ width:"100%", padding:"14px", fontSize:14, color:DS.colors.textMuted, fontWeight:500 }}>Continue as guest</button>
+        <h1 style={{ fontSize: 28, fontWeight: 700, color: DS.colors.text, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Welcome to Chroma</h1>
+        <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 48 }}>Create an account to save your results and unlock your full colour guide.</p>
+        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}>
+          <button onClick={() => setMode("signup")} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Create account</button>
+          <button onClick={() => setMode("signin")} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.bg, color: DS.colors.text, fontSize: 15, fontWeight: 500, border: `1.5px solid ${DS.colors.border}` }}>Sign in</button>
+          <button onClick={onGuest} style={{ width: "100%", padding: "14px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Continue as guest</button>
         </div>
       </div>
     </div>
   );
-
   return (
-    <div className="screen fade-in" style={{ background:DS.colors.bg, overflowY:"auto" }}>
-      <div style={{ padding:"40px 28px 48px", display:"flex", flexDirection:"column", gap:0 }}>
-        <button onClick={() => { setMode("landing"); setError(""); }} style={{ alignSelf:"flex-start", marginBottom:32, color:DS.colors.textMuted }}>
-          <Icon name="chevronLeft" size={20} color={DS.colors.textMuted} />
-        </button>
-        <h1 style={{ fontSize:26, fontWeight:700, letterSpacing:"-0.5px", marginBottom:6 }}>{mode === "signup" ? "Create account" : "Welcome back"}</h1>
-        <p style={{ fontSize:14, color:DS.colors.textMuted, marginBottom:32 }}>{mode === "signup" ? "Start your colour journey today" : "Sign in to your Chroma account"}</p>
-        <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+    <div className="screen fade-in" style={{ background: DS.colors.bg, overflowY: "auto" }}>
+      <div style={{ padding: "40px 28px 48px", display: "flex", flexDirection: "column", gap: 0 }}>
+        <button onClick={() => { setMode("landing"); setError(""); }} style={{ alignSelf: "flex-start", marginBottom: 32, color: DS.colors.textMuted }}><Icon name="chevronLeft" size={20} color={DS.colors.textMuted} /></button>
+        <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>{mode === "signup" ? "Create account" : "Welcome back"}</h1>
+        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 32 }}>{mode === "signup" ? "Start your colour journey today" : "Sign in to your Chroma account"}</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {mode === "signup" && <input style={inputStyle} placeholder="Your name" value={name} onChange={e => setName(e.target.value)} />}
           <input style={inputStyle} type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} />
           <input style={inputStyle} type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
           {mode === "signup" && (
             <>
-              <button onClick={() => setShowReferral(!showReferral)} style={{ alignSelf:"flex-start", fontSize:13, color:DS.colors.accent, fontWeight:500, padding:"4px 0", display:"flex", alignItems:"center", gap:4 }}>
-                <Icon name={showReferral ? "chevronDown" : "chevronRight"} size={14} color={DS.colors.accent} />
-                Have a referral code?
+              <button onClick={() => setShowReferral(!showReferral)} style={{ alignSelf: "flex-start", fontSize: 13, color: DS.colors.accent, fontWeight: 500, padding: "4px 0", display: "flex", alignItems: "center", gap: 4 }}>
+                <Icon name={showReferral ? "chevronDown" : "chevronRight"} size={14} color={DS.colors.accent} />Have a referral code?
               </button>
               {showReferral && <input style={inputStyle} placeholder="Enter referral code" value={referralCode} maxLength={10} onChange={e => setReferralCode(e.target.value.toUpperCase())} />}
-              <button onClick={() => setAgreedToTerms(!agreedToTerms)} style={{ display:"flex", alignItems:"flex-start", gap:10, padding:"4px 0", textAlign:"left" }}>
-                <div style={{ width:20, height:20, borderRadius:DS.radius.sm, border:`1.5px solid ${agreedToTerms ? DS.colors.accent : DS.colors.border}`, background:agreedToTerms ? DS.colors.accent : DS.colors.bg, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, marginTop:1, transition:"all 0.2s" }}>
+              <button onClick={() => setAgreedToTerms(!agreedToTerms)} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "4px 0", textAlign: "left" }}>
+                <div style={{ width: 20, height: 20, borderRadius: DS.radius.sm, border: `1.5px solid ${agreedToTerms ? DS.colors.accent : DS.colors.border}`, background: agreedToTerms ? DS.colors.accent : DS.colors.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1, transition: "all 0.2s" }}>
                   {agreedToTerms && <Icon name="check" size={12} color={DS.colors.white} strokeWidth={2.5} />}
                 </div>
-                <span style={{ fontSize:13, color:DS.colors.textMuted, lineHeight:1.5 }}>I agree to the Terms & Privacy Policy</span>
+                <span style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>I agree to the Terms & Privacy Policy</span>
               </button>
             </>
           )}
-          {error && <p style={{ fontSize:13, color:DS.colors.danger, padding:"8px 12px", background:"#FEF2F2", borderRadius:DS.radius.sm }}>{error}</p>}
-          <button onClick={handleAuth} disabled={loading} style={{ width:"100%", padding:"16px", borderRadius:DS.radius.lg, background:loading ? DS.colors.textFaint : DS.colors.accent, color:DS.colors.white, fontSize:16, fontWeight:600, marginTop:8 }}>
+          {error && <p style={{ fontSize: 13, color: DS.colors.danger, padding: "8px 12px", background: "#FEF2F2", borderRadius: DS.radius.sm }}>{error}</p>}
+          <button onClick={handleAuth} disabled={loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: loading ? DS.colors.textFaint : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginTop: 8 }}>
             {loading ? "Please wait..." : mode === "signup" ? "Create account" : "Sign in"}
           </button>
         </div>
-        <button onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setError(""); }} style={{ marginTop:20, fontSize:14, color:DS.colors.accent, fontWeight:500, alignSelf:"center" }}>
+        <button onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setError(""); }} style={{ marginTop: 20, fontSize: 14, color: DS.colors.accent, fontWeight: 500, alignSelf: "center" }}>
           {mode === "signup" ? "Already have an account? Sign in" : "New to Chroma? Create account"}
         </button>
       </div>
@@ -313,45 +265,45 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File) => void }) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const handleFile = (file: File) => { setPreview(URL.createObjectURL(file)); };
+  const handleFile = (file: File) => setPreview(URL.createObjectURL(file));
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) handleFile(f); };
   const handleAnalyse = () => { const f = fileRef.current?.files?.[0]; if (f) onUpload(f); };
   return (
-    <div className="screen fade-in" style={{ background:DS.colors.bg }}>
-      <div style={{ padding:"40px 28px 0", flex:1, display:"flex", flexDirection:"column" }}>
-        <h1 style={{ fontSize:26, fontWeight:700, letterSpacing:"-0.5px", marginBottom:6 }}>Take your selfie</h1>
-        <p style={{ fontSize:14, color:DS.colors.textMuted, marginBottom:32, lineHeight:1.6 }}>Use natural light, face the camera directly, and remove sunglasses.</p>
+    <div className="screen fade-in" style={{ background: DS.colors.bg }}>
+      <div style={{ padding: "40px 28px 0", flex: 1, display: "flex", flexDirection: "column" }}>
+        <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Take your selfie</h1>
+        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 32, lineHeight: 1.6 }}>Use natural light, face the camera directly, and remove sunglasses.</p>
         <div onClick={() => !preview && fileRef.current?.click()} onDragOver={e => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={e => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files?.[0]; if (f) handleFile(f); }}
-          style={{ flex:1, borderRadius:DS.radius.xl, border:`2px dashed ${isDragging ? DS.colors.accent : DS.colors.border}`, background:isDragging ? DS.colors.accentLight : DS.colors.surface, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", cursor:preview ? "default" : "pointer", transition:"all 0.2s", overflow:"hidden", position:"relative", marginBottom:24, maxHeight:400 }}>
+          style={{ flex: 1, borderRadius: DS.radius.xl, border: `2px dashed ${isDragging ? DS.colors.accent : DS.colors.border}`, background: isDragging ? DS.colors.accentLight : DS.colors.surface, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: preview ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 24, maxHeight: 400 }}>
           {preview ? (
             <>
-              <img src={preview} alt="selfie preview" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
-              <button onClick={() => { setPreview(null); if (fileRef.current) fileRef.current.value = ""; }} style={{ position:"absolute", top:12, right:12, width:32, height:32, borderRadius:DS.radius.full, background:"rgba(0,0,0,0.5)", color:DS.colors.white, display:"flex", alignItems:"center", justifyContent:"center" }}>
+              <img src={preview} alt="selfie preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <button onClick={() => { setPreview(null); if (fileRef.current) fileRef.current.value = ""; }} style={{ position: "absolute", top: 12, right: 12, width: 32, height: 32, borderRadius: DS.radius.full, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Icon name="x" size={16} color={DS.colors.white} />
               </button>
             </>
           ) : (
             <>
-              <div style={{ width:64, height:64, borderRadius:DS.radius.lg, background:DS.colors.accentLight, display:"flex", alignItems:"center", justifyContent:"center", marginBottom:16 }}>
+              <div style={{ width: 64, height: 64, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
                 <Icon name="camera" size={28} color={DS.colors.accent} />
               </div>
-              <p style={{ fontSize:15, fontWeight:500, color:DS.colors.text, marginBottom:4 }}>Upload your selfie</p>
-              <p style={{ fontSize:13, color:DS.colors.textMuted }}>Tap to take or choose a photo</p>
+              <p style={{ fontSize: 15, fontWeight: 500, color: DS.colors.text, marginBottom: 4 }}>Upload your selfie</p>
+              <p style={{ fontSize: 13, color: DS.colors.textMuted }}>Tap to take or choose a photo</p>
             </>
           )}
         </div>
-        <input ref={fileRef} type="file" accept="image/*" onChange={handleChange} style={{ display:"none" }} />
-        <div style={{ display:"flex", flexDirection:"column", gap:12, marginBottom:48 }}>
+        <input ref={fileRef} type="file" accept="image/*" onChange={handleChange} style={{ display: "none" }} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 48 }}>
           {preview ? (
-            <button onClick={handleAnalyse} style={{ width:"100%", padding:"16px", borderRadius:DS.radius.lg, background:DS.colors.accent, color:DS.colors.white, fontSize:16, fontWeight:600 }}>Analyse my colours</button>
+            <button onClick={handleAnalyse} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Analyse my colours</button>
           ) : (
-            <button onClick={() => fileRef.current?.click()} style={{ width:"100%", padding:"16px", borderRadius:DS.radius.lg, background:DS.colors.accent, color:DS.colors.white, fontSize:16, fontWeight:600 }}>Choose photo</button>
+            <button onClick={() => fileRef.current?.click()} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Choose photo</button>
           )}
-          <div style={{ display:"flex", gap:16, padding:"12px 0" }}>
-            {["Natural light","No filters","Face forward"].map(tip => (
-              <div key={tip} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
-                <div style={{ width:6, height:6, borderRadius:DS.radius.full, background:DS.colors.success }} />
-                <span style={{ fontSize:11, color:DS.colors.textMuted, textAlign:"center", fontWeight:500 }}>{tip}</span>
+          <div style={{ display: "flex", gap: 16, padding: "12px 0" }}>
+            {["Natural light", "No filters", "Face forward"].map(tip => (
+              <div key={tip} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                <div style={{ width: 6, height: 6, borderRadius: DS.radius.full, background: DS.colors.success }} />
+                <span style={{ fontSize: 11, color: DS.colors.textMuted, textAlign: "center", fontWeight: 500 }}>{tip}</span>
               </div>
             ))}
           </div>
@@ -362,39 +314,35 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File) => void }) => {
 };
 
 const AnalysingScreen = () => {
-  const steps = ["Reading your features","Mapping your palette","Building your guide"];
-  const [step, setStep] = useState(0);
-  const [progress, setProgress] = useState(0);
+  const steps = ["Reading your features", "Mapping your palette", "Building your guide"];
+  const [step, setStep] = useState(0); const [progress, setProgress] = useState(0);
   useEffect(() => {
-    const pi = setInterval(() => setProgress(p => Math.min(p+1,90)), 120);
-    const t1 = setTimeout(() => setStep(1), 3000);
-    const t2 = setTimeout(() => setStep(2), 6000);
+    const pi = setInterval(() => setProgress(p => Math.min(p + 1, 90)), 120);
+    const t1 = setTimeout(() => setStep(1), 3000); const t2 = setTimeout(() => setStep(2), 6000);
     return () => { clearInterval(pi); clearTimeout(t1); clearTimeout(t2); };
   }, []);
   return (
-    <div className="screen fade-in" style={{ background:DS.colors.bg, alignItems:"center", justifyContent:"center", padding:"40px 28px" }}>
-      <div style={{ width:72, height:72, marginBottom:32, position:"relative" }}>
+    <div className="screen fade-in" style={{ background: DS.colors.bg, alignItems: "center", justifyContent: "center", padding: "40px 28px" }}>
+      <div style={{ width: 72, height: 72, marginBottom: 32, position: "relative" }}>
         <svg width="72" height="72" viewBox="0 0 72 72">
           <circle cx="36" cy="36" r="30" fill="none" stroke={DS.colors.border} strokeWidth="4" />
-          <circle cx="36" cy="36" r="30" fill="none" stroke={DS.colors.accent} strokeWidth="4" strokeLinecap="round"
-            strokeDasharray={`${2*Math.PI*30}`} strokeDashoffset={`${2*Math.PI*30*(1-progress/100)}`}
-            transform="rotate(-90 36 36)" style={{ transition:"stroke-dashoffset 0.1s linear" }} />
+          <circle cx="36" cy="36" r="30" fill="none" stroke={DS.colors.accent} strokeWidth="4" strokeLinecap="round" strokeDasharray={`${2 * Math.PI * 30}`} strokeDashoffset={`${2 * Math.PI * 30 * (1 - progress / 100)}`} transform="rotate(-90 36 36)" style={{ transition: "stroke-dashoffset 0.1s linear" }} />
         </svg>
-        <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <Icon name="sparkles" size={28} color={DS.colors.accent} />
         </div>
       </div>
-      <h2 style={{ fontSize:22, fontWeight:700, letterSpacing:"-0.5px", marginBottom:8, textAlign:"center" }}>Analysing your colours</h2>
-      <p style={{ fontSize:15, color:DS.colors.accent, fontWeight:500, marginBottom:16, transition:"all 0.4s" }}>{steps[step]}...</p>
-      <p style={{ fontSize:13, color:DS.colors.textFaint, textAlign:"center", marginBottom:32, maxWidth:260 }}>This takes 15-20 seconds - please keep this screen open</p>
-      <div style={{ width:"100%", maxWidth:280, display:"flex", flexDirection:"column", gap:12 }}>
-        {steps.map((s,i) => (
-          <div key={s} style={{ display:"flex", alignItems:"center", gap:12 }}>
-            <div style={{ width:24, height:24, borderRadius:DS.radius.full, background:i<=step ? DS.colors.accent : DS.colors.surface, border:`1.5px solid ${i<=step ? DS.colors.accent : DS.colors.border}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all 0.3s" }}>
+      <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>Analysing your colours</h2>
+      <p style={{ fontSize: 15, color: DS.colors.accent, fontWeight: 500, marginBottom: 16, transition: "all 0.4s" }}>{steps[step]}...</p>
+      <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", marginBottom: 32, maxWidth: 260 }}>This takes 15-20 seconds - please keep this screen open</p>
+      <div style={{ width: "100%", maxWidth: 280, display: "flex", flexDirection: "column", gap: 12 }}>
+        {steps.map((s, i) => (
+          <div key={s} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 24, height: 24, borderRadius: DS.radius.full, background: i <= step ? DS.colors.accent : DS.colors.surface, border: `1.5px solid ${i <= step ? DS.colors.accent : DS.colors.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.3s" }}>
               {i < step && <Icon name="check" size={12} color={DS.colors.white} strokeWidth={2.5} />}
-              {i === step && <div style={{ width:8, height:8, borderRadius:DS.radius.full, background:DS.colors.white, animation:"pulse 1s ease infinite" }} />}
+              {i === step && <div style={{ width: 8, height: 8, borderRadius: DS.radius.full, background: DS.colors.white, animation: "pulse 1s ease infinite" }} />}
             </div>
-            <span style={{ fontSize:14, color:i<=step ? DS.colors.text : DS.colors.textFaint, fontWeight:i===step ? 500 : 400, transition:"all 0.3s" }}>{s}</span>
+            <span style={{ fontSize: 14, color: i <= step ? DS.colors.text : DS.colors.textFaint, fontWeight: i === step ? 500 : 400, transition: "all 0.3s" }}>{s}</span>
           </div>
         ))}
       </div>
@@ -403,101 +351,135 @@ const AnalysingScreen = () => {
 };
 
 const tabs: { id: Tab; icon: string; label: string }[] = [
-  { id:"home", icon:"sparkles", label:"Season" },
-  { id:"checker", icon:"image", label:"Checker" },
-  { id:"wardrobe", icon:"hanger", label:"Wardrobe" },
-  { id:"me", icon:"user", label:"Me" },
+  { id: "home", icon: "sparkles", label: "Season" },
+  { id: "checker", icon: "image", label: "Checker" },
+  { id: "wardrobe", icon: "hanger", label: "Wardrobe" },
+  { id: "me", icon: "user", label: "Me" },
 ];
 
 const BottomNav = ({ activeTab, onTabChange }: { activeTab: Tab; onTabChange: (tab: Tab) => void; }) => (
-  <div style={{ height:80, borderTop:`1px solid ${DS.colors.border}`, background:DS.colors.bg, display:"flex", paddingBottom:16 }}>
+  <div style={{ height: 80, borderTop: `1px solid ${DS.colors.border}`, background: DS.colors.bg, display: "flex", paddingBottom: 16 }}>
     {tabs.map(tab => {
       const active = tab.id === activeTab;
       return (
-        <button key={tab.id} onClick={() => onTabChange(tab.id)} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:3 }}>
+        <button key={tab.id} onClick={() => onTabChange(tab.id)} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3 }}>
           <Icon name={tab.icon} size={22} color={active ? DS.colors.accent : DS.colors.textFaint} strokeWidth={active ? 2 : 1.5} />
-          <span style={{ fontSize:10, fontWeight:active ? 600 : 400, color:active ? DS.colors.accent : DS.colors.textFaint, letterSpacing:"0.02em" }}>{tab.label}</span>
+          <span style={{ fontSize: 10, fontWeight: active ? 600 : 400, color: active ? DS.colors.accent : DS.colors.textFaint, letterSpacing: "0.02em" }}>{tab.label}</span>
         </button>
       );
     })}
   </div>
 );
 
-const seasonGradients: Record<string,string> = {
+const seasonGradients: Record<string, string> = {
   Spring: "linear-gradient(160deg, #FFF1E6 0%, #FFE0CC 60%, #FECBA1 100%)",
   Summer: "linear-gradient(160deg, #EEF2FF 0%, #DDE6FF 60%, #C7D7FF 100%)",
   Autumn: "linear-gradient(160deg, #FFF7ED 0%, #FFEDD5 60%, #FED7AA 100%)",
   Winter: "linear-gradient(160deg, #F0F9FF 0%, #E0F2FE 60%, #BAE6FD 100%)",
 };
-const seasonTextColors: Record<string,string> = { Spring:"#7A3A1E", Summer:"#1a2a4a", Autumn:"#5C2E00", Winter:"#0C2340" };
-const seasonAccentColors: Record<string,string> = { Spring:"#E8845A", Summer:"#4A6FD4", Autumn:"#C26B3A", Winter:"#2E7DB5" };
+const seasonTextColors: Record<string, string> = { Spring: "#7A3A1E", Summer: "#1a2a4a", Autumn: "#5C2E00", Winter: "#0C2340" };
+const seasonAccentColors: Record<string, string> = { Spring: "#E8845A", Summer: "#4A6FD4", Autumn: "#C26B3A", Winter: "#2E7DB5" };
+
+const hairColourMap: Record<string, string> = {
+  "ash brown": "#8B7355", "soft chestnut": "#954535", "cool light brown": "#A0785A",
+  "rose brown": "#BC8F8F", "dusty blonde": "#C8B89A", "ash blonde": "#C9B99A",
+  "platinum blonde": "#E8E0D0", "golden blonde": "#D4A843", "warm auburn": "#8B4513",
+  "jet black": "#1A1A1A", "cool black": "#2C2C2C", "dark brown": "#3B2314",
+  "medium brown": "#7B4F2E", "light brown": "#A0785A", "strawberry blonde": "#CB8E73",
+  "copper": "#B87333", "burgundy": "#800020", "caramel": "#C68642",
+  "highlights": "#D4C5A9", "balayage": "#C8B89A", "ombre": "#8B6914",
+};
+
+const metalColourMap: Record<string, string> = {
+  "gold": "#FFD700", "yellow gold": "#FFD700", "rose gold": "#B76E79",
+  "white gold": "#E8E8E8", "silver": "#C0C0C0", "brushed silver": "#A9A9A9",
+  "platinum": "#E5E4E2", "copper": "#B87333", "bronze": "#CD7F32",
+  "oxidised silver": "#808080", "antique gold": "#B8960C",
+};
 
 const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet; seasonData: SeasonData; onClose: () => void; }) => (
-  <div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,0.4)", zIndex:200, display:"flex", alignItems:"flex-end" }} onClick={onClose}>
-    <div className="slide-up" style={{ width:"100%", maxHeight:"85vh", background:DS.colors.bg, borderRadius:`${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY:"auto", padding:"0 0 48px" }} onClick={e => e.stopPropagation()}>
-      <div style={{ display:"flex", justifyContent:"center", padding:"12px 0 0" }}>
-        <div style={{ width:36, height:4, borderRadius:DS.radius.full, background:DS.colors.border }} />
+  <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 200, display: "flex", alignItems: "flex-end" }} onClick={onClose}>
+    <div className="slide-up" style={{ width: "100%", maxHeight: "85vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
+      <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+        <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
       </div>
       {activeSheet === "makeup" && (
-        <div style={{ padding:"16px 24px" }}>
-          <h2 style={{ fontSize:22, fontWeight:700, letterSpacing:"-0.5px", marginBottom:20 }}>Makeup</h2>
-          {[{label:"Foundation",value:seasonData.makeup.foundation},{label:"Blush",value:seasonData.makeup.blush},{label:"Lips",value:seasonData.makeup.lip},{label:"Eyes",value:seasonData.makeup.eye}].map(item => (
-            <div key={item.label} style={{ marginBottom:20, paddingBottom:20, borderBottom:`1px solid ${DS.colors.border}` }}>
-              <p style={{ margin:"0 0 6px", fontSize:11, fontWeight:600, color:DS.colors.accent, letterSpacing:"0.06em", textTransform:"uppercase" }}>{item.label}</p>
-              <p style={{ margin:0, fontSize:14, color:DS.colors.text, lineHeight:1.7 }}>{item.value}</p>
+        <div style={{ padding: "16px 24px" }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 20 }}>Makeup</h2>
+          {[{ label: "Foundation", value: seasonData.makeup.foundation }, { label: "Blush", value: seasonData.makeup.blush }, { label: "Lips", value: seasonData.makeup.lip }, { label: "Eyes", value: seasonData.makeup.eye }].map(item => (
+            <div key={item.label} style={{ marginBottom: 20, paddingBottom: 20, borderBottom: `1px solid ${DS.colors.border}` }}>
+              <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>{item.label}</p>
+              <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{item.value}</p>
             </div>
           ))}
         </div>
       )}
       {activeSheet === "hair" && (
-        <div style={{ padding:"16px 24px" }}>
-          <h2 style={{ fontSize:22, fontWeight:700, letterSpacing:"-0.5px", marginBottom:20 }}>Hair</h2>
-          <div style={{ marginBottom:20 }}>
-            <p style={{ margin:"0 0 10px", fontSize:11, fontWeight:600, color:DS.colors.accent, letterSpacing:"0.06em", textTransform:"uppercase" }}>Best colours</p>
-            <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
-              {seasonData.hair.best_colours.map(c => <span key={c} style={{ padding:"6px 14px", background:DS.colors.accentLight, borderRadius:DS.radius.full, fontSize:13, color:DS.colors.accentDark, fontWeight:500 }}>{c}</span>)}
+        <div style={{ padding: "16px 24px" }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 20 }}>Hair</h2>
+          <div style={{ marginBottom: 20 }}>
+            <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Best colours</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {seasonData.hair.best_colours.map(c => (
+                <span key={c} style={{ padding: "6px 14px 6px 10px", background: DS.colors.accentLight, borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.accentDark, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ width: 12, height: 12, borderRadius: "50%", background: hairColourMap[c.toLowerCase()] || "#C4A882", flexShrink: 0, border: "1px solid rgba(0,0,0,0.1)" }} />
+                  {c}
+                </span>
+              ))}
             </div>
           </div>
-          <div style={{ marginBottom:20 }}>
-            <p style={{ margin:"0 0 10px", fontSize:11, fontWeight:600, color:DS.colors.danger, letterSpacing:"0.06em", textTransform:"uppercase" }}>Avoid</p>
-            <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
-              {seasonData.hair.avoid.map(c => <span key={c} style={{ padding:"6px 14px", background:"#FEF2F2", borderRadius:DS.radius.full, fontSize:13, color:DS.colors.danger, fontWeight:500 }}>{c}</span>)}
+          <div style={{ marginBottom: 20 }}>
+            <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 600, color: DS.colors.danger, letterSpacing: "0.06em", textTransform: "uppercase" }}>Avoid</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {seasonData.hair.avoid.map(c => (
+                <span key={c} style={{ padding: "6px 14px 6px 10px", background: "#FEF2F2", borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.danger, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ width: 12, height: 12, borderRadius: "50%", background: hairColourMap[c.toLowerCase()] || "#888", flexShrink: 0, border: "1px solid rgba(0,0,0,0.1)" }} />
+                  {c}
+                </span>
+              ))}
             </div>
           </div>
           <div>
-            <p style={{ margin:"0 0 8px", fontSize:11, fontWeight:600, color:DS.colors.accent, letterSpacing:"0.06em", textTransform:"uppercase" }}>Stylist tip</p>
-            <p style={{ margin:0, fontSize:14, color:DS.colors.text, lineHeight:1.7 }}>{seasonData.hair.tip}</p>
+            <p style={{ margin: "0 0 8px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Stylist tip</p>
+            <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{seasonData.hair.tip}</p>
           </div>
         </div>
       )}
       {activeSheet === "jewellery" && (
-        <div style={{ padding:"16px 24px" }}>
-          <h2 style={{ fontSize:22, fontWeight:700, letterSpacing:"-0.5px", marginBottom:20 }}>Jewellery</h2>
-          <div style={{ marginBottom:20 }}>
-            <p style={{ margin:"0 0 10px", fontSize:11, fontWeight:600, color:DS.colors.accent, letterSpacing:"0.06em", textTransform:"uppercase" }}>Metals</p>
-            <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
-              {seasonData.jewellery.metals.map(m => <span key={m} style={{ padding:"6px 14px", background:DS.colors.accentLight, borderRadius:DS.radius.full, fontSize:13, color:DS.colors.accentDark, fontWeight:500 }}>{m}</span>)}
+        <div style={{ padding: "16px 24px" }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 20 }}>Jewellery</h2>
+          <div style={{ marginBottom: 20 }}>
+            <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Metals</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {seasonData.jewellery.metals.map(m => (
+                <span key={m} style={{ padding: "6px 14px 6px 10px", background: DS.colors.surface, borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.text, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ width: 12, height: 12, borderRadius: "50%", background: metalColourMap[m.toLowerCase()] || "#C0C0C0", flexShrink: 0, border: "1px solid rgba(0,0,0,0.1)" }} />
+                  {m}
+                </span>
+              ))}
             </div>
           </div>
-          <div style={{ marginBottom:20 }}>
-            <p style={{ margin:"0 0 10px", fontSize:11, fontWeight:600, color:DS.colors.accent, letterSpacing:"0.06em", textTransform:"uppercase" }}>Stones</p>
-            <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
-              {seasonData.jewellery.stones.map(s => <span key={s} style={{ padding:"6px 14px", background:DS.colors.surface, borderRadius:DS.radius.full, fontSize:13, color:DS.colors.textMuted, fontWeight:500 }}>{s}</span>)}
+          <div style={{ marginBottom: 20 }}>
+            <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Stones</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {seasonData.jewellery.stones.map(s => (
+                <span key={s} style={{ padding: "6px 14px", background: DS.colors.surface, borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.textMuted, fontWeight: 500 }}>{s}</span>
+              ))}
             </div>
           </div>
           <div>
-            <p style={{ margin:"0 0 8px", fontSize:11, fontWeight:600, color:DS.colors.accent, letterSpacing:"0.06em", textTransform:"uppercase" }}>Tip</p>
-            <p style={{ margin:0, fontSize:14, color:DS.colors.text, lineHeight:1.7 }}>{seasonData.jewellery.tip}</p>
+            <p style={{ margin: "0 0 8px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Tip</p>
+            <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{seasonData.jewellery.tip}</p>
           </div>
         </div>
       )}
       {activeSheet === "style" && (
-        <div style={{ padding:"16px 24px" }}>
-          <h2 style={{ fontSize:22, fontWeight:700, letterSpacing:"-0.5px", marginBottom:20 }}>Style & Fit</h2>
-          {[{label:"Silhouettes",value:seasonData.style.silhouettes},{label:"Patterns",value:seasonData.style.patterns},{label:"Fabrics",value:seasonData.style.fabrics},{label:"Philosophy",value:seasonData.style.tip}].map(item => (
-            <div key={item.label} style={{ marginBottom:20, paddingBottom:20, borderBottom:`1px solid ${DS.colors.border}` }}>
-              <p style={{ margin:"0 0 6px", fontSize:11, fontWeight:600, color:DS.colors.accent, letterSpacing:"0.06em", textTransform:"uppercase" }}>{item.label}</p>
-              <p style={{ margin:0, fontSize:14, color:DS.colors.text, lineHeight:1.7 }}>{item.value}</p>
+        <div style={{ padding: "16px 24px" }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 20 }}>Style & Fit</h2>
+          {[{ label: "Silhouettes", value: seasonData.style.silhouettes }, { label: "Patterns", value: seasonData.style.patterns }, { label: "Fabrics", value: seasonData.style.fabrics }, { label: "Philosophy", value: seasonData.style.tip }].map(item => (
+            <div key={item.label} style={{ marginBottom: 20, paddingBottom: 20, borderBottom: `1px solid ${DS.colors.border}` }}>
+              <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>{item.label}</p>
+              <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{item.value}</p>
             </div>
           ))}
         </div>
@@ -506,95 +488,91 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
   </div>
 );
 
-const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade }: {
-  seasonData: SeasonData | null; user: User | null;
-  onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void;
-}) => {
+const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade }: { seasonData: SeasonData | null; user: User | null; onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void; }) => {
   const plan = user?.plan || "free";
   if (!seasonData) return (
-    <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:12, padding:"40px 28px" }}>
+    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, padding: "40px 28px" }}>
       <Icon name="sparkles" size={40} color={DS.colors.border} />
-      <p style={{ fontSize:15, fontWeight:500, color:DS.colors.textMuted, textAlign:"center" }}>No season data yet</p>
-      <p style={{ fontSize:13, color:DS.colors.textFaint, textAlign:"center" }}>Upload a selfie to discover your colour season</p>
+      <p style={{ fontSize: 15, fontWeight: 500, color: DS.colors.textMuted, textAlign: "center" }}>No season data yet</p>
+      <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center" }}>Upload a selfie to discover your colour season</p>
     </div>
   );
   const gradient = seasonGradients[seasonData.season] || seasonGradients.Summer;
   const textColor = seasonTextColors[seasonData.season] || "#1a2a4a";
   const accentColor = seasonAccentColors[seasonData.season] || "#4A6FD4";
-  const canAccessMakeup = true;
-  const canAccessHair = true;
-  const canAccessJewellery = true;
-  const canAccessStyle = true;
+  const canAccessMakeup = plan === "glow" || plan === "luxe";
+  const canAccessHair = plan === "glow" || plan === "luxe";
+  const canAccessJewellery = plan === "glow" || plan === "luxe";
+  const canAccessStyle = plan === "luxe";
   const categoryCards = [
-    { id:"makeup" as Sheet, icon:"droplet", label:"Makeup", teaser:seasonData.makeup.foundation.split(".")[0]+".", locked:!canAccessMakeup, requiredPlan:"Glow" },
-    { id:"hair" as Sheet, icon:"scissors", label:"Hair", teaser:seasonData.hair.best_colours.slice(0,2).join(", ")+" and more...", locked:!canAccessHair, requiredPlan:"Glow" },
-    { id:"jewellery" as Sheet, icon:"gem", label:"Jewellery", teaser:seasonData.jewellery.metals.join(", "), locked:!canAccessJewellery, requiredPlan:"Glow" },
-    { id:"style" as Sheet, icon:"shirt", label:"Style & Fit", teaser:seasonData.style.tip, locked:!canAccessStyle, requiredPlan:"Luxe" },
+    { id: "makeup" as Sheet, icon: "droplet", label: "Makeup", teaser: seasonData.makeup.foundation.split(".")[0] + ".", locked: !canAccessMakeup, requiredPlan: "Glow" },
+    { id: "hair" as Sheet, icon: "scissors", label: "Hair", teaser: seasonData.hair.best_colours.slice(0, 2).join(", ") + " and more...", locked: !canAccessHair, requiredPlan: "Glow" },
+    { id: "jewellery" as Sheet, icon: "gem", label: "Jewellery", teaser: seasonData.jewellery.metals.join(", "), locked: !canAccessJewellery, requiredPlan: "Glow" },
+    { id: "style" as Sheet, icon: "shirt", label: "Style & Fit", teaser: seasonData.style.tip, locked: !canAccessStyle, requiredPlan: "Luxe" },
   ];
   return (
-    <div style={{ flex:1, overflowY:"auto", background:DS.colors.bg }}>
-      <div style={{ background:gradient, padding:"52px 24px 28px" }}>
-        <p style={{ margin:"0 0 4px", fontSize:11, fontWeight:600, color:accentColor, letterSpacing:"0.08em", textTransform:"uppercase" }}>Your season</p>
-        <h1 style={{ margin:"0 0 4px", fontSize:42, fontWeight:700, color:textColor, letterSpacing:"-1.5px", lineHeight:1 }}>{seasonData.season}</h1>
-        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:12 }}>
+    <div style={{ flex: 1, overflowY: "auto", background: DS.colors.bg }}>
+      <div style={{ background: gradient, padding: "52px 24px 28px" }}>
+        <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 600, color: accentColor, letterSpacing: "0.08em", textTransform: "uppercase" }}>Your season</p>
+        <h1 style={{ margin: "0 0 4px", fontSize: 42, fontWeight: 700, color: textColor, letterSpacing: "-1.5px", lineHeight: 1 }}>{seasonData.season}</h1>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
           {plan === "free" ? (
-            <button onClick={onUpgrade} style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"3px 10px", background:"rgba(255,255,255,0.5)", borderRadius:DS.radius.full, fontSize:12, fontWeight:500, color:accentColor, border:`1px solid ${accentColor}30` }}>
-              <Icon name="lock" size={10} color={accentColor} strokeWidth={2} />
-              {seasonData.subseason} - unlock
+            <button onClick={onUpgrade} style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: "rgba(255,255,255,0.5)", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, color: accentColor, border: `1px solid ${accentColor}30` }}>
+              <Icon name="lock" size={10} color={accentColor} strokeWidth={2} />{seasonData.subseason} - unlock
             </button>
           ) : (
-            <span style={{ fontSize:15, color:accentColor, fontWeight:500 }}>{seasonData.subseason}</span>
+            <span style={{ fontSize: 15, color: accentColor, fontWeight: 500 }}>{seasonData.subseason}</span>
           )}
         </div>
-        <p style={{ margin:0, fontSize:14, color:textColor, lineHeight:1.6, opacity:0.85, maxWidth:300 }}>{seasonData.headline}</p>
+        <p style={{ margin: 0, fontSize: 14, color: textColor, lineHeight: 1.6, opacity: 0.85, maxWidth: 300 }}>{seasonData.headline}</p>
       </div>
-      <div style={{ margin:"0 16px", background:DS.colors.bg, borderRadius:`0 0 ${DS.radius.lg} ${DS.radius.lg}`, padding:"12px 16px", borderLeft:`3px solid ${accentColor}`, display:"flex", alignItems:"flex-start", gap:10 }}>
+      <div style={{ margin: "0 16px", background: DS.colors.bg, borderRadius: `0 0 ${DS.radius.lg} ${DS.radius.lg}`, padding: "12px 16px", borderLeft: `3px solid ${accentColor}`, display: "flex", alignItems: "flex-start", gap: 10 }}>
         <Icon name="sparkles" size={14} color={accentColor} strokeWidth={2} />
-        <p style={{ margin:0, fontSize:13, color:DS.colors.textMuted, lineHeight:1.5 }}>{seasonData.daily_tip}</p>
+        <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{seasonData.daily_tip}</p>
       </div>
-      <div style={{ padding:"20px 16px", display:"flex", flexDirection:"column", gap:12 }}>
-        <div style={{ background:DS.colors.bg, borderRadius:DS.radius.lg, border:`1px solid ${DS.colors.border}`, padding:"16px" }}>
-          <p style={{ margin:"0 0 12px", fontSize:14, fontWeight:600, color:DS.colors.text }}>Your palette</p>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:8 }}>
+      <div style={{ padding: "20px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "16px" }}>
+          <p style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 600, color: DS.colors.text }}>Your palette</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
             {seasonData.palette.best.map(colour => (
-              <div key={colour.hex} style={{ textAlign:"center" }}>
-                <div style={{ width:"100%", aspectRatio:"1", borderRadius:10, background:colour.hex, marginBottom:4, border:colour.hex==="#FFFFFF" ? `1px solid ${DS.colors.border}` : "none" }} />
-                <p style={{ margin:0, fontSize:9, color:DS.colors.textMuted, lineHeight:1.3 }}>{colour.name}</p>
+              <div key={colour.hex} style={{ textAlign: "center" }}>
+                <div style={{ width: "100%", aspectRatio: "1", borderRadius: 10, background: colour.hex, marginBottom: 4, border: colour.hex === "#FFFFFF" ? `1px solid ${DS.colors.border}` : "none" }} />
+                <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
               </div>
             ))}
           </div>
-          <div style={{ marginTop:16, paddingTop:14, borderTop:`1px solid ${DS.colors.border}` }}>
-            <p style={{ margin:"0 0 10px", fontSize:13, fontWeight:500, color:DS.colors.textMuted }}>Avoid</p>
-            <div style={{ display:"flex", gap:8 }}>
+          <div style={{ marginTop: 16, paddingTop: 14, borderTop: `1px solid ${DS.colors.border}` }}>
+            <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 500, color: DS.colors.textMuted }}>Avoid</p>
+            <div style={{ display: "flex", gap: 8 }}>
               {seasonData.palette.avoid.map(colour => (
-                <div key={colour.hex} style={{ flex:1, textAlign:"center" }}>
-                  <div style={{ width:"100%", aspectRatio:"1", borderRadius:8, background:colour.hex, marginBottom:4, border:`1px solid ${DS.colors.border}`, position:"relative", overflow:"hidden" }}>
-                    <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                      <div style={{ width:"70%", height:1.5, background:DS.colors.danger, transform:"rotate(-45deg)", opacity:0.7 }} />
+                <div key={colour.hex} style={{ flex: 1, textAlign: "center" }}>
+                  <div style={{ width: "100%", aspectRatio: "1", borderRadius: 8, background: colour.hex, marginBottom: 4, border: `1px solid ${DS.colors.border}`, position: "relative", overflow: "hidden" }}>
+                    <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <div style={{ width: "70%", height: 1.5, background: DS.colors.danger, transform: "rotate(-45deg)", opacity: 0.7 }} />
                     </div>
                   </div>
-                  <p style={{ margin:0, fontSize:9, color:DS.colors.textMuted, lineHeight:1.3 }}>{colour.name}</p>
+                  <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
                 </div>
               ))}
             </div>
           </div>
         </div>
         {categoryCards.map(card => (
-          <button key={card.id} onClick={() => { alert("tapped: " + card.id + " locked:" + card.locked); card.locked ? onUpgrade() : onOpenSheet(card.id); }} style={{ background:card.locked ? DS.colors.surface : DS.colors.bg, borderRadius:DS.radius.lg, border:`1px solid ${DS.colors.border}`, padding:"14px 16px", textAlign:"left", width:"100%", display:"flex", flexDirection:"column", gap:6 }}>
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-              <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                <div style={{ width:30, height:30, borderRadius:DS.radius.md, background:card.locked ? DS.colors.border : DS.colors.accentLight, display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <button key={card.id} onClick={() => card.locked ? onUpgrade() : onOpenSheet(card.id)} style={{ background: card.locked ? DS.colors.surface : DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "14px 16px", textAlign: "left", width: "100%", display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 30, height: 30, borderRadius: DS.radius.md, background: card.locked ? DS.colors.border : DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <Icon name={card.icon} size={16} color={card.locked ? DS.colors.textFaint : DS.colors.accent} strokeWidth={1.5} />
                 </div>
-                <span style={{ fontSize:14, fontWeight:600, color:card.locked ? DS.colors.textFaint : DS.colors.text }}>{card.label}</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: card.locked ? DS.colors.textFaint : DS.colors.text }}>{card.label}</span>
               </div>
               {card.locked ? (
-                <span style={{ fontSize:11, background:DS.colors.accentLight, color:DS.colors.accentDark, padding:"3px 8px", borderRadius:DS.radius.full, fontWeight:500 }}>{card.requiredPlan}</span>
+                <span style={{ fontSize: 11, background: DS.colors.accentLight, color: DS.colors.accentDark, padding: "3px 8px", borderRadius: DS.radius.full, fontWeight: 500 }}>{card.requiredPlan}</span>
               ) : (
                 <Icon name="chevronRight" size={16} color={DS.colors.textFaint} />
               )}
             </div>
-            <p style={{ margin:0, fontSize:13, color:card.locked ? DS.colors.textFaint : DS.colors.textMuted, lineHeight:1.5, paddingLeft:38 }}>{card.teaser}</p>
+            <p style={{ margin: 0, fontSize: 13, color: card.locked ? DS.colors.textFaint : DS.colors.textMuted, lineHeight: 1.5, paddingLeft: 38 }}>{card.teaser}</p>
           </button>
         ))}
       </div>
@@ -605,35 +583,35 @@ const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade }: {
 const PlaceholderTab = ({ tab, isGuest, onSignUp }: { tab: Tab; isGuest: boolean; onSignUp: () => void; }) => {
   const locked = isGuest && tab !== "home";
   if (locked) {
-    const tabInfo: Record<string,{icon:string;title:string;body:string}> = {
-      checker: { icon:"image", title:"Check your colours", body:"Check any item, outfit or swatches against your season." },
-      wardrobe: { icon:"hanger", title:"Build your wardrobe", body:"Save and manage your colour-approved wardrobe." },
-      me: { icon:"user", title:"Your profile", body:"Manage your profile, plan and preferences." },
+    const tabInfo: Record<string, { icon: string; title: string; body: string }> = {
+      checker: { icon: "image", title: "Check your colours", body: "Check any item, outfit or swatches against your season." },
+      wardrobe: { icon: "hanger", title: "Build your wardrobe", body: "Save and manage your colour-approved wardrobe." },
+      me: { icon: "user", title: "Your profile", body: "Manage your profile, plan and preferences." },
     };
     const info = tabInfo[tab];
     return (
-      <div style={{ flex:1, position:"relative", overflow:"hidden" }}>
-        <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:12, filter:"blur(4px)", opacity:0.3 }}>
+      <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, filter: "blur(4px)", opacity: 0.3 }}>
           <Icon name={info.icon} size={40} color={DS.colors.border} />
-          <p style={{ fontSize:15, fontWeight:500, color:DS.colors.textMuted }}>{info.title}</p>
+          <p style={{ fontSize: 15, fontWeight: 500, color: DS.colors.textMuted }}>{info.title}</p>
         </div>
-        <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 28px" }}>
-          <div style={{ width:64, height:64, borderRadius:DS.radius.lg, background:DS.colors.accentLight, display:"flex", alignItems:"center", justifyContent:"center", marginBottom:20 }}>
+        <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 28px" }}>
+          <div style={{ width: 64, height: 64, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
             <Icon name="lock" size={28} color={DS.colors.accent} />
           </div>
-          <h2 style={{ fontSize:22, fontWeight:700, letterSpacing:"-0.5px", marginBottom:10, textAlign:"center" }}>{info.title}</h2>
-          <p style={{ fontSize:15, color:DS.colors.textMuted, textAlign:"center", lineHeight:1.6, marginBottom:32, maxWidth:260 }}>{info.body}</p>
-          <button onClick={onSignUp} style={{ width:"100%", padding:"16px", borderRadius:DS.radius.lg, background:DS.colors.accent, color:DS.colors.white, fontSize:16, fontWeight:600, marginBottom:12 }}>Create account</button>
-          <button onClick={onSignUp} style={{ width:"100%", padding:"14px", borderRadius:DS.radius.lg, background:DS.colors.bg, color:DS.colors.text, fontSize:15, fontWeight:500, border:`1.5px solid ${DS.colors.border}` }}>Sign in</button>
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>{info.title}</h2>
+          <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 32, maxWidth: 260 }}>{info.body}</p>
+          <button onClick={onSignUp} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Create account</button>
+          <button onClick={onSignUp} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: DS.colors.bg, color: DS.colors.text, fontSize: 15, fontWeight: 500, border: `1.5px solid ${DS.colors.border}` }}>Sign in</button>
         </div>
       </div>
     );
   }
   return (
-    <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:12, color:DS.colors.textMuted }}>
+    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, color: DS.colors.textMuted }}>
       <Icon name={tabs.find(t => t.id === tab)?.icon || "sparkles"} size={40} color={DS.colors.border} />
-      <p style={{ fontSize:15, fontWeight:500 }}>{tab.charAt(0).toUpperCase() + tab.slice(1)} - coming soon</p>
-      <p style={{ fontSize:13, color:DS.colors.textFaint }}>Foundation deployed</p>
+      <p style={{ fontSize: 15, fontWeight: 500 }}>{tab.charAt(0).toUpperCase() + tab.slice(1)} - coming soon</p>
+      <p style={{ fontSize: 13, color: DS.colors.textFaint }}>Foundation deployed</p>
     </div>
   );
 };
@@ -643,8 +621,8 @@ const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, 
   user: User | null; isGuest: boolean; onSignUp: () => void;
   activeSheet: Sheet; onOpenSheet: (sheet: Sheet) => void; onCloseSheet: () => void; onUpgrade: () => void;
 }) => (
-  <div className="screen fade-in" style={{ background:DS.colors.bg }}>
-    <div style={{ flex:1, overflow:"hidden", display:"flex", flexDirection:"column" }}>
+  <div className="screen fade-in" style={{ background: DS.colors.bg }}>
+    <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
       {activeTab === "home" ? (
         <HomeTab seasonData={seasonData} user={user} onOpenSheet={onOpenSheet} onUpgrade={onUpgrade} />
       ) : (
@@ -674,12 +652,12 @@ export default function App() {
       try {
         const parsedSeason = JSON.parse(cachedSeason);
         const parsedUser = JSON.parse(cachedUser);
-        update({ screen:"main", user:parsedUser, seasonData:parsedSeason });
-        fetch(`${SUPABASE_URL}/auth/v1/user`, { headers:{ ...supabaseHeaders, Authorization:`Bearer ${token}` } })
+        update({ screen: "main", user: parsedUser, seasonData: parsedSeason });
+        fetch(`${SUPABASE_URL}/auth/v1/user`, { headers: { ...supabaseHeaders, Authorization: `Bearer ${token}` } })
           .then(r => r.json())
-          .then(data => { if (data.id) update({ user:{ id:data.id, email:data.email, name:data.user_metadata?.name || data.email.split("@")[0], plan:parsedUser.plan || "free" } }); })
+          .then(data => { if (data.id) update({ user: { id: data.id, email: data.email, name: data.user_metadata?.name || data.email.split("@")[0], plan: parsedUser.plan || "free" } }); })
           .catch(() => {});
-      } catch { update({ screen:"onboarding" }); }
+      } catch { update({ screen: "onboarding" }); }
     }
   }, []);
 
@@ -704,45 +682,40 @@ export default function App() {
     });
 
   const handleUpload = async (file: File) => {
-    update({ screen:"analysing" });
+    update({ screen: "analysing" });
     try {
       const base64 = await resizeAndEncode(file);
       const res = await fetch(`${SUPABASE_URL}/functions/v1/smooth-action`, {
-        method:"POST",
-        headers: { "Content-Type":"application/json", Authorization:`Bearer ${SUPABASE_ANON_KEY}` },
-        body: JSON.stringify({ type:"analyse", image:base64 }),
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ type: "analyse", image: base64 }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       localStorage.setItem("chroma_season", JSON.stringify(data));
-      update({ seasonData:data, screen:"main" });
-    } catch {
-      update({ screen:"main" });
-    }
+      update({ seasonData: data, screen: "main" });
+    } catch { update({ screen: "main" }); }
   };
 
   const { screen, activeTab, user, isGuest, seasonData } = state;
   return (
     <>
       <GlobalStyles />
-      <div style={{ position:"relative", width:"100vw", height:"100vh", maxWidth:430, margin:"0 auto", overflow:"hidden" }}>
-        {screen === "splash" && <SplashScreen onComplete={() => update({ screen:"onboarding" })} />}
-        {screen === "onboarding" && <OnboardingScreen onComplete={() => update({ screen:"auth" })} />}
-        {screen === "auth" && <AuthScreen onSignIn={u => update({ user:u, screen:"upload" })} onGuest={() => update({ isGuest:true, screen:"upload" })} />}
+      <div style={{ position: "relative", width: "100vw", height: "100vh", maxWidth: 430, margin: "0 auto", overflow: "hidden" }}>
+        {screen === "splash" && <SplashScreen onComplete={() => update({ screen: "onboarding" })} />}
+        {screen === "onboarding" && <OnboardingScreen onComplete={() => update({ screen: "auth" })} />}
+        {screen === "auth" && <AuthScreen onSignIn={u => update({ user: u, screen: "upload" })} onGuest={() => update({ isGuest: true, screen: "upload" })} />}
         {screen === "upload" && <UploadScreen onUpload={handleUpload} />}
         {screen === "analysing" && <AnalysingScreen />}
         {screen === "main" && (
           <MainApp
-            activeTab={activeTab}
-            onTabChange={tab => update({ activeTab:tab })}
-            seasonData={seasonData}
-            user={user}
-            isGuest={isGuest}
-            onSignUp={() => update({ screen:"auth" })}
+            activeTab={activeTab} onTabChange={tab => update({ activeTab: tab })}
+            seasonData={seasonData} user={user} isGuest={isGuest}
+            onSignUp={() => update({ screen: "auth" })}
             activeSheet={state.activeSheet}
-            onOpenSheet={sheet => update({ activeSheet:sheet })}
-            onCloseSheet={() => update({ activeSheet:null })}
-            onUpgrade={() => update({ activeSheet:"paywall" })}
+            onOpenSheet={sheet => update({ activeSheet: sheet })}
+            onCloseSheet={() => update({ activeSheet: null })}
+            onUpgrade={() => update({ activeSheet: "paywall" })}
           />
         )}
       </div>
