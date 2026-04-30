@@ -709,7 +709,7 @@ export default function App() {
     <>
       <GlobalStyles />
       {/* Root container — SheetOverlay renders here, OUTSIDE all overflow:hidden screens */}
-      <div style={{ position: "relative", width: "100vw", height: "100vh", maxWidth: 430, margin: "0 auto", overflow: "hidden" }}>
+      <div style={{ position: "relative", width: "100vw", height: "100vh", maxWidth: 430, margin: "0 auto" }}>
         {screen === "splash" && <SplashScreen onComplete={() => update({ screen: "onboarding" })} />}
         {screen === "onboarding" && <OnboardingScreen onComplete={() => update({ screen: "auth" })} />}
         {screen === "auth" && <AuthScreen onSignIn={u => update({ user: u, screen: "upload" })} onGuest={() => update({ isGuest: true, screen: "upload" })} />}
