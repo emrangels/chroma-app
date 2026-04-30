@@ -580,7 +580,7 @@ const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade }: {
           </div>
         </div>
         {categoryCards.map(card => (
-          <button key={card.id} onClick={() => card.locked ? onUpgrade() : onOpenSheet(card.id)} style={{ background:card.locked ? DS.colors.surface : DS.colors.bg, borderRadius:DS.radius.lg, border:`1px solid ${DS.colors.border}`, padding:"14px 16px", textAlign:"left", width:"100%", display:"flex", flexDirection:"column", gap:6 }}>
+          <button key={card.id} onClick={() => { alert("tapped: " + card.id + " locked:" + card.locked); card.locked ? onUpgrade() : onOpenSheet(card.id); }} style={{ background:card.locked ? DS.colors.surface : DS.colors.bg, borderRadius:DS.radius.lg, border:`1px solid ${DS.colors.border}`, padding:"14px 16px", textAlign:"left", width:"100%", display:"flex", flexDirection:"column", gap:6 }}>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
               <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                 <div style={{ width:30, height:30, borderRadius:DS.radius.md, background:card.locked ? DS.colors.border : DS.colors.accentLight, display:"flex", alignItems:"center", justifyContent:"center" }}>
