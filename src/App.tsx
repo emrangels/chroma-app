@@ -729,13 +729,16 @@ export default function App() {
         )}
         {/* SheetOverlay at root level — position:fixed works here, not clipped by any overflow:hidden */}
         {(() => { console.log("activeSheet:", state.activeSheet, "seasonData:", !!seasonData); return null; })()}
-        {state.activeSheet && state.activeSheet !== "paywall" && seasonData && (
-          <SheetOverlay
-            activeSheet={state.activeSheet}
-            seasonData={seasonData}
-            onClose={() => update({ activeSheet: null })}
-          />
-        )}
+{state.activeSheet && (
+  <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, height: 100, background: "red", zIndex: 9999 }} />
+)}
+{state.activeSheet && state.activeSheet !== "paywall" && seasonData && (
+  <SheetOverlay
+    activeSheet={state.activeSheet}
+    seasonData={seasonData}
+    onClose={() => update({ activeSheet: null })}
+  />
+)}
       </div>
     </>
   );
