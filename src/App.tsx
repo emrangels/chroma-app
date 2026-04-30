@@ -433,7 +433,7 @@ const seasonTextColors: Record<string,string> = { Spring:"#7A3A1E", Summer:"#1a2
 const seasonAccentColors: Record<string,string> = { Spring:"#E8845A", Summer:"#4A6FD4", Autumn:"#C26B3A", Winter:"#2E7DB5" };
 
 const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet; seasonData: SeasonData; onClose: () => void; }) => (
-  <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.4)", zIndex:200, display:"flex", alignItems:"flex-end" }} onClick={onClose}>
+  <div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,0.4)", zIndex:200, display:"flex", alignItems:"flex-end" }} onClick={onClose}>
     <div className="slide-up" style={{ width:"100%", maxHeight:"85vh", background:DS.colors.bg, borderRadius:`${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY:"auto", padding:"0 0 48px" }} onClick={e => e.stopPropagation()}>
       <div style={{ display:"flex", justifyContent:"center", padding:"12px 0 0" }}>
         <div style={{ width:36, height:4, borderRadius:DS.radius.full, background:DS.colors.border }} />
