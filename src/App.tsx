@@ -728,7 +728,7 @@ export default function App() {
           />
         )}
         {/* SheetOverlay at root level — position:fixed works here, not clipped by any overflow:hidden */}
-        {(() => { console.log("activeSheet:", state.activeSheet); return null; })()}
+        {(() => { console.log("activeSheet:", state.activeSheet, "seasonData:", !!seasonData); return null; })()}
         {state.activeSheet && state.activeSheet !== "paywall" && seasonData && (
           <SheetOverlay
             activeSheet={state.activeSheet}
