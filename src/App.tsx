@@ -100,12 +100,12 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
   return (
     <div className="screen" style={{ background: DS.colors.accent, alignItems: "center", justifyContent: "center" }}>
       <style>{`
-        @keyframes logoReveal { 0% { opacity:0; transform:scale(0.85) translateY(12px); } 60% { opacity:1; transform:scale(1.02) translateY(-2px); } 100% { opacity:1; transform:scale(1) translateY(0); } }
-        @keyframes taglineReveal { 0% { opacity:0; transform:translateY(8px); } 100% { opacity:1; transform:translateY(0); } }
-        @keyframes dotsReveal { 0% { opacity:0; } 100% { opacity:0.5; } }
-        .logo-anim { animation: logoReveal 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.3s both; }
-        .tag-anim { animation: taglineReveal 0.6s ease 1.0s both; }
-        .dots-anim { animation: dotsReveal 0.5s ease 1.4s both; }
+        @keyframes logoReveal { 0%{opacity:0;transform:scale(0.85) translateY(12px)} 60%{opacity:1;transform:scale(1.02) translateY(-2px)} 100%{opacity:1;transform:scale(1) translateY(0)} }
+        @keyframes taglineReveal { 0%{opacity:0;transform:translateY(8px)} 100%{opacity:1;transform:translateY(0)} }
+        @keyframes dotsReveal { 0%{opacity:0} 100%{opacity:0.5} }
+        .logo-anim{animation:logoReveal 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.3s both}
+        .tag-anim{animation:taglineReveal 0.6s ease 1.0s both}
+        .dots-anim{animation:dotsReveal 0.5s ease 1.4s both}
       `}</style>
       <div style={{ textAlign: "center" }}>
         <div className="logo-anim">
@@ -138,10 +138,10 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
   return (
     <div className="screen" style={{ background: DS.colors.bg, display: "flex", flexDirection: "column" }}>
       <style>{`
-        @keyframes slideInRight { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }
-        @keyframes slideInLeft { from { opacity:0; transform:translateX(-30px); } to { opacity:1; transform:translateX(0); } }
-        .slide-right { animation: slideInRight 0.35s ease both; }
-        .slide-left { animation: slideInLeft 0.35s ease both; }
+        @keyframes slideInRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+        @keyframes slideInLeft{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+        .slide-right{animation:slideInRight 0.35s ease both}
+        .slide-left{animation:slideInLeft 0.35s ease both}
       `}</style>
       <div key={idx} className={dir > 0 ? "slide-right" : "slide-left"} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 28px", minHeight: 0 }}>
         <div style={{ width: 88, height: 88, borderRadius: DS.radius.xl, background: slide.bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, flexShrink: 0 }}>
@@ -397,9 +397,17 @@ const metalColourMap: Record<string, string> = {
   "oxidised silver": "#808080", "antique gold": "#B8960C",
 };
 
+// SheetOverlay — rendered at ROOT level, outside all overflow:hidden containers
 const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet; seasonData: SeasonData; onClose: () => void; }) => (
-  <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 200, display: "flex", alignItems: "flex-end" }} onClick={onClose}>
-    <div className="slide-up" style={{ width: "100%", maxHeight: "85vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
+  <div
+    style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 1000, display: "flex", alignItems: "flex-end" }}
+    onClick={onClose}
+  >
+    <div
+      className="slide-up"
+      style={{ width: "100%", maxHeight: "85vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }}
+      onClick={e => e.stopPropagation()}
+    >
       <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
         <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
       </div>
@@ -616,10 +624,11 @@ const PlaceholderTab = ({ tab, isGuest, onSignUp }: { tab: Tab; isGuest: boolean
   );
 };
 
-const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, activeSheet, onOpenSheet, onCloseSheet, onUpgrade }: {
+// MainApp — NO SheetOverlay here, it lives at root level
+const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, onOpenSheet, onUpgrade }: {
   activeTab: Tab; onTabChange: (tab: Tab) => void; seasonData: SeasonData | null;
   user: User | null; isGuest: boolean; onSignUp: () => void;
-  activeSheet: Sheet; onOpenSheet: (sheet: Sheet) => void; onCloseSheet: () => void; onUpgrade: () => void;
+  onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void;
 }) => (
   <div className="screen fade-in" style={{ background: DS.colors.bg }}>
     <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
@@ -630,9 +639,6 @@ const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, 
       )}
     </div>
     <BottomNav activeTab={activeTab} onTabChange={onTabChange} />
-    {activeSheet && activeSheet !== "paywall" && seasonData && (
-      <SheetOverlay activeSheet={activeSheet} seasonData={seasonData} onClose={onCloseSheet} />
-    )}
   </div>
 );
 
@@ -698,9 +704,11 @@ export default function App() {
   };
 
   const { screen, activeTab, user, isGuest, seasonData } = state;
+
   return (
     <>
       <GlobalStyles />
+      {/* Root container — SheetOverlay renders here, OUTSIDE all overflow:hidden screens */}
       <div style={{ position: "relative", width: "100vw", height: "100vh", maxWidth: 430, margin: "0 auto", overflow: "hidden" }}>
         {screen === "splash" && <SplashScreen onComplete={() => update({ screen: "onboarding" })} />}
         {screen === "onboarding" && <OnboardingScreen onComplete={() => update({ screen: "auth" })} />}
@@ -709,13 +717,22 @@ export default function App() {
         {screen === "analysing" && <AnalysingScreen />}
         {screen === "main" && (
           <MainApp
-            activeTab={activeTab} onTabChange={tab => update({ activeTab: tab })}
-            seasonData={seasonData} user={user} isGuest={isGuest}
+            activeTab={activeTab}
+            onTabChange={tab => update({ activeTab: tab })}
+            seasonData={seasonData}
+            user={user}
+            isGuest={isGuest}
             onSignUp={() => update({ screen: "auth" })}
-            activeSheet={state.activeSheet}
             onOpenSheet={sheet => update({ activeSheet: sheet })}
-            onCloseSheet={() => update({ activeSheet: null })}
             onUpgrade={() => update({ activeSheet: "paywall" })}
+          />
+        )}
+        {/* SheetOverlay at root level — position:fixed works here, not clipped by any overflow:hidden */}
+        {state.activeSheet && state.activeSheet !== "paywall" && seasonData && (
+          <SheetOverlay
+            activeSheet={state.activeSheet}
+            seasonData={seasonData}
+            onClose={() => update({ activeSheet: null })}
           />
         )}
       </div>
