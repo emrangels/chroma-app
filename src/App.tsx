@@ -508,10 +508,10 @@ const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade }: { seasonData: Sea
   const gradient = seasonGradients[seasonData.season] || seasonGradients.Summer;
   const textColor = seasonTextColors[seasonData.season] || "#1a2a4a";
   const accentColor = seasonAccentColors[seasonData.season] || "#4A6FD4";
-  const canAccessMakeup = plan === "glow" || plan === "luxe";
-  const canAccessHair = plan === "glow" || plan === "luxe";
-  const canAccessJewellery = plan === "glow" || plan === "luxe";
-  const canAccessStyle = plan === "luxe";
+  const canAccessMakeup = true;
+  const canAccessHair = true;
+  const canAccessJewellery = true;
+  const canAccessStyle = true;
   const categoryCards = [
     { id: "makeup" as Sheet, icon: "droplet", label: "Makeup", teaser: seasonData.makeup.foundation.split(".")[0] + ".", locked: !canAccessMakeup, requiredPlan: "Glow" },
     { id: "hair" as Sheet, icon: "scissors", label: "Hair", teaser: seasonData.hair.best_colours.slice(0, 2).join(", ") + " and more...", locked: !canAccessHair, requiredPlan: "Glow" },
