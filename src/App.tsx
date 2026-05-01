@@ -396,7 +396,110 @@ const metalColourMap: Record<string, string> = {
   "platinum": "#E5E4E2", "copper": "#B87333", "bronze": "#CD7F32",
   "oxidised silver": "#808080", "antique gold": "#B8960C",
 };
+const PaywallSheet = ({ currentPlan, onUpgrade, onClose }: { currentPlan: Plan; onUpgrade: (plan: Plan) => void; onClose: () => void; }) => {
+  const [selected, setSelected] = useState<Plan>("glow");
+  const [loading, setLoading] = useState(false);
 
+  const plans: { id: Plan; name: string; price: string; color: string; features: string[] }[] = [
+    { id: "free", name: "Free", price: "$0", color: DS.colors.textFaint, features: ["Season & palette", "Daily tip"] },
+    { id: "glow", name: "Glow", price: "$9.99/mo", color: DS.colors.accent, features: ["Everything in Free", "Makeup guide", "Hair colours", "Jewellery guide", "Colour checker"] },
+    { id: "luxe", name: "Luxe", price: "$19.99/mo", color: "#C26B3A", features: ["Everything in Glow", "Style & Fit guide", "Wardrobe tab"] },
+  ];
+
+  const handleUpgrade = async () => {
+    if (selected === currentPlan) { onClose(); return; }
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("chroma_token");
+      const cachedUser = localStorage.getItem("chroma_user");
+      if (token && cachedUser) {
+        const user = JSON.parse(cachedUser);
+        await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}`, {
+          method: "PATCH",
+          headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
+          body: JSON.stringify({ user_plan: selected }),
+        });
+      }
+      onUpgrade(selected);
+    } catch {}
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div
+      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }}
+      onClick={onClose}
+    >
+      <div
+        style={{ width: "100%", maxHeight: "90vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+          <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
+        </div>
+        <div style={{ padding: "20px 24px 0" }}>
+          <div style={{ width: 48, height: 48, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+            <Icon name="crown" size={22} color={DS.colors.accent} />
+          </div>
+          <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Unlock your full guide</h2>
+          <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 24 }}>Get your complete colour guide — makeup, hair, jewellery and style, all personalised to your season.</p>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+            {plans.map(plan => {
+              const isSelected = selected === plan.id;
+              const isCurrent = currentPlan === plan.id;
+              return (
+                <button
+                  key={plan.id}
+                  onClick={() => plan.id !== "free" && setSelected(plan.id)}
+                  style={{
+                    width: "100%", padding: "14px 16px", borderRadius: DS.radius.lg, textAlign: "left",
+                    border: `2px solid ${isSelected ? plan.color : DS.colors.border}`,
+                    background: isSelected ? (plan.id === "glow" ? DS.colors.accentLight : "#FFF7ED") : DS.colors.bg,
+                    cursor: plan.id === "free" ? "default" : "pointer",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 15, fontWeight: 700, color: isSelected ? plan.color : DS.colors.text }}>{plan.name}</span>
+                      {isCurrent && <span style={{ fontSize: 11, background: DS.colors.surface, color: DS.colors.textMuted, padding: "2px 8px", borderRadius: DS.radius.full, fontWeight: 500 }}>Current</span>}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: isSelected ? plan.color : DS.colors.textMuted }}>{plan.price}</span>
+                      <div style={{ width: 20, height: 20, borderRadius: DS.radius.full, border: `2px solid ${isSelected ? plan.color : DS.colors.border}`, background: isSelected ? plan.color : DS.colors.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        {isSelected && <Icon name="check" size={11} color={DS.colors.white} strokeWidth={3} />}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    {plan.features.map(f => (
+                      <div key={f} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <Icon name="check" size={12} color={plan.id === "free" ? DS.colors.textFaint : plan.color} strokeWidth={2.5} />
+                        <span style={{ fontSize: 13, color: plan.id === "free" ? DS.colors.textFaint : DS.colors.textMuted }}>{f}</span>
+                      </div>
+                    ))}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={handleUpgrade}
+            disabled={loading}
+            style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: selected === "luxe" ? "#C26B3A" : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 12, opacity: loading ? 0.7 : 1 }}
+          >
+            {loading ? "Upgrading..." : selected === currentPlan ? "You're on this plan" : `Upgrade to ${plans.find(p => p.id === selected)?.name}`}
+          </button>
+          <button onClick={onClose} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>
+            Maybe later
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 // SheetOverlay — rendered at ROOT level, outside all overflow:hidden containers
 const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet; seasonData: SeasonData; onClose: () => void; }) => (
   <div
@@ -404,9 +507,15 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
     onClick={onClose}
   >
     <div
-      className="slide-up"
-      style={{ width: "100%", maxHeight: "85vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }}
-      onClick={e => e.stopPropagation()}
+  style={{
+    width: "100%", maxHeight: "85vh", background: DS.colors.bg,
+    borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`,
+    overflowY: "auto", padding: "0 0 48px",
+    transform: "translateY(0)",
+    animation: "none",
+    transition: "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
+  }}
+  onClick={e => e.stopPropagation()}
     >
       <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
         <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
@@ -508,10 +617,10 @@ const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade }: { seasonData: Sea
   const gradient = seasonGradients[seasonData.season] || seasonGradients.Summer;
   const textColor = seasonTextColors[seasonData.season] || "#1a2a4a";
   const accentColor = seasonAccentColors[seasonData.season] || "#4A6FD4";
-  const canAccessMakeup = true;
-  const canAccessHair = true;
-  const canAccessJewellery = true;
-  const canAccessStyle = true;
+  const canAccessMakeup = plan !== "free";
+  const canAccessHair = plan !== "free";
+  const canAccessJewellery = plan !== "free";
+  const canAccessStyle = plan === "luxe";
   const categoryCards = [
     { id: "makeup" as Sheet, icon: "droplet", label: "Makeup", teaser: seasonData.makeup.foundation.split(".")[0] + ".", locked: !canAccessMakeup, requiredPlan: "Glow" },
     { id: "hair" as Sheet, icon: "scissors", label: "Hair", teaser: seasonData.hair.best_colours.slice(0, 2).join(", ") + " and more...", locked: !canAccessHair, requiredPlan: "Glow" },
@@ -649,7 +758,11 @@ export default function App() {
     wardrobeItems: [], checkerMode: "single", onboardingIndex: 0,
   });
   const update = (patch: Partial<AppState>) => setState(s => ({ ...s, ...patch }));
-
+  const handleUpgrade = (plan: Plan) => {
+  const updatedUser = state.user ? { ...state.user, plan } : null;
+  if (updatedUser) localStorage.setItem("chroma_user", JSON.stringify(updatedUser));
+  update({ user: updatedUser, activeSheet: null });
+};
   useEffect(() => {
     const token = localStorage.getItem("chroma_token");
     const cachedSeason = localStorage.getItem("chroma_season");
@@ -727,18 +840,21 @@ export default function App() {
             onUpgrade={() => update({ activeSheet: "paywall" })}
           />
         )}
-        {/* SheetOverlay at root level — position:fixed works here, not clipped by any overflow:hidden */}
-        {(() => { console.log("activeSheet:", state.activeSheet, "seasonData:", !!seasonData); return null; })()}
-{state.activeSheet && (
-  <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, height: 100, background: "red", zIndex: 9999 }} />
-)}
-{state.activeSheet && state.activeSheet !== "paywall" && seasonData && (
-  <SheetOverlay
-    activeSheet={state.activeSheet}
-    seasonData={seasonData}
-    onClose={() => update({ activeSheet: null })}
-  />
-)}
+{/* SheetOverlay at root level — position:fixed works here, not clipped by any overflow:hidden */}
+        {state.activeSheet && state.activeSheet !== "paywall" && seasonData && (
+          <SheetOverlay
+            activeSheet={state.activeSheet}
+            seasonData={seasonData}
+            onClose={() => update({ activeSheet: null })}
+          />
+        )}
+        {state.activeSheet === "paywall" && (
+          <PaywallSheet
+            currentPlan={state.user?.plan || "free"}
+            onUpgrade={handleUpgrade}
+            onClose={() => update({ activeSheet: null })}
+          />
+        )}
       </div>
     </>
   );
