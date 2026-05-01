@@ -726,6 +726,223 @@ const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade }: { seasonData: Sea
   );
 };
 
+interface CheckResult {
+  mode: string;
+  overall_verdict?: boolean;
+  overall_tip?: string;
+  items: {
+    piece?: string;
+    colour_name: string;
+    hex: string;
+    verdict: boolean;
+    reason: string;
+    tip: string;
+  }[];
+}
+
+const CheckerTab = ({ seasonData, user }: { seasonData: SeasonData | null; user: User | null; }) => {
+  const [mode, setMode] = useState<"single" | "outfit" | "swatch">("single");
+  const [preview, setPreview] = useState<string | null>(null);
+  const [swatchLabel, setSwatchLabel] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<CheckResult | null>(null);
+  const [error, setError] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const plan = user?.plan || "free";
+  const canAccess = plan !== "free";
+
+  const resizeAndEncode = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let { width, height } = img;
+        const max = 1024;
+        if (width > height) { if (width > max) { height = Math.round(height * max / width); width = max; } }
+        else { if (height > max) { width = Math.round(width * max / height); height = max; } }
+        const canvas = document.createElement("canvas");
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) { reject(new Error("Canvas error")); return; }
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.85).split(",")[1]);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Load error")); };
+      img.src = url;
+    });
+
+  const handleFile = (file: File) => {
+    setPreview(URL.createObjectURL(file));
+    setResult(null);
+    setError("");
+  };
+
+  const handleCheck = async () => {
+    const file = fileRef.current?.files?.[0];
+    if (!file || !seasonData) return;
+    setLoading(true); setError("");
+    try {
+      const base64 = await resizeAndEncode(file);
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/smooth-action`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ type: "check_item", image: base64, season: seasonData.season, mode, swatchLabel: swatchLabel || undefined }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setResult(data);
+    } catch (e) { setError(e instanceof Error ? e.message : "Something went wrong."); }
+    finally { setLoading(false); }
+  };
+
+  const reset = () => {
+    setPreview(null);
+    setResult(null);
+    setError("");
+    setSwatchLabel("");
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  if (!canAccess) return (
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 28px" }}>
+      <div style={{ width: 64, height: 64, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+        <Icon name="lock" size={28} color={DS.colors.accent} />
+      </div>
+      <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Colour Checker</h2>
+      <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260 }}>Upgrade to Glow to check items, outfits and swatches against your season.</p>
+    </div>
+  );
+
+  if (!seasonData) return (
+    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, padding: "40px 28px" }}>
+      <Icon name="image" size={40} color={DS.colors.border} />
+      <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center" }}>Complete your colour analysis first to use the checker.</p>
+    </div>
+  );
+
+  return (
+    <div style={{ flex: 1, overflowY: "auto", background: DS.colors.bg }}>
+      <div style={{ padding: "20px 16px 0" }}>
+        {/* Mode switcher */}
+        <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, marginBottom: 20, gap: 4 }}>
+          {(["single", "outfit", "swatch"] as const).map(m => (
+            <button key={m} onClick={() => { setMode(m); reset(); }} style={{ flex: 1, padding: "8px 4px", borderRadius: DS.radius.md, fontSize: 13, fontWeight: mode === m ? 600 : 400, color: mode === m ? DS.colors.white : DS.colors.textMuted, background: mode === m ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
+              {m.charAt(0).toUpperCase() + m.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        {/* Mode description */}
+        <p style={{ fontSize: 13, color: DS.colors.textFaint, marginBottom: 16, lineHeight: 1.5 }}>
+          {mode === "single" && "Upload a photo of one item to check if it suits your season."}
+          {mode === "outfit" && "Upload a full outfit photo for an overall verdict and per-piece breakdown."}
+          {mode === "swatch" && "Upload a photo of colour swatches (e.g. lipsticks on your arm) for individual verdicts."}
+        </p>
+
+        {/* Swatch label */}
+        {mode === "swatch" && (
+          <input
+            value={swatchLabel}
+            onChange={e => setSwatchLabel(e.target.value)}
+            placeholder="What are these swatches? (e.g. lipstick shades)"
+            style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 16, fontFamily: DS.font }}
+          />
+        )}
+
+        {/* Upload area */}
+        {!result && (
+          <div
+            onClick={() => !preview && fileRef.current?.click()}
+            style={{ borderRadius: DS.radius.xl, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: preview ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 16, height: 220 }}
+          >
+            {preview ? (
+              <>
+                <img src={preview} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <button onClick={e => { e.stopPropagation(); reset(); }} style={{ position: "absolute", top: 12, right: 12, width: 32, height: 32, borderRadius: DS.radius.full, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Icon name="x" size={16} color={DS.colors.white} />
+                </button>
+              </>
+            ) : (
+              <>
+                <div style={{ width: 52, height: 52, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+                  <Icon name="camera" size={24} color={DS.colors.accent} />
+                </div>
+                <p style={{ fontSize: 14, fontWeight: 500, color: DS.colors.text, marginBottom: 4 }}>Upload photo</p>
+                <p style={{ fontSize: 12, color: DS.colors.textFaint }}>Tap to choose</p>
+              </>
+            )}
+          </div>
+        )}
+
+        <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+
+        {/* CTA */}
+        {preview && !result && (
+          <button onClick={handleCheck} disabled={loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: loading ? DS.colors.textFaint : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
+            {loading ? "Checking..." : "Check this"}
+          </button>
+        )}
+
+        {error && <p style={{ fontSize: 13, color: DS.colors.danger, padding: "8px 12px", background: "#FEF2F2", borderRadius: DS.radius.sm, marginBottom: 16 }}>{error}</p>}
+
+        {/* Results */}
+        {result && (
+          <div style={{ marginBottom: 32 }}>
+            {/* Outfit overall verdict */}
+            {result.mode === "outfit" && (
+              <div style={{ background: result.overall_verdict ? "#F0FDF4" : "#FEF2F2", borderRadius: DS.radius.lg, padding: "14px 16px", marginBottom: 16, borderLeft: `3px solid ${result.overall_verdict ? DS.colors.success : DS.colors.danger}` }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                  <Icon name={result.overall_verdict ? "check" : "x"} size={16} color={result.overall_verdict ? DS.colors.success : DS.colors.danger} strokeWidth={2.5} />
+                  <span style={{ fontSize: 14, fontWeight: 700, color: result.overall_verdict ? DS.colors.success : DS.colors.danger }}>{result.overall_verdict ? "This outfit works" : "This outfit needs work"}</span>
+                </div>
+                {result.overall_tip && <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{result.overall_tip}</p>}
+              </div>
+            )}
+
+            {/* Thumbnail */}
+            {preview && (
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                <img src={preview} style={{ width: 56, height: 56, borderRadius: DS.radius.md, objectFit: "cover", flexShrink: 0 }} />
+                <div>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>{result.items.length} colour{result.items.length !== 1 ? "s" : ""} analysed</p>
+                  <p style={{ margin: 0, fontSize: 12, color: DS.colors.textFaint }}>{result.items.filter(i => i.verdict).length} of {result.items.length} suit your {seasonData.season} season</p>
+                </div>
+                <button onClick={reset} style={{ marginLeft: "auto", fontSize: 13, color: DS.colors.accent, fontWeight: 500, padding: "6px 12px", borderRadius: DS.radius.full, border: `1px solid ${DS.colors.accentLight}`, background: DS.colors.accentLight }}>
+                  Check another
+                </button>
+              </div>
+            )}
+
+            {/* Item cards */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {result.items.map((item, i) => (
+                <div key={i} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "14px 16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: DS.radius.md, background: item.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        {item.piece && <span style={{ fontSize: 11, color: DS.colors.textFaint, fontWeight: 500 }}>{item.piece} · </span>}
+                        <span style={{ fontSize: 14, fontWeight: 600, color: DS.colors.text }}>{item.colour_name}</span>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: DS.radius.full, background: item.verdict ? "#F0FDF4" : "#FEF2F2", flexShrink: 0 }}>
+                      <Icon name={item.verdict ? "check" : "x"} size={12} color={item.verdict ? DS.colors.success : DS.colors.danger} strokeWidth={2.5} />
+                      <span style={{ fontSize: 12, fontWeight: 600, color: item.verdict ? DS.colors.success : DS.colors.danger }}>{item.verdict ? "Yes" : "No"}</span>
+                    </div>
+                  </div>
+                  <p style={{ margin: "0 0 4px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{item.reason}</p>
+                  <p style={{ margin: 0, fontSize: 13, color: DS.colors.accent, lineHeight: 1.5, fontWeight: 500 }}>{item.tip}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 const PlaceholderTab = ({ tab, isGuest, onSignUp }: { tab: Tab; isGuest: boolean; onSignUp: () => void; }) => {
   const locked = isGuest && tab !== "home";
   if (locked) {
@@ -771,10 +988,12 @@ const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, 
   <div className="screen fade-in" style={{ background: DS.colors.bg }}>
     <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
       {activeTab === "home" ? (
-        <HomeTab seasonData={seasonData} user={user} onOpenSheet={onOpenSheet} onUpgrade={onUpgrade} />
-      ) : (
-        <PlaceholderTab tab={activeTab} isGuest={isGuest} onSignUp={onSignUp} />
-      )}
+  <HomeTab seasonData={seasonData} user={user} onOpenSheet={onOpenSheet} onUpgrade={onUpgrade} />
+) : activeTab === "checker" ? (
+  <CheckerTab seasonData={seasonData} user={user} />
+) : (
+  <PlaceholderTab tab={activeTab} isGuest={isGuest} onSignUp={onSignUp} />
+)}
     </div>
     <BottomNav activeTab={activeTab} onTabChange={onTabChange} />
   </div>
