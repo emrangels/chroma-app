@@ -943,6 +943,139 @@ const CheckerTab = ({ seasonData, user }: { seasonData: SeasonData | null; user:
     </div>
   );
 };
+const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade }: {
+  user: User | null; seasonData: SeasonData | null;
+  onSignOut: () => void; onReanalyse: () => void; onUpgrade: () => void;
+}) => {
+  const [showReanalyseWarning, setShowReanalyseWarning] = useState(false);
+  const [referralCopied, setReferralCopied] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [referralCount, setReferralCount] = useState(0);
+
+  useEffect(() => {
+    const token = localStorage.getItem("chroma_token");
+    if (!token || !user?.id) return;
+    fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}&select=referral_code,referral_count`, {
+      headers: { ...supabaseHeaders, Authorization: `Bearer ${token}` },
+    }).then(r => r.json()).then(data => {
+      if (data?.[0]) {
+        setReferralCode(data[0].referral_code);
+        setReferralCount(data[0].referral_count || 0);
+      }
+    }).catch(() => {});
+  }, [user?.id]);
+
+  const planColors: Record<Plan, string> = { free: DS.colors.textFaint, glow: DS.colors.accent, luxe: "#C26B3A" };
+  const planLabel: Record<Plan, string> = { free: "Free", glow: "Glow", luxe: "Luxe" };
+  const plan = user?.plan || "free";
+
+  const copyReferral = () => {
+    if (!referralCode) return;
+    navigator.clipboard.writeText(referralCode).then(() => {
+      setReferralCopied(true);
+      setTimeout(() => setReferralCopied(false), 2000);
+    });
+  };
+
+  const planFeatures: Record<Plan, string[]> = {
+    free: ["Season & palette", "Daily tip"],
+    glow: ["Season & palette", "Makeup guide", "Hair colours", "Jewellery guide", "Colour checker"],
+    luxe: ["Everything in Glow", "Style & Fit guide", "Wardrobe tab"],
+  };
+
+  return (
+    <div style={{ flex: 1, overflowY: "auto", background: DS.colors.bg }}>
+      {/* Profile header */}
+      <div style={{ padding: "40px 24px 24px", background: DS.colors.surface, borderBottom: `1px solid ${DS.colors.border}` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <div style={{ width: 56, height: 56, borderRadius: DS.radius.full, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Icon name="user" size={24} color={DS.colors.accent} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ margin: 0, fontSize: 17, fontWeight: 700, color: DS.colors.text, letterSpacing: "-0.3px" }}>{user?.name || "Guest"}</p>
+            <p style={{ margin: "2px 0 6px", fontSize: 13, color: DS.colors.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.email || ""}</p>
+            <span style={{ display: "inline-block", fontSize: 11, fontWeight: 600, color: planColors[plan], background: plan === "free" ? DS.colors.surface : plan === "glow" ? DS.colors.accentLight : "#FFF7ED", padding: "2px 10px", borderRadius: DS.radius.full, border: `1px solid ${planColors[plan]}30` }}>
+              {planLabel[plan]} plan
+            </span>
+          </div>
+        </div>
+        {seasonData && (
+          <div style={{ marginTop: 16, padding: "10px 14px", background: DS.colors.bg, borderRadius: DS.radius.md, border: `1px solid ${DS.colors.border}`, display: "flex", alignItems: "center", gap: 10 }}>
+            <Icon name="sparkles" size={14} color={DS.colors.accent} />
+            <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{seasonData.season} · {seasonData.subseason}</span>
+          </div>
+        )}
+      </div>
+
+      <div style={{ padding: "16px 16px 48px", display: "flex", flexDirection: "column", gap: 12 }}>
+        {/* Plan card */}
+        <div style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: DS.colors.text }}>Your plan</p>
+            {plan !== "luxe" && (
+              <button onClick={onUpgrade} style={{ fontSize: 12, fontWeight: 600, color: DS.colors.accent, background: DS.colors.accentLight, padding: "4px 12px", borderRadius: DS.radius.full }}>
+                Upgrade
+              </button>
+            )}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {planFeatures[plan].map(f => (
+              <div key={f} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <Icon name="check" size={13} color={planColors[plan]} strokeWidth={2.5} />
+                <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{f}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Referral card */}
+        <div style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <Icon name="gift" size={16} color={DS.colors.accent} />
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: DS.colors.text }}>Refer a friend</p>
+          </div>
+          <p style={{ margin: "0 0 12px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>Share your code and help a friend discover their season.</p>
+          {referralCode ? (
+            <button onClick={copyReferral} style={{ width: "100%", padding: "12px 16px", borderRadius: DS.radius.md, background: DS.colors.surface, border: `1.5px dashed ${DS.colors.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontSize: 16, fontWeight: 700, color: DS.colors.accent, letterSpacing: "0.05em" }}>{referralCode}</span>
+              <span style={{ fontSize: 12, color: referralCopied ? DS.colors.success : DS.colors.textMuted, fontWeight: 500 }}>{referralCopied ? "Copied!" : "Tap to copy"}</span>
+            </button>
+          ) : (
+            <div style={{ padding: "12px 16px", borderRadius: DS.radius.md, background: DS.colors.surface, fontSize: 13, color: DS.colors.textFaint }}>Loading code...</div>
+          )}
+          {referralCount > 0 && (
+            <p style={{ margin: "8px 0 0", fontSize: 12, color: DS.colors.textMuted }}>{referralCount} friend{referralCount !== 1 ? "s" : ""} referred</p>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, overflow: "hidden" }}>
+          <button onClick={() => setShowReanalyseWarning(true)} style={{ width: "100%", padding: "16px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${DS.colors.border}` }}>
+            <Icon name="refresh" size={18} color={DS.colors.text} />
+            <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.text }}>Re-analyse my colours</span>
+            <span style={{ marginLeft: "auto" }}><Icon name="chevronRight" size={16} color={DS.colors.textFaint} /></span>
+          </button>
+          <button onClick={onSignOut} style={{ width: "100%", padding: "16px", display: "flex", alignItems: "center", gap: 12 }}>
+            <Icon name="logout" size={18} color={DS.colors.danger} />
+            <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.danger }}>Sign out</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Re-analyse warning */}
+      {showReanalyseWarning && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 32px" }} onClick={() => setShowReanalyseWarning(false)}>
+          <div style={{ background: DS.colors.bg, borderRadius: DS.radius.xl, padding: "28px 24px", width: "100%" }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.3px" }}>Re-analyse your colours?</h3>
+            <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 24 }}>Your current season results will be cleared and you'll need to upload a new selfie. This cannot be undone.</p>
+            <button onClick={onReanalyse} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 15, fontWeight: 600, marginBottom: 10 }}>Yes, re-analyse</button>
+            <button onClick={() => setShowReanalyseWarning(false)} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Cancel</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 const PlaceholderTab = ({ tab, isGuest, onSignUp }: { tab: Tab; isGuest: boolean; onSignUp: () => void; }) => {
   const locked = isGuest && tab !== "home";
   if (locked) {
@@ -980,17 +1113,19 @@ const PlaceholderTab = ({ tab, isGuest, onSignUp }: { tab: Tab; isGuest: boolean
 };
 
 // MainApp — NO SheetOverlay here, it lives at root level
-const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, onOpenSheet, onUpgrade }: {
+const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, onOpenSheet, onUpgrade, onSignOut, onReanalyse }: {
   activeTab: Tab; onTabChange: (tab: Tab) => void; seasonData: SeasonData | null;
   user: User | null; isGuest: boolean; onSignUp: () => void;
-  onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void;
+  onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void; onSignOut: () => void; onReanalyse: () => void;
 }) => (
   <div className="screen fade-in" style={{ background: DS.colors.bg }}>
     <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
       {activeTab === "home" ? (
   <HomeTab seasonData={seasonData} user={user} onOpenSheet={onOpenSheet} onUpgrade={onUpgrade} />
-) : activeTab === "checker" ? (
+       ) : activeTab === "checker" ? (
   <CheckerTab seasonData={seasonData} user={user} />
+) : activeTab === "me" ? (
+  <MeTab user={user} seasonData={seasonData} onSignOut={onSignOut} onReanalyse={onReanalyse} onUpgrade={onUpgrade} />
 ) : (
   <PlaceholderTab tab={activeTab} isGuest={isGuest} onSignUp={onSignUp} />
 )}
@@ -1006,6 +1141,18 @@ export default function App() {
     wardrobeItems: [], checkerMode: "single", onboardingIndex: 0,
   });
   const update = (patch: Partial<AppState>) => setState(s => ({ ...s, ...patch }));
+  const handleSignOut = () => {
+  localStorage.removeItem("chroma_token");
+  localStorage.removeItem("chroma_refresh");
+  localStorage.removeItem("chroma_user");
+  localStorage.removeItem("chroma_season");
+  update({ screen: "auth", user: null, seasonData: null, isGuest: false, activeSheet: null, activeTab: "home" });
+};
+
+const handleReanalyse = () => {
+  localStorage.removeItem("chroma_season");
+  update({ screen: "upload", seasonData: null, activeTab: "home" });
+};
   const handleUpgrade = (plan: Plan) => {
   const updatedUser = state.user ? { ...state.user, plan } : null;
   if (updatedUser) localStorage.setItem("chroma_user", JSON.stringify(updatedUser));
@@ -1086,6 +1233,8 @@ export default function App() {
             onSignUp={() => update({ screen: "auth" })}
             onOpenSheet={sheet => update({ activeSheet: sheet })}
             onUpgrade={() => update({ activeSheet: "paywall" })}
+            onSignOut={handleSignOut}
+            onReanalyse={handleReanalyse}
           />
         )}
 {/* SheetOverlay at root level — position:fixed works here, not clipped by any overflow:hidden */}
