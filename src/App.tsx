@@ -387,7 +387,8 @@ const hairColourMap: Record<string, string> = {
   "jet black": "#1A1A1A", "cool black": "#2C2C2C", "dark brown": "#3B2314",
   "medium brown": "#7B4F2E", "light brown": "#A0785A", "strawberry blonde": "#CB8E73",
   "copper": "#CB6D51", "burgundy": "#800020", "caramel": "#C68642",
-  "highlights": "#D4C5A9", "balayage": "#C8B89A", "ombre": "#8B6914",
+  "highlights": "#D4C5A9", "balayage": "#C8B89A", "ombre": "#8B6914","copper red": "#CB6D51",
+
 };
 
 const metalColourMap: Record<string, string> = {
@@ -509,6 +510,22 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose }: { currentPlan: Plan; 
     </div>
   );
 };
+const guessColourFromName = (name: string): string => {
+  const n = name.toLowerCase();
+  if (n.includes("black")) return "#2C2C2C";
+  if (n.includes("white") || n.includes("platinum") || n.includes("silver")) return "#E0E0E0";
+  if (n.includes("red") || n.includes("copper")) return "#CB6D51";
+  if (n.includes("auburn") || n.includes("chestnut")) return "#954535";
+  if (n.includes("burgundy") || n.includes("plum") || n.includes("violet")) return "#800020";
+  if (n.includes("blonde") || n.includes("golden") || n.includes("honey")) return "#D4A843";
+  if (n.includes("ash") || n.includes("cool") || n.includes("mushroom")) return "#A0A0A0";
+  if (n.includes("rose") || n.includes("pink")) return "#BC8F8F";
+  if (n.includes("brown") || n.includes("caramel") || n.includes("toffee")) return "#7B4F2E";
+  if (n.includes("grey") || n.includes("gray")) return "#8A8A8A";
+  if (n.includes("strawberry")) return "#CB8E73";
+  if (n.includes("balayage") || n.includes("ombre") || n.includes("highlight")) return "#D4C5A9";
+  return "#C4A882";
+};
 // SheetOverlay — rendered at ROOT level, outside all overflow:hidden containers
 const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet; seasonData: SeasonData; onClose: () => void; }) => (
   <div
@@ -548,7 +565,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {seasonData.hair.best_colours.map(c => (
                 <span key={c} style={{ padding: "6px 14px 6px 10px", background: DS.colors.accentLight, borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.accentDark, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ width: 12, height: 12, borderRadius: "50%", background: hairColourMap[c.toLowerCase()] || "#C4A882", flexShrink: 0, border: "1px solid rgba(0,0,0,0.1)" }} />
+                  <span style={{ width: 12, height: 12, borderRadius: "50%", background: hairColourMap[c.toLowerCase()] || guessColourFromName(c), flexShrink: 0, border: "1px solid rgba(0,0,0,0.1)" }} />
                   {c}
                 </span>
               ))}
@@ -559,7 +576,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {seasonData.hair.avoid.map(c => (
                 <span key={c} style={{ padding: "6px 14px 6px 10px", background: "#FEF2F2", borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.danger, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ width: 12, height: 12, borderRadius: "50%", background: hairColourMap[c.toLowerCase()] || "#888", flexShrink: 0, border: "1px solid rgba(0,0,0,0.1)" }} />
+                  <span style={{ width: 12, height: 12, borderRadius: "50%", background: hairColourMap[c.toLowerCase()] || guessColourFromName(c), flexShrink: 0, border: "1px solid rgba(0,0,0,0.1)" }} />
                   {c}
                 </span>
               ))}
@@ -590,7 +607,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {seasonData.jewellery.stones.map(s => (
   <span key={s} style={{ padding: "6px 14px 6px 10px", background: DS.colors.surface, borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.textMuted, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}>
-    <span style={{ width: 12, height: 12, borderRadius: "50%", background: stoneColourMap[s.toLowerCase()] || "#E0E0E0", flexShrink: 0, border: "1px solid rgba(0,0,0,0.1)" }} />
+    <span style={{ width: 12, height: 12, borderRadius: "50%", background: stoneColourMap[s.toLowerCase()] || guessColourFromName(s), flexShrink: 0, border: "1px solid rgba(0,0,0,0.1)" }} />
     {s}
   </span>
 ))}
