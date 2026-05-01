@@ -334,8 +334,8 @@ const AnalysingScreen = () => {
       </div>
       <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>Analysing your colours</h2>
       <p style={{ fontSize: 15, color: DS.colors.accent, fontWeight: 500, marginBottom: 16, transition: "all 0.4s" }}>{steps[step]}...</p>
-      <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", marginBottom: 32, maxWidth: 260 }}>This takes 15-20 seconds - please keep this screen open</p>
-      <div style={{ width: "100%", maxWidth: 280, display: "flex", flexDirection: "column", gap: 12 }}>
+      <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", marginBottom: 32, maxWidth: 260 }}>This usually takes 15–20 seconds. Stay on this screen until your results are ready.</p>
+      <div style={{ width: "100%", maxWidth: 280, display: "flex", flexDirection: "column", gap: 12, alignSelf: "center" }}>
         {steps.map((s, i) => (
           <div key={s} style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ width: 24, height: 24, borderRadius: DS.radius.full, background: i <= step ? DS.colors.accent : DS.colors.surface, border: `1.5px solid ${i <= step ? DS.colors.accent : DS.colors.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.3s" }}>
@@ -1145,7 +1145,6 @@ export default function App() {
   localStorage.removeItem("chroma_token");
   localStorage.removeItem("chroma_refresh");
   localStorage.removeItem("chroma_user");
-  localStorage.removeItem("chroma_season");
   update({ screen: "auth", user: null, seasonData: null, isGuest: false, activeSheet: null, activeTab: "home" });
 };
 
