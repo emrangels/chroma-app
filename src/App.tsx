@@ -396,6 +396,15 @@ const metalColourMap: Record<string, string> = {
   "platinum": "#E5E4E2", "copper": "#B87333", "bronze": "#CD7F32",
   "oxidised silver": "#808080", "antique gold": "#B8960C",
 };
+const stoneColourMap: Record<string, string> = {
+  "pearl": "#F0EAD6", "rose quartz": "#F4A7B9", "amethyst": "#9B59B6",
+  "aquamarine": "#7FFFD4", "sapphire": "#0F52BA", "emerald": "#50C878",
+  "ruby": "#9B111E", "opal": "#A8C5DA", "moonstone": "#E8E8E8",
+  "turquoise": "#40E0D0", "garnet": "#733635", "topaz": "#FFC87C",
+  "diamond": "#F0F8FF", "malachite": "#0BDA51", "lapis lazuli": "#26619C",
+  "coral": "#FF7F50", "jade": "#00A86B", "onyx": "#353935",
+  "citrine": "#E4D00A", "amber": "#FFBF00", "labradorite": "#7B9095",
+};
 const PaywallSheet = ({ currentPlan, onUpgrade, onClose }: { currentPlan: Plan; onUpgrade: (plan: Plan) => void; onClose: () => void; }) => {
   const [selected, setSelected] = useState<Plan>("glow");
   const [loading, setLoading] = useState(false);
