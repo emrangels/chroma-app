@@ -589,8 +589,11 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
             <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Stones</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {seasonData.jewellery.stones.map(s => (
-                <span key={s} style={{ padding: "6px 14px", background: DS.colors.surface, borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.textMuted, fontWeight: 500 }}>{s}</span>
-              ))}
+  <span key={s} style={{ padding: "6px 14px 6px 10px", background: DS.colors.surface, borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.textMuted, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}>
+    <span style={{ width: 12, height: 12, borderRadius: "50%", background: stoneColourMap[s.toLowerCase()] || "#E0E0E0", flexShrink: 0, border: "1px solid rgba(0,0,0,0.1)" }} />
+    {s}
+  </span>
+))}
             </div>
           </div>
           <div>
