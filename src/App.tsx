@@ -386,7 +386,7 @@ const hairColourMap: Record<string, string> = {
   "platinum blonde": "#E8E0D0", "golden blonde": "#D4A843", "warm auburn": "#8B4513",
   "jet black": "#1A1A1A", "cool black": "#2C2C2C", "dark brown": "#3B2314",
   "medium brown": "#7B4F2E", "light brown": "#A0785A", "strawberry blonde": "#CB8E73",
-  "copper": "#B87333", "burgundy": "#800020", "caramel": "#C68642",
+  "copper": "#CB6D51", "burgundy": "#800020", "caramel": "#C68642",
   "highlights": "#D4C5A9", "balayage": "#C8B89A", "ombre": "#8B6914",
 };
 
