@@ -838,7 +838,7 @@ const CheckerTab = ({ seasonData, user }: { seasonData: SeasonData | null; user:
         <p style={{ fontSize: 13, color: DS.colors.textFaint, marginBottom: 16, lineHeight: 1.5 }}>
           {mode === "single" && "Upload a photo of one item. For best results, photograph in natural light against a neutral background — results may vary with filters or poor lighting."}
           {mode === "outfit" && "Upload a full outfit photo for an overall verdict and per-piece breakdown. Natural light gives the most accurate colour reading."}
-          {mode === "swatch" && "Upload a photo of your swatches in natural light (e.g. lipsticks swatched on your arm). If a result doesn't seem right, try retaking in better lighting."}
+          {mode === "swatch" && "Upload a photo of your swatches in natural light (e.g. lipsticks swatched on your arm). The clearer the photo, the more precise each verdict will be."}
         </p>
 
         {/* Swatch label */}
