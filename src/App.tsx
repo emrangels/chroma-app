@@ -988,9 +988,18 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade }: {
     if (!token || !user?.id) return;
     fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}&select=referral_code,referral_count`, {
       headers: { ...supabaseHeaders, Authorization: `Bearer ${token}` },
-    }).then(r => r.json()).then(data => {
+    }).then(r => r.json()).then(async data => {
       if (data?.[0]) {
-        setReferralCode(data[0].referral_code);
+        let code = data[0].referral_code;
+        if (!code) {
+          code = (user.name.replace(/[^a-zA-Z]/g, "").toUpperCase().slice(0, 6) || "USER") + Math.floor(1000 + Math.random() * 9000);
+          await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}`, {
+            method: "PATCH",
+            headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
+            body: JSON.stringify({ referral_code: code }),
+          });
+        }
+        setReferralCode(code);
         setReferralCount(data[0].referral_count || 0);
       }
     }).catch(() => {});
