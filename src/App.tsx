@@ -770,7 +770,7 @@ interface CheckResult {
   }[];
 }
 
-const CheckerTab = ({ seasonData, user }: { seasonData: SeasonData | null; user: User | null; }) => {
+const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | null; user: User | null; onUpgrade: () => void; }) => {
   const [mode, setMode] = useState<"single" | "outfit" | "swatch">("single");
   const [preview, setPreview] = useState<string | null>(null);
   const [swatchLabel, setSwatchLabel] = useState("");
@@ -836,14 +836,15 @@ const CheckerTab = ({ seasonData, user }: { seasonData: SeasonData | null; user:
   };
 
   if (!canAccess) return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 28px" }}>
-      <div style={{ width: 64, height: 64, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
-        <Icon name="lock" size={28} color={DS.colors.accent} />
-      </div>
-      <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Colour Checker</h2>
-      <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260 }}>Upgrade to Glow to check items, outfits and swatches against your season.</p>
+  <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 28px" }}>
+    <div style={{ width: 64, height: 64, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+      <Icon name="lock" size={28} color={DS.colors.accent} />
     </div>
-  );
+    <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Colour Checker</h2>
+    <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 24 }}>Upgrade to Glow to check items, outfits and swatches against your season.</p>
+    <button onClick={onUpgrade} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Unlock Checker</button>
+  </div>
+);
 
   if (!seasonData) return (
     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, padding: "40px 28px" }}>
@@ -1153,7 +1154,7 @@ const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, 
       {activeTab === "home" ? (
   <HomeTab seasonData={seasonData} user={user} onOpenSheet={onOpenSheet} onUpgrade={onUpgrade} />
        ) : activeTab === "checker" ? (
-  <CheckerTab seasonData={seasonData} user={user} />
+  <CheckerTab seasonData={seasonData} user={user} onUpgrade={onUpgrade} />
 ) : activeTab === "me" ? (
   <MeTab user={user} seasonData={seasonData} onSignOut={onSignOut} onReanalyse={onReanalyse} onUpgrade={onUpgrade} />
 ) : (
@@ -1251,7 +1252,19 @@ export default function App() {
       <div style={{ position: "relative", width: "100vw", height: "100vh", maxWidth: 430, margin: "0 auto" }}>
         {screen === "splash" && <SplashScreen onComplete={() => update({ screen: "onboarding" })} />}
         {screen === "onboarding" && <OnboardingScreen onComplete={() => update({ screen: "auth" })} />}
-        {screen === "auth" && <AuthScreen onSignIn={u => update({ user: u, screen: "upload" })} onGuest={() => update({ isGuest: true, screen: "upload" })} />}
+        {screen === "auth" && <AuthScreen onSignIn={u => {
+  const cachedSeason = localStorage.getItem("chroma_season");
+  if (cachedSeason) {
+    try {
+      const parsedSeason = JSON.parse(cachedSeason);
+      update({ user: u, screen: "main", seasonData: parsedSeason });
+    } catch {
+      update({ user: u, screen: "upload" });
+    }
+  } else {
+    update({ user: u, screen: "upload" });
+  }
+}} onGuest={() => update({ isGuest: true, screen: "upload" })} />}
         {screen === "upload" && <UploadScreen onUpload={handleUpload} />}
         {screen === "analysing" && <AnalysingScreen />}
         {screen === "main" && (
