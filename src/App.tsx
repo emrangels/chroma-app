@@ -1171,22 +1171,24 @@ export default function App() {
     wardrobeItems: [], checkerMode: "single", onboardingIndex: 0,
   });
   const update = (patch: Partial<AppState>) => setState(s => ({ ...s, ...patch }));
-  const handleSignOut = () => {
-  localStorage.removeItem("chroma_token");
-  localStorage.removeItem("chroma_refresh");
-  localStorage.removeItem("chroma_user");
-  update({ screen: "auth", user: null, seasonData: null, isGuest: false, activeSheet: null, activeTab: "home" });
-};
 
-const handleReanalyse = () => {
-  localStorage.removeItem("chroma_season");
-  update({ screen: "upload", seasonData: null, activeTab: "home" });
-};
+  const handleSignOut = () => {
+    localStorage.removeItem("chroma_token");
+    localStorage.removeItem("chroma_refresh");
+    localStorage.removeItem("chroma_user");
+    update({ screen: "auth", user: null, seasonData: null, isGuest: false, activeSheet: null, activeTab: "home" });
+  };
+
+  const handleReanalyse = () => {
+    localStorage.removeItem("chroma_season");
+    update({ screen: "upload", seasonData: null, activeTab: "home" });
+  };
+
   const handleUpgrade = (plan: Plan) => {
-  const updatedUser = state.user ? { ...state.user, plan } : null;
-  if (updatedUser) localStorage.setItem("chroma_user", JSON.stringify(updatedUser));
-  update({ user: updatedUser, activeSheet: null });
-};
+    const updatedUser = state.user ? { ...state.user, plan } : null;
+    if (updatedUser) localStorage.setItem("chroma_user", JSON.stringify(updatedUser));
+    update({ user: updatedUser, activeSheet: null });
+  };
   useEffect(() => {
     const token = localStorage.getItem("chroma_token");
     const cachedSeason = localStorage.getItem("chroma_season");
