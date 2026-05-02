@@ -386,9 +386,18 @@ const hairColourMap: Record<string, string> = {
   "platinum blonde": "#E8E0D0", "golden blonde": "#D4A843", "warm auburn": "#8B4513",
   "jet black": "#1A1A1A", "cool black": "#2C2C2C", "dark brown": "#3B2314",
   "medium brown": "#7B4F2E", "light brown": "#A0785A", "strawberry blonde": "#CB8E73",
-  "copper": "#CB6D51", "burgundy": "#800020", "caramel": "#C68642",
-  "highlights": "#D4C5A9", "balayage": "#C8B89A", "ombre": "#8B6914","copper red": "#CB6D51",
-
+  "copper": "#CB6D51", "copper red": "#CB6D51", "burgundy": "#800020", "caramel": "#C68642",
+  "highlights": "#D4C5A9", "balayage": "#C8B89A", "ombre": "#8B6914",
+  "warm brown": "#7B4F2E", "cool brown": "#8B7355", "chestnut": "#954535",
+  "mahogany": "#6B2737", "espresso": "#2C1503", "truffle": "#6B5C4E",
+  "toffee": "#C68642", "honey blonde": "#D4A843", "dirty blonde": "#C8B89A",
+  "sandy blonde": "#D2B48C", "champagne blonde": "#F0E0A0", "beige blonde": "#E8D5A3",
+  "cool blonde": "#D8D0C0", "warm blonde": "#D4A843", "dark blonde": "#B8860B",
+  "light ash brown": "#A0907A", "warm chestnut": "#954535", "soft black": "#2C2C2C",
+  "blue black": "#1A1A2E", "chocolate brown": "#3D1C02", "walnut": "#6B4423",
+  "pecan": "#8B6339", "cinnamon": "#D2691E", "ginger": "#B06500",
+  "red": "#8B2500", "deep red": "#6B0000", "violet": "#4B0082",
+  "cool medium brown": "#8B7355", "mushroom brown": "#9E8E7E",
 };
 
 const metalColourMap: Record<string, string> = {
@@ -396,7 +405,13 @@ const metalColourMap: Record<string, string> = {
   "white gold": "#E8E8E8", "silver": "#C0C0C0", "brushed silver": "#A9A9A9",
   "platinum": "#E5E4E2", "copper": "#B87333", "bronze": "#CD7F32",
   "oxidised silver": "#808080", "antique gold": "#B8960C",
+  "warm gold": "#D4A843", "brushed bronze": "#8B6914", "brushed gold": "#C5A028",
+  "matte gold": "#C5A028", "polished gold": "#FFD700", "mixed metals": "#C0C0C0",
+  "gunmetal": "#2C3539", "pewter": "#96A8A1", "brass": "#B5A642",
+  "antique silver": "#A9A9A9", "antique bronze": "#CD7F32", "vermeil": "#D4A843",
+  "gold fill": "#FFD700", "sterling silver": "#C0C0C0",
 };
+
 const stoneColourMap: Record<string, string> = {
   "pearl": "#F0EAD6", "rose quartz": "#F4A7B9", "amethyst": "#9B59B6",
   "aquamarine": "#7FFFD4", "sapphire": "#0F52BA", "emerald": "#50C878",
@@ -405,19 +420,32 @@ const stoneColourMap: Record<string, string> = {
   "diamond": "#F0F8FF", "malachite": "#0BDA51", "lapis lazuli": "#26619C",
   "coral": "#FF7F50", "jade": "#00A86B", "onyx": "#353935",
   "citrine": "#E4D00A", "amber": "#FFBF00", "labradorite": "#7B9095",
+  "rose gold stone": "#B76E79", "smoky quartz": "#7B6E5D", "clear quartz": "#F0F8FF",
+  "peridot": "#8DB600", "tanzanite": "#4D5ACA", "alexandrite": "#8B4789",
+  "spinel": "#FF1493", "tourmaline": "#00827F", "kunzite": "#FF9EBC",
+  "aqua": "#00FFFF", "blue topaz": "#4682B4", "pink sapphire": "#FF69B4",
+  "green amethyst": "#50C878", "white topaz": "#F0F8FF", "iolite": "#5C5CFF",
 };
-const PaywallSheet = ({ currentPlan, onUpgrade, onClose }: { currentPlan: Plan; onUpgrade: (plan: Plan) => void; onClose: () => void; }) => {
-  const [selected, setSelected] = useState<Plan>("glow");
+const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
+  currentPlan: Plan; onUpgrade: (plan: Plan) => void;
+  onClose: () => void; isGuest?: boolean; onSignUp?: () => void;
+}) => {
+  const [selected, setSelected] = useState<"glow" | "luxe">("glow");
+  const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
   const [loading, setLoading] = useState(false);
 
-  const plans: { id: Plan; name: string; price: string; color: string; features: string[] }[] = [
-    { id: "free", name: "Free", price: "$0", color: DS.colors.textFaint, features: ["Season & palette", "Daily tip"] },
-    { id: "glow", name: "Glow", price: "$9.99/mo", color: DS.colors.accent, features: ["Everything in Free", "Makeup guide", "Hair colours", "Jewellery guide", "Colour checker"] },
-    { id: "luxe", name: "Luxe", price: "$19.99/mo", color: "#C26B3A", features: ["Everything in Glow", "Style & Fit guide", "Wardrobe tab"] },
+  const pricing = {
+    glow: { monthly: "$6.99", annual: "$49.99", monthlyEquiv: "$4.17/mo" },
+    luxe: { monthly: "$14.99", annual: "$99.99", monthlyEquiv: "$8.33/mo" },
+  };
+
+  const plans: { id: "glow" | "luxe"; name: string; color: string; features: string[] }[] = [
+    { id: "glow", name: "Glow", color: DS.colors.accent, features: ["Season & palette", "Makeup guide", "Hair colours", "Jewellery guide", "Colour checker"] },
+    { id: "luxe", name: "Luxe", color: "#C26B3A", features: ["Everything in Glow", "Style & Fit guide", "Wardrobe tab"] },
   ];
 
   const handleUpgrade = async () => {
-    if (selected === currentPlan) { onClose(); return; }
+    if (isGuest && onSignUp) { onSignUp(); return; }
     setLoading(true);
     try {
       const token = localStorage.getItem("chroma_token");
@@ -436,14 +464,8 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose }: { currentPlan: Plan; 
   };
 
   return (
-    <div
-      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }}
-      onClick={onClose}
-    >
-      <div
-        style={{ width: "100%", maxHeight: "90vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }}
-        onClick={e => e.stopPropagation()}
-      >
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={onClose}>
+      <div style={{ width: "100%", maxHeight: "92vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
           <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
         </div>
@@ -451,60 +473,68 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose }: { currentPlan: Plan; 
           <div style={{ width: 48, height: 48, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
             <Icon name="crown" size={22} color={DS.colors.accent} />
           </div>
-          <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Unlock your full guide</h2>
-          <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 24 }}>Get your complete colour guide — makeup, hair, jewellery and style, all personalised to your season.</p>
+          <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 4 }}>
+            {isGuest ? "Create an account to upgrade" : "Unlock your full guide"}
+          </h2>
+          <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>
+            {isGuest ? "Sign up first, then choose your plan to unlock your complete colour guide." : "Start your 7-day free trial. Cancel anytime."}
+          </p>
+          {!isGuest && (
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#F0FDF4", padding: "4px 12px", borderRadius: DS.radius.full, marginBottom: 20 }}>
+              <Icon name="check" size={12} color={DS.colors.success} strokeWidth={2.5} />
+              <span style={{ fontSize: 12, color: DS.colors.success, fontWeight: 600 }}>7-day free trial — no charge until day 8</span>
+            </div>
+          )}
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
-            {plans.map(plan => {
-              const isSelected = selected === plan.id;
-              const isCurrent = currentPlan === plan.id;
-              return (
-                <button
-                  key={plan.id}
-                  onClick={() => plan.id !== "free" && setSelected(plan.id)}
-                  style={{
-                    width: "100%", padding: "14px 16px", borderRadius: DS.radius.lg, textAlign: "left",
-                    border: `2px solid ${isSelected ? plan.color : DS.colors.border}`,
-                    background: isSelected ? (plan.id === "glow" ? DS.colors.accentLight : "#FFF7ED") : DS.colors.bg,
-                    cursor: plan.id === "free" ? "default" : "pointer",
-                    transition: "all 0.2s",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 15, fontWeight: 700, color: isSelected ? plan.color : DS.colors.text }}>{plan.name}</span>
-                      {isCurrent && <span style={{ fontSize: 11, background: DS.colors.surface, color: DS.colors.textMuted, padding: "2px 8px", borderRadius: DS.radius.full, fontWeight: 500 }}>Current</span>}
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: isSelected ? plan.color : DS.colors.textMuted }}>{plan.price}</span>
-                      <div style={{ width: 20, height: 20, borderRadius: DS.radius.full, border: `2px solid ${isSelected ? plan.color : DS.colors.border}`, background: isSelected ? plan.color : DS.colors.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        {isSelected && <Icon name="check" size={11} color={DS.colors.white} strokeWidth={3} />}
-                      </div>
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                    {plan.features.map(f => (
-                      <div key={f} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <Icon name="check" size={12} color={plan.id === "free" ? DS.colors.textFaint : plan.color} strokeWidth={2.5} />
-                        <span style={{ fontSize: 13, color: plan.id === "free" ? DS.colors.textFaint : DS.colors.textMuted }}>{f}</span>
-                      </div>
-                    ))}
-                  </div>
+          {/* Billing toggle */}
+          {!isGuest && (
+            <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, marginBottom: 16, gap: 4 }}>
+              {(["monthly", "annual"] as const).map(b => (
+                <button key={b} onClick={() => setBilling(b)} style={{ flex: 1, padding: "8px", borderRadius: DS.radius.md, fontSize: 13, fontWeight: billing === b ? 600 : 400, color: billing === b ? DS.colors.white : DS.colors.textMuted, background: billing === b ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
+                  {b === "monthly" ? "Monthly" : "Annual — save 40%"}
                 </button>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
 
-          <button
-            onClick={handleUpgrade}
-            disabled={loading}
-            style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: selected === "luxe" ? "#C26B3A" : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 12, opacity: loading ? 0.7 : 1 }}
-          >
-            {loading ? "Upgrading..." : selected === currentPlan ? "You're on this plan" : `Upgrade to ${plans.find(p => p.id === selected)?.name}`}
+          {/* Plan cards */}
+          {!isGuest && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
+              {plans.map(plan => {
+                const isSelected = selected === plan.id;
+                const price = pricing[plan.id][billing];
+                const equiv = billing === "annual" ? pricing[plan.id].monthlyEquiv : null;
+                return (
+                  <button key={plan.id} onClick={() => setSelected(plan.id)} style={{ width: "100%", padding: "14px 16px", borderRadius: DS.radius.lg, textAlign: "left", border: `2px solid ${isSelected ? plan.color : DS.colors.border}`, background: isSelected ? (plan.id === "glow" ? DS.colors.accentLight : "#FFF7ED") : DS.colors.bg, transition: "all 0.2s" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 15, fontWeight: 700, color: isSelected ? plan.color : DS.colors.text }}>{plan.name}</span>
+                        {plan.id === "glow" && <span style={{ fontSize: 10, background: DS.colors.success, color: DS.colors.white, padding: "2px 7px", borderRadius: DS.radius.full, fontWeight: 600 }}>POPULAR</span>}
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: isSelected ? plan.color : DS.colors.textMuted }}>{price}</div>
+                        {equiv && <div style={{ fontSize: 11, color: DS.colors.textFaint }}>{equiv}</div>}
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      {plan.features.map(f => (
+                        <div key={f} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <Icon name="check" size={12} color={plan.color} strokeWidth={2.5} />
+                          <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{f}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          <button onClick={handleUpgrade} disabled={loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: isGuest ? DS.colors.accent : selected === "luxe" ? "#C26B3A" : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 8, opacity: loading ? 0.7 : 1 }}>
+            {loading ? "Starting trial..." : isGuest ? "Create account to continue" : `Start 7-day free trial`}
           </button>
-          <button onClick={onClose} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>
-            Maybe later
-          </button>
+          {!isGuest && <p style={{ textAlign: "center", fontSize: 11, color: DS.colors.textFaint, marginBottom: 12, lineHeight: 1.5 }}>After your trial, {selected === "glow" ? (billing === "monthly" ? "$6.99/mo" : "$49.99/yr") : (billing === "monthly" ? "$14.99/mo" : "$99.99/yr")} — cancel anytime before day 8.</p>}
+          <button onClick={onClose} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Maybe later</button>
         </div>
       </div>
     </div>
@@ -1245,12 +1275,14 @@ const handleReanalyse = () => {
           />
         )}
         {state.activeSheet === "paywall" && (
-          <PaywallSheet
-            currentPlan={state.user?.plan || "free"}
-            onUpgrade={handleUpgrade}
-            onClose={() => update({ activeSheet: null })}
-          />
-        )}
+  <PaywallSheet
+    currentPlan={state.user?.plan || "free"}
+    onUpgrade={handleUpgrade}
+    onClose={() => update({ activeSheet: null })}
+    isGuest={state.isGuest}
+    onSignUp={() => { update({ activeSheet: null, screen: "auth" }); }}
+  />
+)}
       </div>
     </>
   );
