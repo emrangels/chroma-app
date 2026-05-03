@@ -1281,12 +1281,12 @@ export default function App() {
   if (cachedSeason) {
     try {
       const parsedSeason = JSON.parse(cachedSeason);
-      update({ user: u, screen: "main", seasonData: parsedSeason });
+      update({ user: u, screen: "main", seasonData: parsedSeason, isGuest: false });
     } catch {
-      update({ user: u, screen: "upload" });
+      update({ user: u, screen: "upload", isGuest: false });
     }
   } else {
-    update({ user: u, screen: "upload" });
+    update({ user: u, screen: "upload", isGuest: false });
   }
 }} onGuest={() => update({ isGuest: true, screen: "upload" })} />}
         {screen === "upload" && <UploadScreen onUpload={handleUpload} />}
