@@ -1270,20 +1270,29 @@ export default function App() {
     });
 
   const handleUpload = async (file: File) => {
-    update({ screen: "analysing" });
-    try {
-      const base64 = await resizeAndEncode(file);
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/smooth-action`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
-        body: JSON.stringify({ type: "analyse", image: base64 }),
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      localStorage.setItem(`chroma_season_${state.user?.id || "guest"}`, JSON.stringify(data));
-      update({ seasonData: data, screen: "main" });
-    } catch { update({ screen: "main" }); }
-  };
+  update({ screen: "analysing" });
+  try {
+    const base64 = await resizeAndEncode(file);
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/smooth-action`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+      body: JSON.stringify({ type: "analyse", image: base64 }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    localStorage.setItem(`chroma_season_${state.user?.id || "guest"}`, JSON.stringify(data));
+    // Save to Supabase if logged in
+    const token = localStorage.getItem("chroma_token");
+    if (token && state.user?.id) {
+      fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${state.user.id}`, {
+        method: "PATCH",
+        headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
+        body: JSON.stringify({ season_data: data }),
+      }).catch(() => {});
+    }
+    update({ seasonData: data, screen: "main" });
+  } catch { update({ screen: "main" }); }
+};
 
   const { screen, activeTab, user, isGuest, seasonData } = state;
 
