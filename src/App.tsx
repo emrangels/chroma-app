@@ -1190,7 +1190,7 @@ export default function App() {
   };
 
   const handleReanalyse = () => {
-    localStorage.removeItem("chroma_season");
+    localStorage.removeItem(`chroma_season_${state.user?.id || "guest"}`);
     update({ screen: "upload", seasonData: null, activeTab: "home" });
   };
 
