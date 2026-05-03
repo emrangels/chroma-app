@@ -1200,21 +1200,25 @@ export default function App() {
     update({ user: updatedUser, activeSheet: null });
   };
   useEffect(() => {
-    const token = localStorage.getItem("chroma_token");
-    const cachedSeason = localStorage.getItem("chroma_season");
-    const cachedUser = localStorage.getItem("chroma_user");
-    if (token && cachedSeason && cachedUser) {
-      try {
+  const token = localStorage.getItem("chroma_token");
+  const cachedUser = localStorage.getItem("chroma_user");
+  if (token && cachedUser) {
+    try {
+      const parsedUser = JSON.parse(cachedUser);
+      const cachedSeason = localStorage.getItem(`chroma_season_${parsedUser.id}`);
+      if (cachedSeason) {
         const parsedSeason = JSON.parse(cachedSeason);
-        const parsedUser = JSON.parse(cachedUser);
         update({ screen: "main", user: parsedUser, seasonData: parsedSeason });
-        fetch(`${SUPABASE_URL}/auth/v1/user`, { headers: { ...supabaseHeaders, Authorization: `Bearer ${token}` } })
-          .then(r => r.json())
-          .then(data => { if (data.id) update({ user: { id: data.id, email: data.email, name: data.user_metadata?.name || data.email.split("@")[0], plan: parsedUser.plan || "free" } }); })
-          .catch(() => {});
-      } catch { update({ screen: "onboarding" }); }
-    }
-  }, []);
+      } else {
+        update({ screen: "main", user: parsedUser });
+      }
+      fetch(`${SUPABASE_URL}/auth/v1/user`, { headers: { ...supabaseHeaders, Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(data => { if (data.id) update({ user: { id: data.id, email: data.email, name: data.user_metadata?.name || data.email.split("@")[0], plan: parsedUser.plan || "free" } }); })
+        .catch(() => {});
+    } catch { update({ screen: "onboarding" }); }
+  }
+}, []);
 
   const resizeAndEncode = (file: File, maxDimension = 1024, quality = 0.85): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -1247,7 +1251,7 @@ export default function App() {
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      localStorage.setItem("chroma_season", JSON.stringify(data));
+      localStorage.setItem(`chroma_season_${state.user?.id || "guest"}`, JSON.stringify(data));
       update({ seasonData: data, screen: "main" });
     } catch { update({ screen: "main" }); }
   };
@@ -1262,7 +1266,7 @@ export default function App() {
         {screen === "splash" && <SplashScreen onComplete={() => update({ screen: "onboarding" })} />}
         {screen === "onboarding" && <OnboardingScreen onComplete={() => update({ screen: "auth" })} />}
         {screen === "auth" && <AuthScreen onSignIn={u => {
-  const cachedSeason = localStorage.getItem("chroma_season");
+  const cachedSeason = localStorage.getItem(`chroma_season_${u.id}`);
   if (cachedSeason) {
     try {
       const parsedSeason = JSON.parse(cachedSeason);
