@@ -445,23 +445,34 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
   ];
 
   const handleUpgrade = async () => {
-    if (isGuest && onSignUp) { onSignUp(); return; }
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("chroma_token");
-      const cachedUser = localStorage.getItem("chroma_user");
-      if (token && cachedUser) {
-        const user = JSON.parse(cachedUser);
-        await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}`, {
-          method: "PATCH",
-          headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
-          body: JSON.stringify({ user_plan: selected }),
-        });
-      }
-      onUpgrade(selected);
-    } catch {}
-    finally { setLoading(false); }
-  };
+  if (isGuest && onSignUp) { onSignUp(); return; }
+  setLoading(true);
+  try {
+    const token = localStorage.getItem("chroma_token");
+    const cachedUser = localStorage.getItem("chroma_user");
+    if (!token || !cachedUser) { onSignUp?.(); return; }
+    const user = JSON.parse(cachedUser);
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/stripe-checkout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+      body: JSON.stringify({
+        type: "create_checkout",
+        plan: selected,
+        billing,
+        user_id: user.id,
+        email: user.email,
+        return_url: "https://chromaapp.vercel.app",
+      }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    window.location.href = data.url;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={onClose}>
