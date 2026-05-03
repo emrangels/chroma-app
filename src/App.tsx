@@ -465,10 +465,13 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
       }),
     });
     const data = await res.json();
+    console.log("Stripe response:", JSON.stringify(data));
     if (data.error) throw new Error(data.error);
+    if (!data.url) throw new Error("No checkout URL returned");
     window.location.href = data.url;
   } catch (e) {
-    console.error(e);
+    console.error("Stripe error:", e);
+    alert("Error: " + (e instanceof Error ? e.message : String(e)));
   } finally {
     setLoading(false);
   }
@@ -496,8 +499,6 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
               <span style={{ fontSize: 12, color: DS.colors.success, fontWeight: 600 }}>7-day free trial — no charge until day 8</span>
             </div>
           )}
-
-          {/* Billing toggle */}
           {!isGuest && (
             <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, marginBottom: 16, gap: 4 }}>
               {(["monthly", "annual"] as const).map(b => (
@@ -507,8 +508,6 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
               ))}
             </div>
           )}
-
-          {/* Plan cards */}
           {!isGuest && (
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
               {plans.map(plan => {
@@ -540,7 +539,6 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
               })}
             </div>
           )}
-
           <button onClick={handleUpgrade} disabled={loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: isGuest ? DS.colors.accent : selected === "luxe" ? "#C26B3A" : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 8, opacity: loading ? 0.7 : 1 }}>
             {loading ? "Starting trial..." : isGuest ? "Create account to continue" : `Start 7-day free trial`}
           </button>
