@@ -465,9 +465,9 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
       }),
     });
     const data = await res.json();
-    console.log("Stripe response:", JSON.stringify(data));
-    if (data.error) throw new Error(data.error);
-    if (!data.url) throw new Error("No checkout URL returned");
+alert("Response: " + JSON.stringify(data));
+if (data.error) throw new Error(data.error);
+if (!data.url) throw new Error("No checkout URL returned");
     window.location.href = data.url;
   } catch (e) {
     console.error("Stripe error:", e);
