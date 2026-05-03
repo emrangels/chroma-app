@@ -1220,6 +1220,15 @@ export default function App() {
         update({ screen: "main", user: parsedUser, seasonData: parsedSeason });
       } else {
         update({ screen: "main", user: parsedUser });
+        fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${parsedUser.id}&select=season_data`, {
+          headers: { ...supabaseHeaders, Authorization: `Bearer ${token}` },
+        }).then(r => r.json()).then(data => {
+          if (data?.[0]?.season_data) {
+            const season = data[0].season_data;
+            localStorage.setItem(`chroma_season_${parsedUser.id}`, JSON.stringify(season));
+            update({ seasonData: season });
+          }
+        }).catch(() => {});
       }
 
       // Check for successful Stripe checkout
@@ -1228,7 +1237,6 @@ export default function App() {
       const plan = params.get("plan") as Plan | null;
       const billing = params.get("billing");
       if (checkout === "success" && plan && token) {
-        // Update plan in Supabase and locally
         fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${parsedUser.id}`, {
           method: "PATCH",
           headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
@@ -1237,7 +1245,6 @@ export default function App() {
         const updatedUser = { ...parsedUser, plan };
         localStorage.setItem("chroma_user", JSON.stringify(updatedUser));
         update({ screen: "main", user: updatedUser, seasonData: cachedSeason ? JSON.parse(cachedSeason) : null });
-        // Clean up URL
         window.history.replaceState({}, "", "/");
       }
 
