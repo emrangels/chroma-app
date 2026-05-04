@@ -725,18 +725,52 @@ const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade }: { seasonData: Sea
       <div style={{ padding: "20px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
         <div style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "16px" }}>
           <p style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 600, color: DS.colors.text }}>Your palette</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
-            {seasonData.palette.best.map(colour => (
+          
+          {/* Best colours */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 16 }}>
+            {(seasonData.palette.best || []).map(colour => (
               <div key={colour.hex} style={{ textAlign: "center" }}>
                 <div style={{ width: "100%", aspectRatio: "1", borderRadius: 10, background: colour.hex, marginBottom: 4, border: colour.hex === "#FFFFFF" ? `1px solid ${DS.colors.border}` : "none" }} />
                 <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
               </div>
             ))}
           </div>
-          <div style={{ marginTop: 16, paddingTop: 14, borderTop: `1px solid ${DS.colors.border}` }}>
+
+          {/* Base colours */}
+          {seasonData.palette.base && seasonData.palette.base.length > 0 && (
+            <div style={{ marginBottom: 16, paddingTop: 14, borderTop: `1px solid ${DS.colors.border}` }}>
+              <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 500, color: DS.colors.textMuted }}>Base neutrals</p>
+              <div style={{ display: "flex", gap: 8 }}>
+                {seasonData.palette.base.map(colour => (
+                  <div key={colour.hex} style={{ flex: 1, textAlign: "center" }}>
+                    <div style={{ width: "100%", aspectRatio: "1", borderRadius: 8, background: colour.hex, marginBottom: 4, border: `1px solid ${DS.colors.border}` }} />
+                    <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Accent colours */}
+          {seasonData.palette.accent && seasonData.palette.accent.length > 0 && (
+            <div style={{ marginBottom: 16, paddingTop: 14, borderTop: `1px solid ${DS.colors.border}` }}>
+              <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 500, color: DS.colors.textMuted }}>Accent colours</p>
+              <div style={{ display: "flex", gap: 8 }}>
+                {seasonData.palette.accent.map(colour => (
+                  <div key={colour.hex} style={{ flex: 1, textAlign: "center" }}>
+                    <div style={{ width: "100%", aspectRatio: "1", borderRadius: 8, background: colour.hex, marginBottom: 4, border: `1px solid ${DS.colors.border}` }} />
+                    <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Avoid colours */}
+          <div style={{ paddingTop: 14, borderTop: `1px solid ${DS.colors.border}` }}>
             <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 500, color: DS.colors.textMuted }}>Avoid</p>
             <div style={{ display: "flex", gap: 8 }}>
-              {seasonData.palette.avoid.map(colour => (
+              {(seasonData.palette.avoid || []).map(colour => (
                 <div key={colour.hex} style={{ flex: 1, textAlign: "center" }}>
                   <div style={{ width: "100%", aspectRatio: "1", borderRadius: 8, background: colour.hex, marginBottom: 4, border: `1px solid ${DS.colors.border}`, position: "relative", overflow: "hidden" }}>
                     <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
