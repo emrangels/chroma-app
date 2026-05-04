@@ -1736,6 +1736,8 @@ const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, 
   <CheckerTab seasonData={seasonData} user={user} onUpgrade={onUpgrade} />
 ) : activeTab === "me" ? (
   <MeTab user={user} seasonData={seasonData} onSignOut={onSignOut} onReanalyse={onReanalyse} onUpgrade={onUpgrade} />
+) : activeTab === "wardrobe" ? (
+  <WardrobeTab user={user} seasonData={seasonData} onUpgrade={onUpgrade} />
 ) : (
   <PlaceholderTab tab={activeTab} isGuest={isGuest} onSignUp={onSignUp} />
 )}
