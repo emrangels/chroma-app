@@ -1090,9 +1090,30 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade }: {
           </div>
         </div>
         {seasonData && (
-          <div style={{ marginTop: 16, padding: "10px 14px", background: DS.colors.bg, borderRadius: DS.radius.md, border: `1px solid ${DS.colors.border}`, display: "flex", alignItems: "center", gap: 10 }}>
-            <Icon name="sparkles" size={14} color={DS.colors.accent} />
-            <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{seasonData.season} · {seasonData.subseason}</span>
+          <div style={{ marginTop: 16 }}>
+            <div style={{ padding: "10px 14px", background: DS.colors.bg, borderRadius: DS.radius.md, border: `1px solid ${DS.colors.border}`, display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+              <Icon name="sparkles" size={14} color={DS.colors.accent} />
+              <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{seasonData.season} · {seasonData.subseason}</span>
+            </div>
+            {seasonData.colour_profile && (
+              <div style={{ padding: "12px 14px", background: DS.colors.bg, borderRadius: DS.radius.md, border: `1px solid ${DS.colors.border}` }}>
+                <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Your colour profile</p>
+                <p style={{ margin: "0 0 8px", fontSize: 14, fontWeight: 600, color: DS.colors.text }}>{seasonData.colour_profile.defining_quality}</p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+                  {[
+                    { label: "Undertone", value: seasonData.colour_profile.undertone },
+                    { label: "Depth", value: seasonData.colour_profile.depth },
+                    { label: "Chroma", value: seasonData.colour_profile.chroma },
+                    { label: "Contrast", value: seasonData.colour_profile.contrast },
+                  ].map(item => (
+                    <div key={item.label} style={{ padding: "3px 10px", background: DS.colors.accentLight, borderRadius: DS.radius.full }}>
+                      <span style={{ fontSize: 11, color: DS.colors.accentDark, fontWeight: 500 }}>{item.label}: {item.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>{seasonData.colour_profile.season_description}</p>
+              </div>
+            )}
           </div>
         )}
       </div>
