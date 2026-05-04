@@ -1029,6 +1029,7 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade }: {
   onSignOut: () => void; onReanalyse: () => void; onUpgrade: () => void;
 }) => {
   const [showReanalyseWarning, setShowReanalyseWarning] = useState(false);
+  const [activePill, setActivePill] = useState<{ label: string; value: string; description: string } | null>(null);
   const [referralCopied, setReferralCopied] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralCount, setReferralCount] = useState(0);
@@ -1101,16 +1102,32 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade }: {
                 <p style={{ margin: "0 0 8px", fontSize: 14, fontWeight: 600, color: DS.colors.text }}>{seasonData.colour_profile.defining_quality}</p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
                   {[
-                    { label: "Undertone", value: seasonData.colour_profile.undertone },
-                    { label: "Depth", value: seasonData.colour_profile.depth },
-                    { label: "Chroma", value: seasonData.colour_profile.chroma },
-                    { label: "Contrast", value: seasonData.colour_profile.contrast },
+                    { label: "Undertone", value: seasonData.colour_profile.undertone, description: "Undertone is the subtle hue beneath your skin's surface — warm (golden/yellow), cool (pink/blue), or neutral (a mix of both). It's the most important factor in colour analysis and determines which colour families will harmonise with your natural colouring." },
+                    { label: "Depth", value: seasonData.colour_profile.depth, description: "Depth refers to how light or dark your overall colouring is — your skin, hair and eyes combined. Light colouring is best matched with lighter, softer shades. Deep colouring can carry richer, darker tones. Wearing colours that match your depth keeps you looking balanced and vibrant." },
+                    { label: "Chroma", value: seasonData.colour_profile.chroma, description: "Chroma describes how clear or muted your colouring is. Bright chroma means your features are vivid and saturated — you can wear bold, saturated colours. Muted or soft chroma means your features have a gentle, blended quality — you look best in toned-down, less saturated shades." },
+                    { label: "Contrast", value: seasonData.colour_profile.contrast, description: "Contrast is the difference in value between your hair, skin and eyes. High contrast colouring (e.g. dark hair, light skin) suits bold colour combinations and strong patterns. Low contrast colouring looks best in tonal, harmonious combinations without stark differences between pieces." },
                   ].map(item => (
-                    <div key={item.label} style={{ padding: "3px 10px", background: DS.colors.accentLight, borderRadius: DS.radius.full }}>
+                    <button key={item.label} onClick={() => setActivePill(item)} style={{ padding: "3px 10px", background: DS.colors.accentLight, borderRadius: DS.radius.full, display: "flex", alignItems: "center", gap: 4 }}>
                       <span style={{ fontSize: 11, color: DS.colors.accentDark, fontWeight: 500 }}>{item.label}: {item.value}</span>
-                    </div>
+                      <span style={{ fontSize: 10, color: DS.colors.accent, fontWeight: 600 }}>?</span>
+                    </button>
                   ))}
                 </div>
+
+                {/* Pill explanation modal */}
+                {activePill && (
+                  <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 2000, display: "flex", alignItems: "flex-end" }} onClick={() => setActivePill(null)}>
+                    <div style={{ width: "100%", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, padding: "24px 24px 48px" }} onClick={e => e.stopPropagation()}>
+                      <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+                        <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
+                      </div>
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: DS.colors.accentLight, borderRadius: DS.radius.full, marginBottom: 12 }}>
+                        <span style={{ fontSize: 11, color: DS.colors.accentDark, fontWeight: 600 }}>{activePill.label}: {activePill.value}</span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.7 }}>{activePill.description}</p>
+                    </div>
+                  </div>
+                )}
                 <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>{seasonData.colour_profile.season_description}</p>
               </div>
             )}
