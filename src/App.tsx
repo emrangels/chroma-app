@@ -20,7 +20,14 @@ interface User { id: string; email: string; name: string; plan: Plan; }
 interface PaletteColour { name: string; hex: string; }
 interface SeasonData {
   season: string; subseason: string; confidence: number; headline: string;
-  palette: { best: PaletteColour[]; avoid: PaletteColour[]; };
+  colour_profile: {
+    undertone: string; depth: string; chroma: string; contrast: string;
+    defining_quality: string; season_description: string;
+  };
+  palette: {
+    base: PaletteColour[]; accent: PaletteColour[];
+    best: PaletteColour[]; avoid: PaletteColour[];
+  };
   makeup: { foundation: string; blush: string; lip: string; eye: string; };
   hair: { best_colours: string[]; avoid: string[]; tip: string; };
   jewellery: { metals: string[]; stones: string[]; tip: string; };
