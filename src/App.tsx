@@ -36,7 +36,15 @@ interface SeasonData {
 }
 interface WardrobeItem {
   id: string; user_id: string; name: string; category: string;
-  colour_name: string; hex: string; verdict: boolean; tip: string; created_at: string;
+  colour_name: string; hex: string; verdict: boolean; tip: string;
+  starred: boolean; image_url?: string; price?: number; created_at: string;
+}
+interface Outfit {
+  id: string; user_id: string; name: string; item_ids: string[];
+  overall_verdict: boolean; starred: boolean; created_at: string;
+}
+interface ChatMessage {
+  role: "user" | "assistant"; content: string;
 }
 interface AppState {
   screen: Screen; activeTab: Tab; activeSheet: Sheet;
@@ -1199,6 +1207,479 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade }: {
             <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 24 }}>Your current season results will be cleared and you'll need to upload a new selfie. This cannot be undone.</p>
             <button onClick={onReanalyse} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 15, fontWeight: 600, marginBottom: 10 }}>Yes, re-analyse</button>
             <button onClick={() => setShowReanalyseWarning(false)} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Cancel</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seasonData: SeasonData | null; onUpgrade: () => void; }) => {
+  const plan = user?.plan || "free";
+  const canAccess = plan === "luxe";
+
+  const [view, setView] = useState<"items" | "outfits" | "chat">("items");
+  const [items, setItems] = useState<WardrobeItem[]>([]);
+  const [outfits, setOutfits] = useState<Outfit[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [showAddItem, setShowAddItem] = useState(false);
+  const [showAddOutfit, setShowAddOutfit] = useState(false);
+  const [filterCategory, setFilterCategory] = useState("All");
+  const [filterStarred, setFilterStarred] = useState(false);
+
+  // Add item form
+  const [itemName, setItemName] = useState("");
+  const [itemCategory, setItemCategory] = useState("Top");
+  const [itemPrice, setItemPrice] = useState("");
+  const [itemPreview, setItemPreview] = useState<string | null>(null);
+  const [itemChecking, setItemChecking] = useState(false);
+  const [itemResult, setItemResult] = useState<{ colour_name: string; hex: string; verdict: boolean; tip: string } | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  // Add outfit form
+  const [outfitName, setOutfitName] = useState("");
+  const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
+
+  // AI Chat
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const categories = ["All", "Top", "Bottom", "Dress", "Outerwear", "Shoes", "Accessories"];
+
+  const token = localStorage.getItem("chroma_token");
+  const authHeaders = { ...supabaseHeaders, Authorization: `Bearer ${token}` };
+
+  useEffect(() => {
+    if (!canAccess || !user?.id) return;
+    loadItems();
+    loadOutfits();
+  }, [canAccess, user?.id]);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages]);
+
+  const loadItems = async () => {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?user_id=eq.${user!.id}&order=created_at.desc`, { headers: authHeaders });
+      const data = await res.json();
+      if (Array.isArray(data)) setItems(data);
+    } catch {}
+  };
+
+  const loadOutfits = async () => {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/outfits?user_id=eq.${user!.id}&order=created_at.desc`, { headers: authHeaders });
+      const data = await res.json();
+      if (Array.isArray(data)) setOutfits(data);
+    } catch {}
+  };
+
+  const resizeAndEncode = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let { width, height } = img;
+        const max = 1024;
+        if (width > height) { if (width > max) { height = Math.round(height * max / width); width = max; } }
+        else { if (height > max) { width = Math.round(width * max / height); height = max; } }
+        const canvas = document.createElement("canvas");
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) { reject(new Error("Canvas error")); return; }
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.85).split(",")[1]);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Load error")); };
+      img.src = url;
+    });
+
+  const handleItemPhoto = async (file: File) => {
+    setItemPreview(URL.createObjectURL(file));
+    setItemResult(null);
+    if (!seasonData) return;
+    setItemChecking(true);
+    try {
+      const base64 = await resizeAndEncode(file);
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/smooth-action`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ type: "check_item", image: base64, season: seasonData.season, mode: "single" }),
+      });
+      const data = await res.json();
+      if (data.items?.[0]) setItemResult(data.items[0]);
+    } catch {}
+    finally { setItemChecking(false); }
+  };
+
+  const handleAddItem = async () => {
+    if (!itemName.trim() || !itemResult || !user?.id) return;
+    setLoading(true);
+    try {
+      const newItem = {
+        user_id: user.id, name: itemName.trim(), category: itemCategory,
+        colour_name: itemResult.colour_name, hex: itemResult.hex,
+        verdict: itemResult.verdict, tip: itemResult.tip,
+        starred: false, price: itemPrice ? parseFloat(itemPrice) : null,
+      };
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items`, {
+        method: "POST",
+        headers: { ...authHeaders, Prefer: "return=representation" },
+        body: JSON.stringify(newItem),
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) setItems(prev => [data[0], ...prev]);
+      setShowAddItem(false);
+      setItemName(""); setItemCategory("Top"); setItemPrice("");
+      setItemPreview(null); setItemResult(null);
+      if (fileRef.current) fileRef.current.value = "";
+    } catch {}
+    finally { setLoading(false); }
+  };
+
+  const handleToggleStar = async (item: WardrobeItem) => {
+    const updated = { ...item, starred: !item.starred };
+    setItems(prev => prev.map(i => i.id === item.id ? updated : i));
+    await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?id=eq.${item.id}`, {
+      method: "PATCH",
+      headers: { ...authHeaders, Prefer: "return=minimal" },
+      body: JSON.stringify({ starred: updated.starred }),
+    }).catch(() => {});
+  };
+
+  const handleDeleteItem = async (id: string) => {
+    setItems(prev => prev.filter(i => i.id !== id));
+    await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?id=eq.${id}`, {
+      method: "DELETE", headers: authHeaders,
+    }).catch(() => {});
+  };
+
+  const handleAddOutfit = async () => {
+    if (!outfitName.trim() || selectedItemIds.length < 2 || !user?.id) return;
+    setLoading(true);
+    try {
+      const outfitItems = items.filter(i => selectedItemIds.includes(i.id));
+      const overall_verdict = outfitItems.filter(i => i.verdict).length >= outfitItems.length / 2;
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/outfits`, {
+        method: "POST",
+        headers: { ...authHeaders, Prefer: "return=representation" },
+        body: JSON.stringify({ user_id: user.id, name: outfitName.trim(), item_ids: selectedItemIds, overall_verdict, starred: false }),
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) setOutfits(prev => [data[0], ...prev]);
+      setShowAddOutfit(false); setOutfitName(""); setSelectedItemIds([]);
+    } catch {}
+    finally { setLoading(false); }
+  };
+
+  const handleToggleOutfitStar = async (outfit: Outfit) => {
+    const updated = { ...outfit, starred: !outfit.starred };
+    setOutfits(prev => prev.map(o => o.id === outfit.id ? updated : o));
+    await fetch(`${SUPABASE_URL}/rest/v1/outfits?id=eq.${outfit.id}`, {
+      method: "PATCH", headers: { ...authHeaders, Prefer: "return=minimal" },
+      body: JSON.stringify({ starred: updated.starred }),
+    }).catch(() => {});
+  };
+
+  const handleChat = async () => {
+    if (!chatInput.trim() || !seasonData) return;
+    const userMsg: ChatMessage = { role: "user", content: chatInput.trim() };
+    setChatMessages(prev => [...prev, userMsg]);
+    setChatInput("");
+    setChatLoading(true);
+    try {
+      const wardrobeContext = items.map(i => `${i.name} (${i.category}, ${i.colour_name}, ${i.verdict ? "suits season" : "doesn't suit season"})`).join(", ");
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          system: `You are Chroma, a personal AI stylist. The user's colour season is ${seasonData.season} (${seasonData.subseason}). Their wardrobe contains: ${wardrobeContext || "no items yet"}. Their body shape is ${seasonData.body_shape || "unknown"}. Give specific, warm, practical styling advice. Reference their actual wardrobe items by name. Keep responses concise and actionable. No markdown, just plain text.`,
+          messages: [...chatMessages, userMsg].map(m => ({ role: m.role, content: m.content })),
+        }),
+      });
+      const data = await res.json();
+      const text = data.content?.find((c: { type: string }) => c.type === "text")?.text || "I couldn't generate a response. Please try again.";
+      setChatMessages(prev => [...prev, { role: "assistant", content: text }]);
+    } catch {
+      setChatMessages(prev => [...prev, { role: "assistant", content: "Something went wrong. Please try again." }]);
+    }
+    finally { setChatLoading(false); }
+  };
+
+  if (!canAccess) return (
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 28px" }}>
+      <div style={{ width: 64, height: 64, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+        <Icon name="hanger" size={28} color={DS.colors.accent} />
+      </div>
+      <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Your Wardrobe</h2>
+      <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 24 }}>Upgrade to Luxe to build your wardrobe, create outfits, and chat with your AI stylist.</p>
+      <button onClick={onUpgrade} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: "#C26B3A", color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Unlock Wardrobe</button>
+    </div>
+  );
+
+  const filteredItems = items.filter(i => {
+    if (filterStarred && !i.starred) return false;
+    if (filterCategory !== "All" && i.category !== filterCategory) return false;
+    return true;
+  });
+
+  return (
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", background: DS.colors.bg }}>
+      {/* Tab switcher */}
+      <div style={{ padding: "16px 16px 0", flexShrink: 0 }}>
+        <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, gap: 4 }}>
+          {(["items", "outfits", "chat"] as const).map(v => (
+            <button key={v} onClick={() => setView(v)} style={{ flex: 1, padding: "8px 4px", borderRadius: DS.radius.md, fontSize: 13, fontWeight: view === v ? 600 : 400, color: view === v ? DS.colors.white : DS.colors.textMuted, background: view === v ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
+              {v === "items" ? "Wardrobe" : v === "outfits" ? "Outfits" : "Stylist"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Items view */}
+      {view === "items" && (
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
+          {/* Filters */}
+          <div style={{ display: "flex", gap: 8, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
+            <button onClick={() => setFilterStarred(!filterStarred)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterStarred ? "#FFD700" : DS.colors.surface, color: filterStarred ? "#7A5800" : DS.colors.textMuted, flexShrink: 0 }}>
+              ★ Starred
+            </button>
+            {categories.map(cat => (
+              <button key={cat} onClick={() => setFilterCategory(cat)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterCategory === cat ? DS.colors.accent : DS.colors.surface, color: filterCategory === cat ? DS.colors.white : DS.colors.textMuted, flexShrink: 0, transition: "all 0.2s" }}>
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Items grid */}
+          {filteredItems.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "40px 0" }}>
+              <Icon name="hanger" size={40} color={DS.colors.border} />
+              <p style={{ fontSize: 15, color: DS.colors.textMuted, marginTop: 12 }}>No items yet</p>
+              <p style={{ fontSize: 13, color: DS.colors.textFaint, marginTop: 4 }}>Add your first item to get started</p>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 80 }}>
+              {filteredItems.map(item => (
+                <div key={item.id} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "14px 16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: DS.radius.md, background: item.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: DS.colors.text }}>{item.name}</p>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+                        <span style={{ fontSize: 11, color: DS.colors.textFaint }}>{item.category}</span>
+                        <span style={{ fontSize: 11, color: DS.colors.textFaint }}>·</span>
+                        <span style={{ fontSize: 11, color: DS.colors.textFaint }}>{item.colour_name}</span>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ padding: "3px 8px", borderRadius: DS.radius.full, background: item.verdict ? "#F0FDF4" : "#FEF2F2" }}>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: item.verdict ? DS.colors.success : DS.colors.danger }}>{item.verdict ? "✓" : "✗"}</span>
+                      </div>
+                      <button onClick={() => handleToggleStar(item)} style={{ fontSize: 16, color: item.starred ? "#FFD700" : DS.colors.border }}>★</button>
+                      <button onClick={() => handleDeleteItem(item.id)}><Icon name="trash" size={14} color={DS.colors.textFaint} /></button>
+                    </div>
+                  </div>
+                  {item.tip && <p style={{ margin: "8px 0 0", fontSize: 12, color: DS.colors.textMuted, lineHeight: 1.5 }}>{item.tip}</p>}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Add item button */}
+          <button onClick={() => setShowAddItem(true)} style={{ position: "fixed", bottom: 96, right: 20, width: 52, height: 52, borderRadius: DS.radius.full, background: DS.colors.accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: DS.shadow.lg }}>
+            <Icon name="plus" size={24} color={DS.colors.white} />
+          </button>
+        </div>
+      )}
+
+      {/* Outfits view */}
+      {view === "outfits" && (
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
+          {outfits.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "40px 0" }}>
+              <Icon name="star" size={40} color={DS.colors.border} />
+              <p style={{ fontSize: 15, color: DS.colors.textMuted, marginTop: 12 }}>No outfits yet</p>
+              <p style={{ fontSize: 13, color: DS.colors.textFaint, marginTop: 4 }}>Combine wardrobe items into saved outfits</p>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 80 }}>
+              {outfits.map(outfit => {
+                const outfitItems = items.filter(i => outfit.item_ids.includes(i.id));
+                return (
+                  <div key={outfit.id} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "14px 16px" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: DS.colors.text }}>{outfit.name}</p>
+                        <div style={{ padding: "2px 8px", borderRadius: DS.radius.full, background: outfit.overall_verdict ? "#F0FDF4" : "#FEF2F2" }}>
+                          <span style={{ fontSize: 11, fontWeight: 600, color: outfit.overall_verdict ? DS.colors.success : DS.colors.danger }}>{outfit.overall_verdict ? "Works" : "Needs work"}</span>
+                        </div>
+                      </div>
+                      <button onClick={() => handleToggleOutfitStar(outfit)} style={{ fontSize: 16, color: outfit.starred ? "#FFD700" : DS.colors.border }}>★</button>
+                    </div>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      {outfitItems.map(item => (
+                        <div key={item.id} style={{ textAlign: "center" }}>
+                          <div style={{ width: 36, height: 36, borderRadius: DS.radius.sm, background: item.hex, border: "1px solid rgba(0,0,0,0.08)" }} />
+                          <p style={{ margin: "3px 0 0", fontSize: 9, color: DS.colors.textFaint, maxWidth: 40, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          <button onClick={() => setShowAddOutfit(true)} style={{ position: "fixed", bottom: 96, right: 20, width: 52, height: 52, borderRadius: DS.radius.full, background: DS.colors.accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: DS.shadow.lg }}>
+            <Icon name="plus" size={24} color={DS.colors.white} />
+          </button>
+        </div>
+      )}
+
+      {/* AI Stylist chat */}
+      {view === "chat" && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: 12 }}>
+            {chatMessages.length === 0 && (
+              <div style={{ textAlign: "center", padding: "40px 0" }}>
+                <div style={{ width: 56, height: 56, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+                  <Icon name="sparkles" size={24} color={DS.colors.accent} />
+                </div>
+                <p style={{ fontSize: 15, fontWeight: 600, color: DS.colors.text, marginBottom: 8 }}>Your AI Stylist</p>
+                <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, maxWidth: 240, margin: "0 auto" }}>Ask me anything about your style, outfits, or what to wear for any occasion.</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 20 }}>
+                  {["What should I wear to a job interview?", "Put together a weekend outfit from my wardrobe", "What colours work with my season?"].map(suggestion => (
+                    <button key={suggestion} onClick={() => { setChatInput(suggestion); }} style={{ padding: "10px 14px", borderRadius: DS.radius.md, background: DS.colors.surface, fontSize: 13, color: DS.colors.textMuted, textAlign: "left", border: `1px solid ${DS.colors.border}` }}>
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {chatMessages.map((msg, i) => (
+              <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
+                <div style={{ maxWidth: "80%", padding: "10px 14px", borderRadius: msg.role === "user" ? `${DS.radius.lg} ${DS.radius.lg} 4px ${DS.radius.lg}` : `${DS.radius.lg} ${DS.radius.lg} ${DS.radius.lg} 4px`, background: msg.role === "user" ? DS.colors.accent : DS.colors.surface, color: msg.role === "user" ? DS.colors.white : DS.colors.text }}>
+                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>{msg.content}</p>
+                </div>
+              </div>
+            ))}
+            {chatLoading && (
+              <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                <div style={{ padding: "10px 14px", borderRadius: DS.radius.lg, background: DS.colors.surface }}>
+                  <div style={{ display: "flex", gap: 4 }}>
+                    {[0,1,2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: DS.colors.textFaint, animation: `pulse 1.2s ease ${i * 0.2}s infinite` }} />)}
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={chatEndRef} />
+          </div>
+          <div style={{ padding: "12px 16px", borderTop: `1px solid ${DS.colors.border}`, display: "flex", gap: 8, flexShrink: 0, paddingBottom: "calc(12px + env(safe-area-inset-bottom))" }}>
+            <input value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleChat(); } }} placeholder="Ask your stylist..." style={{ flex: 1, padding: "12px 14px", borderRadius: DS.radius.lg, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", fontFamily: DS.font }} />
+            <button onClick={handleChat} disabled={!chatInput.trim() || chatLoading} style={{ width: 44, height: 44, borderRadius: DS.radius.lg, background: chatInput.trim() ? DS.colors.accent : DS.colors.border, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Icon name="chevronRight" size={18} color={DS.colors.white} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Add Item Sheet */}
+      {showAddItem && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={() => setShowAddItem(false)}>
+          <div style={{ width: "100%", maxHeight: "90vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+              <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
+            </div>
+            <div style={{ padding: "16px 24px" }}>
+              <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20 }}>Add item</h2>
+
+              {/* Photo upload */}
+              <div onClick={() => fileRef.current?.click()} style={{ borderRadius: DS.radius.lg, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, height: 160, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", overflow: "hidden", position: "relative", marginBottom: 16 }}>
+                {itemPreview ? (
+                  <img src={itemPreview} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  <>
+                    <Icon name="camera" size={24} color={DS.colors.accent} />
+                    <p style={{ fontSize: 13, color: DS.colors.textMuted, marginTop: 8 }}>Photo of item</p>
+                  </>
+                )}
+                {itemChecking && (
+                  <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <p style={{ color: DS.colors.white, fontSize: 13 }}>Checking colour...</p>
+                  </div>
+                )}
+              </div>
+              <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) handleItemPhoto(f); }} />
+
+              {/* Colour result */}
+              {itemResult && (
+                <div style={{ padding: "10px 14px", borderRadius: DS.radius.md, background: itemResult.verdict ? "#F0FDF4" : "#FEF2F2", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: DS.radius.sm, background: itemResult.hex, flexShrink: 0 }} />
+                  <div>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>{itemResult.colour_name} — {itemResult.verdict ? "✓ Suits your season" : "✗ Doesn't suit your season"}</p>
+                    <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted }}>{itemResult.tip}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Item name */}
+              <input value={itemName} onChange={e => setItemName(e.target.value)} placeholder="Item name (e.g. Blue linen top)" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 12, fontFamily: DS.font }} />
+
+              {/* Category */}
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+                {["Top", "Bottom", "Dress", "Outerwear", "Shoes", "Accessories"].map(cat => (
+                  <button key={cat} onClick={() => setItemCategory(cat)} style={{ padding: "6px 14px", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 500, background: itemCategory === cat ? DS.colors.accent : DS.colors.surface, color: itemCategory === cat ? DS.colors.white : DS.colors.textMuted, transition: "all 0.2s" }}>
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
+              {/* Price (optional) */}
+              <input value={itemPrice} onChange={e => setItemPrice(e.target.value)} placeholder="Price (optional, e.g. 49.99)" type="number" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 20, fontFamily: DS.font }} />
+
+              <button onClick={handleAddItem} disabled={!itemName.trim() || !itemResult || loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: !itemName.trim() || !itemResult ? DS.colors.border : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>
+                {loading ? "Adding..." : "Add to wardrobe"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Outfit Sheet */}
+      {showAddOutfit && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={() => setShowAddOutfit(false)}>
+          <div style={{ width: "100%", maxHeight: "90vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+              <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
+            </div>
+            <div style={{ padding: "16px 24px" }}>
+              <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20 }}>Create outfit</h2>
+              <input value={outfitName} onChange={e => setOutfitName(e.target.value)} placeholder="Outfit name (e.g. Work Monday)" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 16, fontFamily: DS.font }} />
+              <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 12 }}>Select items (minimum 2):</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
+                {items.map(item => {
+                  const selected = selectedItemIds.includes(item.id);
+                  return (
+                    <button key={item.id} onClick={() => setSelectedItemIds(prev => selected ? prev.filter(id => id !== item.id) : [...prev, item.id])} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${selected ? DS.colors.accent : DS.colors.border}`, background: selected ? DS.colors.accentLight : DS.colors.bg, textAlign: "left" }}>
+                      <div style={{ width: 32, height: 32, borderRadius: DS.radius.sm, background: item.hex, flexShrink: 0 }} />
+                      <div style={{ flex: 1 }}>
+                        <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>{item.name}</p>
+                        <p style={{ margin: 0, fontSize: 11, color: DS.colors.textFaint }}>{item.category} · {item.colour_name}</p>
+                      </div>
+                      {selected && <Icon name="check" size={16} color={DS.colors.accent} strokeWidth={2.5} />}
+                    </button>
+                  );
+                })}
+              </div>
+              <button onClick={handleAddOutfit} disabled={!outfitName.trim() || selectedItemIds.length < 2 || loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: !outfitName.trim() || selectedItemIds.length < 2 ? DS.colors.border : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>
+                {loading ? "Creating..." : "Save outfit"}
+              </button>
+            </div>
           </div>
         </div>
       )}
