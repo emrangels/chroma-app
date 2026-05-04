@@ -95,6 +95,7 @@ const Icon = ({ name, size = 24, color = "currentColor", strokeWidth = 1.5 }: { 
     gem: <><polygon points="6 3 18 3 22 9 12 22 2 9"/><polyline points="2 9 12 14 22 9"/><line x1="12" y1="22" x2="12" y2="14"/><line x1="6" y1="3" x2="2" y2="9"/><line x1="18" y1="3" x2="22" y2="9"/></>,
     shirt: <><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></>,
     crown: <><path d="M2 20h20"/><path d="M4 20l2-12 6 6 4-8 4 8 6-6-2 12"/></>,
+    info: <><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></>,
   };
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={{ display: "block", flexShrink: 0 }}>
@@ -1109,7 +1110,7 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade }: {
                   ].map(item => (
                     <button key={item.label} onClick={() => setActivePill(item)} style={{ padding: "3px 10px", background: DS.colors.accentLight, borderRadius: DS.radius.full, display: "flex", alignItems: "center", gap: 4 }}>
                       <span style={{ fontSize: 11, color: DS.colors.accentDark, fontWeight: 500 }}>{item.label}: {item.value}</span>
-                      <span style={{ fontSize: 10, color: DS.colors.accent, fontWeight: 600 }}>?</span>
+                      <Icon name="info" size={10} color={DS.colors.accent} strokeWidth={2} />
                     </button>
                   ))}
                 </div>
