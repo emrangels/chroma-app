@@ -1247,11 +1247,13 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
 
   const categories = ["All", "Top", "Bottom", "Dress", "Outerwear", "Shoes", "Accessories"];
 
+  const getAuthHeaders = () => {
   const token = localStorage.getItem("chroma_token");
-  const authHeaders = { 
-  "Content-Type": "application/json",
-  apikey: SUPABASE_ANON_KEY,
-  Authorization: `Bearer ${token || SUPABASE_JWT_KEY}` 
+  return {
+    "Content-Type": "application/json",
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${token || SUPABASE_JWT_KEY}`
+  };
 };
   useEffect(() => {
     if (!canAccess || !user?.id) return;
@@ -1265,7 +1267,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
 
   const loadItems = async () => {
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?user_id=eq.${user!.id}&order=created_at.desc`, { headers: authHeaders });
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?user_id=eq.${user!.id}&order=created_at.desc`, { headers: getAuthHeaders() });
       const data = await res.json();
       if (Array.isArray(data)) setItems(data);
     } catch {}
@@ -1273,7 +1275,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
 
   const loadOutfits = async () => {
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/outfits?user_id=eq.${user!.id}&order=created_at.desc`, { headers: authHeaders });
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/outfits?user_id=eq.${user!.id}&order=created_at.desc`, { headers: getAuthHeaders() });
       const data = await res.json();
       if (Array.isArray(data)) setOutfits(data);
     } catch {}
@@ -1330,7 +1332,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
       };
       const res = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items`, {
         method: "POST",
-        headers: { ...authHeaders, Prefer: "return=representation" },
+        headers: { ...getAuthHeaders(), Prefer: "return=representation" },
         body: JSON.stringify(newItem),
       });
       const data = await res.json();
@@ -1348,20 +1350,20 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
     setItems(prev => prev.map(i => i.id === item.id ? updated : i));
     await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?id=eq.${item.id}`, {
       method: "PATCH",
-      headers: { ...authHeaders, Prefer: "return=minimal" },
+      headers: { ...getAuthHeaders(), Prefer: "return=minimal" },
       body: JSON.stringify({ starred: updated.starred }),
     }).catch(() => {});
   };
 const handleDeleteOutfit = async (id: string) => {
   setOutfits(prev => prev.filter(o => o.id !== id));
   await fetch(`${SUPABASE_URL}/rest/v1/outfits?id=eq.${id}`, {
-    method: "DELETE", headers: authHeaders,
+    method: "DELETE", headers: getAuthHeaders(),
   }).catch(() => {});
 };
   const handleDeleteItem = async (id: string) => {
     setItems(prev => prev.filter(i => i.id !== id));
     await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?id=eq.${id}`, {
-      method: "DELETE", headers: authHeaders,
+      method: "DELETE", headers: getAuthHeaders(),
     }).catch(() => {});
   };
 
@@ -1373,7 +1375,7 @@ const handleDeleteOutfit = async (id: string) => {
       const overall_verdict = outfitItems.filter(i => i.verdict).length >= outfitItems.length / 2;
       const res = await fetch(`${SUPABASE_URL}/rest/v1/outfits`, {
         method: "POST",
-        headers: { ...authHeaders, Prefer: "return=representation" },
+        headers: { ...getAuthHeaders(), Prefer: "return=representation" },
         body: JSON.stringify({ user_id: user.id, name: outfitName.trim(), item_ids: selectedItemIds, overall_verdict, starred: false }),
       });
       const data = await res.json();
@@ -1387,7 +1389,7 @@ const handleDeleteOutfit = async (id: string) => {
     const updated = { ...outfit, starred: !outfit.starred };
     setOutfits(prev => prev.map(o => o.id === outfit.id ? updated : o));
     await fetch(`${SUPABASE_URL}/rest/v1/outfits?id=eq.${outfit.id}`, {
-      method: "PATCH", headers: { ...authHeaders, Prefer: "return=minimal" },
+      method: "PATCH", headers: { ...getAuthHeaders(), Prefer: "return=minimal" },
       body: JSON.stringify({ starred: updated.starred }),
     }).catch(() => {});
   };
