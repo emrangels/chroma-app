@@ -1557,7 +1557,10 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                   <Icon name="sparkles" size={24} color={DS.colors.accent} />
                 </div>
                 <p style={{ fontSize: 15, fontWeight: 600, color: DS.colors.text, marginBottom: 8 }}>Your AI Stylist</p>
-                <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, maxWidth: 240, margin: "0 auto" }}>Ask me anything about your style, outfits, or what to wear for any occasion.</p>
+<div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: items.length > 0 ? DS.colors.accentLight : DS.colors.surface, borderRadius: DS.radius.full, marginBottom: 8 }}>
+  <span style={{ fontSize: 11, color: items.length > 0 ? DS.colors.accentDark : DS.colors.textFaint, fontWeight: 500 }}>{items.length > 0 ? `${items.length} wardrobe item${items.length !== 1 ? "s" : ""} loaded` : "No wardrobe items yet"}</span>
+</div>
+                <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, maxWidth: 240, margin: "0 auto" }}>Ask me anything about your style, outfits, or what to wear for any occasion. Add items to your wardrobe first for personalised outfit suggestions.</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 20 }}>
                   {["What should I wear to a job interview?", "Put together a weekend outfit from my wardrobe", "What colours work with my season?"].map(suggestion => (
                     <button key={suggestion} onClick={() => { setChatInput(suggestion); }} style={{ padding: "10px 14px", borderRadius: DS.radius.md, background: DS.colors.surface, fontSize: 13, color: DS.colors.textMuted, textAlign: "left", border: `1px solid ${DS.colors.border}` }}>
