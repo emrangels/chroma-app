@@ -1454,9 +1454,32 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
 
       {/* Items view */}
       {view === "items" && (
-        <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
-          {/* Filters */}
-          <div style={{ display: "flex", gap: 8, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
+  <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
+
+    {/* Stats card */}
+    {items.length > 0 && (() => {
+      const suits = items.filter(i => i.verdict).length;
+      const pct = Math.round((suits / items.length) * 100);
+      const categoryCounts = items.reduce((acc, i) => { acc[i.category] = (acc[i.category] || 0) + 1; return acc; }, {} as Record<string, number>);
+      const topCategory = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "";
+      return (
+        <div style={{ background: DS.colors.accentLight, borderRadius: DS.radius.lg, padding: "14px 16px", marginBottom: 16, display: "flex", gap: 0 }}>
+          {[
+            { label: "Items", value: items.length.toString() },
+            { label: "Suits season", value: `${pct}%` },
+            { label: "Most worn", value: topCategory },
+          ].map((stat, i) => (
+            <div key={stat.label} style={{ flex: 1, textAlign: "center", borderLeft: i > 0 ? `1px solid ${DS.colors.accent}20` : "none", padding: "0 8px" }}>
+              <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: DS.colors.accent }}>{stat.value}</p>
+              <p style={{ margin: 0, fontSize: 11, color: DS.colors.accentDark, marginTop: 2 }}>{stat.label}</p>
+            </div>
+          ))}
+        </div>
+      );
+    })()}
+
+    {/* Filters */}
+    <div style={{ display: "flex", gap: 8, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
             <button onClick={() => setFilterStarred(!filterStarred)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterStarred ? "#FFD700" : DS.colors.surface, color: filterStarred ? "#7A5800" : DS.colors.textMuted, flexShrink: 0 }}>
               ★ Starred
             </button>
