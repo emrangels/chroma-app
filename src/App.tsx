@@ -104,6 +104,8 @@ const Icon = ({ name, size = 24, color = "currentColor", strokeWidth = 1.5 }: { 
     shirt: <><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></>,
     crown: <><path d="M2 20h20"/><path d="M4 20l2-12 6 6 4-8 4 8 6-6-2 12"/></>,
     info: <><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></>,
+    list: <><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></>,
+    grid: <><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></>,
   };
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={{ display: "block", flexShrink: 0 }}>
@@ -1228,6 +1230,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const [editingItem, setEditingItem] = useState<WardrobeItem | null>(null);
   const [editName, setEditName] = useState("");
   const [editCategory, setEditCategory] = useState("");
+  const [gridView, setGridView] = useState(false);
 
   // Add item form
   const [itemName, setItemName] = useState("");
@@ -1494,19 +1497,25 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
     })()}
 
     {/* Filters */}
-    <div style={{ display: "flex", gap: 8, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
-            <button onClick={() => setFilterStarred(!filterStarred)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterStarred ? "#FFD700" : DS.colors.surface, color: filterStarred ? "#7A5800" : DS.colors.textMuted, flexShrink: 0 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+  <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4, flex: 1 }}>
+    <button onClick={() => setFilterStarred(!filterStarred)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterStarred ? "#FFD700" : DS.colors.surface, color: filterStarred ? "#7A5800" : DS.colors.textMuted, flexShrink: 0 }}>
               ★ Starred
             </button>
             {categories.map(cat => {
-  const count = cat === "All" ? items.length : items.filter(i => i.category === cat).length;
-  return (
-    <button key={cat} onClick={() => setFilterCategory(cat)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterCategory === cat ? DS.colors.accent : DS.colors.surface, color: filterCategory === cat ? DS.colors.white : DS.colors.textMuted, flexShrink: 0, transition: "all 0.2s" }}>
-      {cat}{count > 0 ? ` (${count})` : ""}
-    </button>
-  );
-})}
-          </div>
+      const count = cat === "All" ? items.length : items.filter(i => i.category === cat).length;
+      if (cat !== "All" && count === 0) return null;
+      return (
+        <button key={cat} onClick={() => setFilterCategory(cat)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterCategory === cat ? DS.colors.accent : DS.colors.surface, color: filterCategory === cat ? DS.colors.white : DS.colors.textMuted, flexShrink: 0, transition: "all 0.2s" }}>
+          {cat}{count > 0 ? ` (${count})` : ""}
+        </button>
+      );
+    })}
+  </div>
+  <button onClick={() => setGridView(!gridView)} style={{ padding: "5px 10px", borderRadius: DS.radius.md, background: DS.colors.surface, flexShrink: 0 }}>
+    <Icon name={gridView ? "list" : "grid"} size={16} color={DS.colors.textMuted} />
+  </button>
+</div>
 
           {/* Items grid */}
           {filteredItems.length === 0 ? (
@@ -1515,12 +1524,37 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
               <p style={{ fontSize: 15, color: DS.colors.textMuted, marginTop: 12 }}>No items yet</p>
               <p style={{ fontSize: 13, color: DS.colors.textFaint, marginTop: 4 }}>Add your first item to get started</p>
             </div>
+          ) : gridView ? (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 80 }}>
+              {filteredItems.map(item => (
+                <div key={item.id} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, overflow: "hidden" }}>
+                  <div style={{ width: "100%", aspectRatio: "1", background: item.hex, position: "relative" }}>
+                    <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 4 }}>
+                      <button onClick={() => handleToggleStar(item)} style={{ width: 28, height: 28, borderRadius: DS.radius.full, background: "rgba(255,255,255,0.9)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: item.starred ? "#FFD700" : DS.colors.border }}>★</button>
+                    </div>
+                    <div style={{ position: "absolute", bottom: 8, left: 8, padding: "2px 8px", borderRadius: DS.radius.full, background: item.verdict ? "#F0FDF4" : "#FEF2F2" }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: item.verdict ? DS.colors.success : DS.colors.danger }}>{item.verdict ? "✓" : "✗"}</span>
+                    </div>
+                  </div>
+                  <div style={{ padding: "10px 12px" }}>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</p>
+                    <p style={{ margin: "2px 0 0", fontSize: 11, color: DS.colors.textFaint }}>{item.category}</p>
+                    <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                      <button onClick={() => { setEditingItem(item); setEditName(item.name); setEditCategory(item.category); }} style={{ flex: 1, padding: "5px", borderRadius: DS.radius.sm, background: DS.colors.surface, fontSize: 11, color: DS.colors.textMuted }}>Edit</button>
+                      <button onClick={() => handleDeleteItem(item.id)} style={{ padding: "5px 8px", borderRadius: DS.radius.sm, background: DS.colors.surface }}>
+                        <Icon name="trash" size={12} color={DS.colors.textFaint} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 80 }}>
               {filteredItems.map(item => (
                 <div key={item.id} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "14px 16px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: DS.radius.md, background: item.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
+                    <div style={{ width: 60, height: 60, borderRadius: DS.radius.md, background: item.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: DS.colors.text }}>{item.name}</p>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
@@ -1543,6 +1577,11 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
               ))}
             </div>
           )}
+
+          {/* Add item button */}
+          <button onClick={() => setShowAddItem(true)} style={{ position: "fixed", bottom: 96, right: 20, width: 52, height: 52, borderRadius: DS.radius.full, background: DS.colors.accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: DS.shadow.lg }}>
+            <Icon name="plus" size={24} color={DS.colors.white} />
+          </button>
 
           {/* Add item button */}
           <button onClick={() => setShowAddItem(true)} style={{ position: "fixed", bottom: 96, right: 20, width: 52, height: 52, borderRadius: DS.radius.full, background: DS.colors.accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: DS.shadow.lg }}>
