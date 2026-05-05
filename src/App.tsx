@@ -1498,11 +1498,14 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             <button onClick={() => setFilterStarred(!filterStarred)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterStarred ? "#FFD700" : DS.colors.surface, color: filterStarred ? "#7A5800" : DS.colors.textMuted, flexShrink: 0 }}>
               ★ Starred
             </button>
-            {categories.map(cat => (
-              <button key={cat} onClick={() => setFilterCategory(cat)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterCategory === cat ? DS.colors.accent : DS.colors.surface, color: filterCategory === cat ? DS.colors.white : DS.colors.textMuted, flexShrink: 0, transition: "all 0.2s" }}>
-                {cat}
-              </button>
-            ))}
+            {categories.map(cat => {
+  const count = cat === "All" ? items.length : items.filter(i => i.category === cat).length;
+  return (
+    <button key={cat} onClick={() => setFilterCategory(cat)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterCategory === cat ? DS.colors.accent : DS.colors.surface, color: filterCategory === cat ? DS.colors.white : DS.colors.textMuted, flexShrink: 0, transition: "all 0.2s" }}>
+      {cat}{count > 0 ? ` (${count})` : ""}
+    </button>
+  );
+})}
           </div>
 
           {/* Items grid */}
