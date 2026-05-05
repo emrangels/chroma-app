@@ -1248,7 +1248,11 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const categories = ["All", "Top", "Bottom", "Dress", "Outerwear", "Shoes", "Accessories"];
 
   const token = localStorage.getItem("chroma_token");
-  const authHeaders = { ...supabaseHeaders, Authorization: `Bearer ${token}` };
+  const authHeaders = { 
+  "Content-Type": "application/json",
+  apikey: SUPABASE_ANON_KEY,
+  Authorization: `Bearer ${token}` 
+};
 
   useEffect(() => {
     if (!canAccess || !user?.id) return;
@@ -1306,7 +1310,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
       const base64 = await resizeAndEncode(file);
       const res = await fetch(`${SUPABASE_URL}/functions/v1/smooth-action`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+        headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
         body: JSON.stringify({ type: "check_item", image: base64, season: seasonData.season, mode: "single" }),
       });
       const data = await res.json();
