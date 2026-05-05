@@ -1251,9 +1251,8 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const authHeaders = { 
   "Content-Type": "application/json",
   apikey: SUPABASE_ANON_KEY,
-  Authorization: `Bearer ${token}` 
+  Authorization: `Bearer ${token || SUPABASE_JWT_KEY}` 
 };
-
   useEffect(() => {
     if (!canAccess || !user?.id) return;
     loadItems();
