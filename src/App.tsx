@@ -1396,18 +1396,21 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
     setChatLoading(true);
     try {
       const wardrobeContext = items.map(i => `${i.name} (${i.category}, ${i.colour_name}, ${i.verdict ? "suits season" : "doesn't suit season"})`).join(", ");
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: `You are Chroma, a personal AI stylist. The user's colour season is ${seasonData.season} (${seasonData.subseason}). Their wardrobe contains: ${wardrobeContext || "no items yet"}. Their body shape is ${seasonData.body_shape || "unknown"}. Give specific, warm, practical styling advice. Reference their actual wardrobe items by name. Keep responses concise and actionable. No markdown, just plain text.`,
-          messages: [...chatMessages, userMsg].map(m => ({ role: m.role, content: m.content })),
-        }),
-      });
-      const data = await res.json();
-      const text = data.content?.find((c: { type: string }) => c.type === "text")?.text || "I couldn't generate a response. Please try again.";
+     const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+  body: JSON.stringify({
+    type: "stylist_chat",
+    message: userMsg.content,
+    history: chatMessages.map(m => ({ role: m.role, content: m.content })),
+    season: seasonData.season,
+    subseason: seasonData.subseason,
+    body_shape: seasonData.body_shape,
+    wardrobe: items.map(i => `${i.name} (${i.category}, ${i.colour_name}, ${i.verdict ? "suits season" : "doesn't suit season"})`).join(", "),
+  }),
+});
+const data = await res.json();
+const text = data.reply || "I couldn't generate a response. Please try again.";
       setChatMessages(prev => [...prev, { role: "assistant", content: text }]);
     } catch {
       setChatMessages(prev => [...prev, { role: "assistant", content: "Something went wrong. Please try again." }]);
@@ -1847,7 +1850,7 @@ export default function App() {
   update({ screen: "analysing" });
   try {
     const base64 = await resizeAndEncode(file);
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/smooth-action`, {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
       body: JSON.stringify({ type: "analyse", image: base64 }),
