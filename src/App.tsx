@@ -478,7 +478,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
         billing,
         user_id: user.id,
         email: user.email,
-        return_url: "https://chromaapp.vercel.app",
+        return_url: "https://chromaapp.com.au",
       }),
     });
     const data = await res.json();
