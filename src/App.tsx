@@ -1307,7 +1307,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
     setItemChecking(true);
     try {
       const base64 = await resizeAndEncode(file);
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/smooth-action`, {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
         method: "POST",
         headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
         body: JSON.stringify({ type: "check_item", image: base64, season: seasonData.season, mode: "single" }),
