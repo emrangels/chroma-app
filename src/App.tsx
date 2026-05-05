@@ -1231,6 +1231,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const [editName, setEditName] = useState("");
   const [editCategory, setEditCategory] = useState("");
   const [gridView, setGridView] = useState(false);
+  const [filterVerdict, setFilterVerdict] = useState<boolean | null>(null);
 
   // Add item form
   const [itemName, setItemName] = useState("");
@@ -1452,10 +1453,11 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
   );
 
   const filteredItems = items.filter(i => {
-    if (filterStarred && !i.starred) return false;
-    if (filterCategory !== "All" && i.category !== filterCategory) return false;
-    return true;
-  });
+  if (filterStarred && !i.starred) return false;
+  if (filterCategory !== "All" && i.category !== filterCategory) return false;
+  if (filterVerdict !== null && i.verdict !== filterVerdict) return false;
+  return true;
+});
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", background: DS.colors.bg }}>
@@ -1500,8 +1502,11 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
   <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4, flex: 1 }}>
     <button onClick={() => setFilterStarred(!filterStarred)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterStarred ? "#FFD700" : DS.colors.surface, color: filterStarred ? "#7A5800" : DS.colors.textMuted, flexShrink: 0 }}>
-              ★ Starred
-            </button>
+  ★ Starred
+</button>
+<button onClick={() => setFilterVerdict(v => v === null ? true : v === true ? false : null)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterVerdict === true ? "#F0FDF4" : filterVerdict === false ? "#FEF2F2" : DS.colors.surface, color: filterVerdict === true ? DS.colors.success : filterVerdict === false ? DS.colors.danger : DS.colors.textMuted, flexShrink: 0 }}>
+  {filterVerdict === true ? "✓ Suits" : filterVerdict === false ? "✗ Doesn't suit" : "All verdicts"}
+</button>
             {categories.map(cat => {
       const count = cat === "All" ? items.length : items.filter(i => i.category === cat).length;
       if (cat !== "All" && count === 0) return null;
