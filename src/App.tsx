@@ -1582,7 +1582,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             {chatMessages.map((msg, i) => (
               <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
                 <div style={{ maxWidth: "80%", padding: "10px 14px", borderRadius: msg.role === "user" ? `${DS.radius.lg} ${DS.radius.lg} 4px ${DS.radius.lg}` : `${DS.radius.lg} ${DS.radius.lg} ${DS.radius.lg} 4px`, background: msg.role === "user" ? DS.colors.accent : DS.colors.surface, color: msg.role === "user" ? DS.colors.white : DS.colors.text }}>
-                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>{msg.content}</p>
+                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: msg.content.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>') }} />
                 </div>
               </div>
             ))}
