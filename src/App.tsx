@@ -1225,6 +1225,9 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const [showAddOutfit, setShowAddOutfit] = useState(false);
   const [filterCategory, setFilterCategory] = useState("All");
   const [filterStarred, setFilterStarred] = useState(false);
+  const [editingItem, setEditingItem] = useState<WardrobeItem | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editCategory, setEditCategory] = useState("");
 
   // Add item form
   const [itemName, setItemName] = useState("");
@@ -1366,7 +1369,17 @@ const handleDeleteOutfit = async (id: string) => {
       method: "DELETE", headers: getAuthHeaders(),
     }).catch(() => {});
   };
-
+  const handleEditItem = async () => {
+  if (!editingItem || !editName.trim()) return;
+  const updated = { ...editingItem, name: editName, category: editCategory };
+  setItems(prev => prev.map(i => i.id === editingItem.id ? updated : i));
+  await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?id=eq.${editingItem.id}`, {
+    method: "PATCH",
+    headers: { ...getAuthHeaders(), Prefer: "return=minimal" },
+    body: JSON.stringify({ name: editName, category: editCategory }),
+  }).catch(() => {});
+  setEditingItem(null);
+};
   const handleAddOutfit = async () => {
     if (!outfitName.trim() || selectedItemIds.length < 2 || !user?.id) return;
     setLoading(true);
@@ -1518,6 +1531,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                         <span style={{ fontSize: 11, fontWeight: 600, color: item.verdict ? DS.colors.success : DS.colors.danger }}>{item.verdict ? "✓" : "✗"}</span>
                       </div>
                       <button onClick={() => handleToggleStar(item)} style={{ fontSize: 16, color: item.starred ? "#FFD700" : DS.colors.border }}>★</button>
+                      <button onClick={() => { setEditingItem(item); setEditName(item.name); setEditCategory(item.category); }}><Icon name="refresh" size={14} color={DS.colors.textFaint} /></button>
                       <button onClick={() => handleDeleteItem(item.id)}><Icon name="trash" size={14} color={DS.colors.textFaint} /></button>
                     </div>
                   </div>
@@ -1730,6 +1744,35 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           </div>
         </div>
       )}
+      {/* Edit Item Sheet */}
+{editingItem && (
+  <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={() => setEditingItem(null)}>
+    <div style={{ width: "100%", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
+      <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+        <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
+      </div>
+      <div style={{ padding: "16px 24px" }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20 }}>Edit item</h2>
+        <input
+          value={editName}
+          onChange={e => setEditName(e.target.value)}
+          placeholder="Item name"
+          style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 12, fontFamily: DS.font }}
+        />
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
+          {["Top", "Bottom", "Dress", "Outerwear", "Shoes", "Accessories"].map(cat => (
+            <button key={cat} onClick={() => setEditCategory(cat)} style={{ padding: "6px 14px", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 500, background: editCategory === cat ? DS.colors.accent : DS.colors.surface, color: editCategory === cat ? DS.colors.white : DS.colors.textMuted, transition: "all 0.2s" }}>
+              {cat}
+            </button>
+          ))}
+        </div>
+        <button onClick={handleEditItem} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>
+          Save changes
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };
