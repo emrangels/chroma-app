@@ -14,7 +14,7 @@ const DS = {
 
 type Screen = "splash" | "onboarding" | "auth" | "upload" | "analysing" | "main";
 type Tab = "home" | "checker" | "wardrobe" | "me";
-type Sheet = "palette" | "makeup" | "hair" | "jewellery" | "style" | "paywall" | null;
+type Sheet = "palette" | "makeup" | "hair" | "jewellery" | "style" | "paywall" | "faq" | null;
 type Plan = "free" | "glow" | "luxe";
 
 interface User { id: string; email: string; name: string; plan: Plan; }
@@ -693,8 +693,22 @@ const guessColourFromName = (name: string): string => {
   if (n.includes("grey") || n.includes("gray")) return "#8A8A8A";
   if (n.includes("strawberry")) return "#CB8E73";
   if (n.includes("balayage") || n.includes("ombre") || n.includes("highlight")) return "#D4C5A9";
-  return "#C4A882";
+return "#C4A882";
 };
+
+const FaqItem = ({ question, answer }: { question: string; answer: string }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <button onClick={() => setOpen(!open)} style={{ width: "100%", textAlign: "left", padding: "14px 0", borderBottom: `1px solid ${DS.colors.border}`, background: "none" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: DS.colors.text, flex: 1 }}>{question}</span>
+        <Icon name={open ? "chevronDown" : "chevronRight"} size={16} color={DS.colors.textFaint} />
+      </div>
+      {open && <p style={{ margin: "10px 0 0", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.7 }}>{answer}</p>}
+    </button>
+  );
+};
+
 // SheetOverlay — rendered at ROOT level, outside all overflow:hidden containers
 const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet; seasonData: SeasonData; onClose: () => void; }) => (
   <div
@@ -799,6 +813,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           ))}
         </div>
       )}
+      
     </div>
   </div>
 );
@@ -1282,9 +1297,9 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
     </div>
   );
 };
-const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade }: {
+const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq }: {
   user: User | null; seasonData: SeasonData | null;
-  onSignOut: () => void; onReanalyse: () => void; onUpgrade: () => void;
+  onSignOut: () => void; onReanalyse: () => void; onUpgrade: () => void; onOpenFaq: () => void;
 }) => {
   const [showReanalyseWarning, setShowReanalyseWarning] = useState(false);
   const [activePill, setActivePill] = useState<{ label: string; value: string; description: string } | null>(null);
@@ -1436,7 +1451,12 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade }: {
 
         {/* Actions */}
         <div style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, overflow: "hidden" }}>
-          <button onClick={() => setShowReanalyseWarning(true)} style={{ width: "100%", padding: "16px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${DS.colors.border}` }}>
+  <button onClick={() => onOpenFaq()} style={{ width: "100%", padding: "16px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${DS.colors.border}` }}>
+    <Icon name="info" size={18} color={DS.colors.text} />
+    <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.text }}>Colour theory & FAQ</span>
+    <span style={{ marginLeft: "auto" }}><Icon name="chevronRight" size={16} color={DS.colors.textFaint} /></span>
+  </button>
+  <button onClick={() => setShowReanalyseWarning(true)} style={{ width: "100%", padding: "16px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${DS.colors.border}` }}>
             <Icon name="refresh" size={18} color={DS.colors.text} />
             <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.text }}>Re-analyse my colours</span>
             <span style={{ marginLeft: "auto" }}><Icon name="chevronRight" size={16} color={DS.colors.textFaint} /></span>
@@ -2214,7 +2234,7 @@ const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, 
        ) : activeTab === "checker" ? (
   <CheckerTab seasonData={seasonData} user={user} onUpgrade={onUpgrade} />
 ) : activeTab === "me" ? (
-  <MeTab user={user} seasonData={seasonData} onSignOut={onSignOut} onReanalyse={onReanalyse} onUpgrade={onUpgrade} />
+  <MeTab user={user} seasonData={seasonData} onSignOut={onSignOut} onReanalyse={onReanalyse} onUpgrade={onUpgrade} onOpenFaq={() => onOpenSheet("faq")} />
 ) : activeTab === "wardrobe" ? (
   <WardrobeTab user={user} seasonData={seasonData} onUpgrade={onUpgrade} />
 ) : (
