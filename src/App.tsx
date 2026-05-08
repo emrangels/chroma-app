@@ -804,7 +804,6 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
       )}
       {activeSheet === "style" && (
         <div style={{ padding: "16px 24px" }}>
-          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 20 }}>Style & Fit</h2>
           {[{ label: "Silhouettes", value: seasonData?.style.silhouettes }, { label: "Patterns", value: seasonData?.style.patterns }, { label: "Fabrics", value: seasonData?.style.fabrics }, { label: "Philosophy", value: seasonData?.style.tip }].map(item => (
             <div key={item.label} style={{ marginBottom: 20, paddingBottom: 20, borderBottom: `1px solid ${DS.colors.border}` }}>
               <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>{item.label}</p>
@@ -813,7 +812,27 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           ))}
         </div>
       )}
-      
+      {activeSheet === "faq" && (
+        <div style={{ padding: "16px 24px" }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Colour Theory & FAQ</h2>
+          <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.5 }}>Everything you need to know about colour season analysis.</p>
+          {[
+            { q: "What is colour season analysis?", a: "Colour season analysis is a method of identifying which colours harmonise with your natural colouring — your skin tone, undertone, eye colour and hair colour. By grouping these into four seasons (Spring, Summer, Autumn, Winter) and 12 sub-seasons, we can identify the colours that make you look vibrant and alive versus those that wash you out or clash." },
+            { q: "What are the four seasons?", a: "Spring — warm, clear and bright colouring. Summer — cool, soft and muted colouring. Autumn — warm, deep and earthy colouring. Winter — cool, deep and high contrast colouring. Each season has three sub-seasons that add further nuance." },
+            { q: "What is undertone?", a: "Undertone is the subtle hue beneath your skin's surface. Warm undertones have golden or yellow hints. Cool undertones have pink or blue hints. Neutral undertones are a mix of both. It's the single most important factor in colour analysis." },
+            { q: "What is chroma?", a: "Chroma describes how clear or muted your colouring is. High chroma means vivid, saturated features — you suit bold colours. Low chroma means soft, blended features — you suit muted, toned-down shades." },
+            { q: "What is contrast?", a: "Contrast is the difference between your hair, skin and eye colour. High contrast (e.g. dark hair, light skin) suits bold colour combinations. Low contrast suits tonal, harmonious combinations." },
+            { q: "How do I use the colour checker?", a: "Go to the Checker tab and upload a photo of any clothing item, full outfit, or colour swatches. Solla will analyse the colours against your season and give you a verdict with styling tips." },
+            { q: "How do I add items to my wardrobe?", a: "Go to the Wardrobe tab and tap the + button. Upload a photo of the item — Solla will automatically identify the colour and check it against your season. Name the item, select a category, and save." },
+            { q: "How do I edit or move an item in my wardrobe?", a: "Tap the edit icon (refresh symbol) on any wardrobe item to change the name or category. To delete, tap the trash icon." },
+            { q: "Can I re-analyse my colours?", a: "Yes — go to the Me tab and tap 'Re-analyse my colours'. This clears your current results and takes you back to the upload screen. For best results use a clear, well-lit selfie in natural light with no filters." },
+            { q: "What's the difference between Glow and Luxe?", a: "Glow unlocks your full colour guide including makeup, hair, jewellery and the colour checker. Luxe adds the style & fit guide, wardrobe builder, outfit creator and AI stylist chat." },
+            { q: "How does the AI stylist work?", a: "The AI stylist in the Wardrobe tab knows your colour season, body shape and every item in your wardrobe. Ask it anything — what to wear for an occasion, how to style a specific item, or to analyse your whole wardrobe for gaps." },
+          ].map((item, i) => (
+            <FaqItem key={i} question={item.q} answer={item.a} />
+          ))}
+        </div>
+      )}
     </div>
   </div>
 );
