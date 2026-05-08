@@ -281,20 +281,73 @@ const AuthScreen = ({ onSignIn, onGuest }: { onSignIn: (user: User) => void; onG
   );
 };
 
-const UploadScreen = ({ onUpload }: { onUpload: (file: File) => void }) => {
+const BodyShapeIcon = ({ shape, selected, color }: { shape: string; selected: boolean; color: string }) => {
+  const paths: Record<string, React.ReactNode> = {
+    Hourglass: (
+      <svg viewBox="0 0 40 80" width="40" height="80" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
+        <path d="M8 4 Q20 4 32 4 Q24 20 22 32 Q20 38 20 40 Q20 42 18 48 Q16 60 8 76 Q20 76 32 76 Q24 60 22 48 Q20 42 20 40 Q20 38 18 32 Q16 20 8 4Z" />
+      </svg>
+    ),
+    Pear: (
+      <svg viewBox="0 0 40 80" width="40" height="80" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
+        <path d="M13 4 Q20 4 27 4 Q24 18 22 30 Q20 36 18 48 Q14 62 8 76 Q20 76 32 76 Q26 62 22 48 Q20 36 18 30 Q16 18 13 4Z" />
+      </svg>
+    ),
+    Apple: (
+      <svg viewBox="0 0 40 80" width="40" height="80" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
+        <path d="M10 4 Q20 4 30 4 Q32 18 32 32 Q32 44 28 56 Q24 68 20 76 Q16 68 12 56 Q8 44 8 32 Q8 18 10 4Z" />
+      </svg>
+    ),
+    Rectangle: (
+      <svg viewBox="0 0 40 80" width="40" height="80" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
+        <path d="M10 4 Q20 4 30 4 Q30 20 30 36 Q30 52 30 68 Q20 76 20 76 Q20 76 10 68 Q10 52 10 36 Q10 20 10 4Z" />
+      </svg>
+    ),
+    "Inverted Triangle": (
+      <svg viewBox="0 0 40 80" width="40" height="80" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
+        <path d="M6 4 Q20 4 34 4 Q30 20 26 36 Q23 50 21 62 Q20 70 20 76 Q20 70 19 62 Q17 50 14 36 Q10 20 6 4Z" />
+      </svg>
+    ),
+    Oval: (
+      <svg viewBox="0 0 40 80" width="40" height="80" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
+        <path d="M12 4 Q20 4 28 4 Q34 16 34 32 Q34 52 28 64 Q24 72 20 76 Q16 72 12 64 Q6 52 6 32 Q6 16 12 4Z" />
+      </svg>
+    ),
+  };
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 40, height: 80 }}>
+      {paths[shape] || null}
+    </div>
+  );
+};
+
+const UploadScreen = ({ onUpload }: { onUpload: (file: File, bodyShape: string) => void }) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [bodyShape, setBodyShape] = useState<string>("");
   const handleFile = (file: File) => setPreview(URL.createObjectURL(file));
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) handleFile(f); };
-  const handleAnalyse = () => { const f = fileRef.current?.files?.[0]; if (f) onUpload(f); };
+  const handleAnalyse = () => { const f = fileRef.current?.files?.[0]; if (f && bodyShape) onUpload(f, bodyShape); };
+
+  const bodyShapes = [
+    { id: "Hourglass", label: "Hourglass" },
+    { id: "Pear", label: "Pear" },
+    { id: "Apple", label: "Apple" },
+    { id: "Rectangle", label: "Rectangle" },
+    { id: "Inverted Triangle", label: "Inv. Triangle" },
+    { id: "Oval", label: "Oval" },
+  ];
+
   return (
-    <div className="screen fade-in" style={{ background: DS.colors.bg }}>
-      <div style={{ padding: "40px 28px 0", flex: 1, display: "flex", flexDirection: "column" }}>
+    <div className="screen fade-in" style={{ background: DS.colors.bg, overflowY: "auto" }}>
+      <div style={{ padding: "40px 28px 48px", display: "flex", flexDirection: "column" }}>
         <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Take your selfie</h1>
-        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 32, lineHeight: 1.6 }}>Use natural light, face the camera directly, and remove sunglasses.</p>
+        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.6 }}>Use natural light, face the camera directly, and remove sunglasses.</p>
+
+        {/* Photo upload */}
         <div onClick={() => !preview && fileRef.current?.click()} onDragOver={e => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={e => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files?.[0]; if (f) handleFile(f); }}
-          style={{ flex: 1, borderRadius: DS.radius.xl, border: `2px dashed ${isDragging ? DS.colors.accent : DS.colors.border}`, background: isDragging ? DS.colors.accentLight : DS.colors.surface, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: preview ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 24, maxHeight: 400 }}>
+          style={{ borderRadius: DS.radius.xl, border: `2px dashed ${isDragging ? DS.colors.accent : DS.colors.border}`, background: isDragging ? DS.colors.accentLight : DS.colors.surface, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: preview ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 24, height: 280 }}>
           {preview ? (
             <>
               <img src={preview} alt="selfie preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -313,26 +366,46 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File) => void }) => {
           )}
         </div>
         <input ref={fileRef} type="file" accept="image/*" onChange={handleChange} style={{ display: "none" }} />
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 48 }}>
-          {preview ? (
-            <button onClick={handleAnalyse} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Analyse my colours</button>
-          ) : (
-            <button onClick={() => fileRef.current?.click()} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Choose photo</button>
-          )}
-          <div style={{ display: "flex", gap: 16, padding: "12px 0" }}>
-            {["Natural light", "No filters", "Face forward"].map(tip => (
-              <div key={tip} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                <div style={{ width: 6, height: 6, borderRadius: DS.radius.full, background: DS.colors.success }} />
-                <span style={{ fontSize: 11, color: DS.colors.textMuted, textAlign: "center", fontWeight: 500 }}>{tip}</span>
-              </div>
-            ))}
+
+        {/* Tips */}
+        <div style={{ display: "flex", gap: 16, marginBottom: 28 }}>
+          {["Natural light", "No filters", "Face forward"].map(tip => (
+            <div key={tip} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+              <div style={{ width: 6, height: 6, borderRadius: DS.radius.full, background: DS.colors.success }} />
+              <span style={{ fontSize: 11, color: DS.colors.textMuted, textAlign: "center", fontWeight: 500 }}>{tip}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Body shape */}
+        <div style={{ marginBottom: 28 }}>
+          <p style={{ fontSize: 15, fontWeight: 600, color: DS.colors.text, marginBottom: 4 }}>Your body shape</p>
+          <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 16, lineHeight: 1.5 }}>This helps personalise your style and fit recommendations.</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+            {bodyShapes.map(shape => {
+              const isSelected = bodyShape === shape.id;
+              return (
+                <button key={shape.id} onClick={() => setBodyShape(shape.id)} style={{ padding: "16px 8px 12px", borderRadius: DS.radius.lg, border: `2px solid ${isSelected ? DS.colors.accent : DS.colors.border}`, background: isSelected ? DS.colors.accentLight : DS.colors.bg, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, transition: "all 0.2s" }}>
+                  <BodyShapeIcon shape={shape.id} selected={isSelected} color={isSelected ? DS.colors.accent : DS.colors.textFaint} />
+                  <span style={{ fontSize: 11, fontWeight: isSelected ? 600 : 400, color: isSelected ? DS.colors.accent : DS.colors.textMuted }}>{shape.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
+
+        {/* CTA */}
+        {preview ? (
+          <button onClick={handleAnalyse} disabled={!bodyShape} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: !bodyShape ? DS.colors.border : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>
+            {!bodyShape ? "Select your body shape to continue" : "Analyse my colours"}
+          </button>
+        ) : (
+          <button onClick={() => fileRef.current?.click()} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Choose photo</button>
+        )}
       </div>
     </div>
   );
 };
-
 const AnalysingScreen = () => {
   const steps = ["Reading your features", "Mapping your palette", "Building your guide"];
   const [step, setStep] = useState(0); const [progress, setProgress] = useState(0);
@@ -2076,14 +2149,14 @@ export default function App() {
       img.src = objectUrl;
     });
 
-  const handleUpload = async (file: File) => {
+  const handleUpload = async (file: File, bodyShape: string = "") => {
   update({ screen: "analysing" });
   try {
     const base64 = await resizeAndEncode(file);
     const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
-      body: JSON.stringify({ type: "analyse", image: base64 }),
+      body: JSON.stringify({ type: "analyse", image: base64, body_shape: bodyShape }),
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
