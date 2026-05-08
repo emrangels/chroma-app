@@ -942,6 +942,33 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
       img.src = url;
     });
 
+    const handleSaveToWardrobe = async (item: { colour_name: string; hex: string; verdict: boolean; tip: string }) => {
+  if (!user?.id) return;
+  const token = localStorage.getItem("solla_token");
+  const name = prompt("Name this item (e.g. Blue linen top):");
+  if (!name) return;
+  const category = "Top";
+  await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${token}`,
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify({
+      user_id: user.id,
+      name,
+      category,
+      colour_name: item.colour_name,
+      hex: item.hex,
+      verdict: item.verdict,
+      tip: item.tip,
+      starred: false,
+      times_worn: 0,
+    }),
+  });
+};
   const handleFile = (file: File) => {
     setPreview(URL.createObjectURL(file));
     setResult(null);
@@ -1104,6 +1131,11 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                   </div>
                   <p style={{ margin: "0 0 4px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{item.reason}</p>
                   <p style={{ margin: 0, fontSize: 13, color: DS.colors.accent, lineHeight: 1.5, fontWeight: 500 }}>{item.tip}</p>
+{user?.plan === "luxe" && (
+  <button onClick={() => handleSaveToWardrobe(item)} style={{ marginTop: 8, padding: "6px 14px", borderRadius: DS.radius.full, background: DS.colors.accentLight, fontSize: 12, color: DS.colors.accentDark, fontWeight: 500 }}>
+    + Save to wardrobe
+  </button>
+)}
                 </div>
               ))}
             </div>
