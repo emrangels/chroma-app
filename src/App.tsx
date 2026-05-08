@@ -131,7 +131,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
           <div style={{ width: 88, height: 88, borderRadius: DS.radius.xl, background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", backdropFilter: "blur(8px)", border: "1.5px solid rgba(255,255,255,0.3)" }}>
             <Icon name="sparkles" size={40} color={DS.colors.white} strokeWidth={1.5} />
           </div>
-          <div style={{ fontSize: 42, fontWeight: 700, color: DS.colors.white, letterSpacing: "-1px" }}>Chroma</div>
+          <div style={{ fontSize: 42, fontWeight: 700, color: DS.colors.white, letterSpacing: "-1px" }}>Solla</div>
         </div>
         <div className="tag-anim" style={{ marginTop: 12, fontSize: 15, color: "rgba(255,255,255,0.75)", fontWeight: 400, letterSpacing: "0.02em" }}>Your colour season, revealed</div>
         <div className="dots-anim" style={{ marginTop: 48, display: "flex", gap: 6, justifyContent: "center" }}>
