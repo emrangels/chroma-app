@@ -967,14 +967,12 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
         starred: false,
       }),
     });
-    if (res.ok) {
-      alert("Saved to wardrobe!");
-    } else {
+    if (!res.ok) {
       const err = await res.json();
-      alert("Error: " + JSON.stringify(err));
+      console.error("Save error:", err);
     }
   } catch (e) {
-    alert("Failed: " + String(e));
+    console.error("Failed:", e);
   }
 };
   const handleFile = (file: File) => {
