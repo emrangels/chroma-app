@@ -945,19 +945,19 @@ const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade }: { seasonData: Sea
           </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <div style={{ padding: "12px 14px", background: DS.colors.surface, borderRadius: DS.radius.md }}>
-            <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Why it works</p>
-            <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>This colour harmonises with your {seasonData.season} colouring — it shares the same {seasonData.colour_profile?.undertone?.toLowerCase() || "natural"} undertone and {seasonData.colour_profile?.chroma?.toLowerCase() || "balanced"} chroma as your natural features.</p>
-          </div>
-          <div style={{ padding: "12px 14px", background: DS.colors.surface, borderRadius: DS.radius.md }}>
-            <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>How to wear it</p>
-            <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>Wear near your face for maximum impact — as a top, scarf, or jacket. Pairs beautifully with your base neutrals.</p>
-          </div>
-          <div style={{ padding: "12px 14px", background: DS.colors.surface, borderRadius: DS.radius.md }}>
-            <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Shop for this colour</p>
-            <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>When shopping, search for "{selectedColour.name}" or show retailers the hex code <strong>{selectedColour.hex}</strong> on your phone.</p>
-          </div>
-        </div>
+  <div style={{ padding: "12px 14px", background: DS.colors.surface, borderRadius: DS.radius.md, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+    <div>
+      <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Hex code</p>
+      <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: DS.colors.text }}>{selectedColour.hex}</p>
+    </div>
+    <button onClick={() => navigator.clipboard.writeText(selectedColour.hex)} style={{ padding: "6px 14px", borderRadius: DS.radius.full, background: DS.colors.accentLight, fontSize: 12, color: DS.colors.accentDark, fontWeight: 600 }}>
+      Copy
+    </button>
+  </div>
+  <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>
+    Show this hex code to a retailer or use it when shopping online to find your exact shade.
+  </p>
+</div>
       </div>
     </div>
   </div>
