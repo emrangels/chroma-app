@@ -947,27 +947,36 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
   const token = localStorage.getItem("solla_token");
   const name = prompt("Name this item (e.g. Blue linen top):");
   if (!name) return;
-  const category = "Top";
-  await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${token}`,
-      Prefer: "return=minimal",
-    },
-    body: JSON.stringify({
-      user_id: user.id,
-      name,
-      category,
-      colour_name: item.colour_name,
-      hex: item.hex,
-      verdict: item.verdict,
-      tip: item.tip,
-      starred: false,
-      times_worn: 0,
-    }),
-  });
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${token}`,
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({
+        user_id: user.id,
+        name,
+        category: "Top",
+        colour_name: item.colour_name,
+        hex: item.hex,
+        verdict: item.verdict,
+        tip: item.tip,
+        starred: false,
+        times_worn: 0,
+      }),
+    });
+    if (res.ok) {
+      alert("Saved to wardrobe!");
+    } else {
+      const err = await res.json();
+      alert("Error: " + JSON.stringify(err));
+    }
+  } catch (e) {
+    alert("Failed: " + String(e));
+  }
 };
   const handleFile = (file: File) => {
     setPreview(URL.createObjectURL(file));
