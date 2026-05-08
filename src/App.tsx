@@ -710,7 +710,7 @@ const FaqItem = ({ question, answer }: { question: string; answer: string }) => 
 };
 
 // SheetOverlay — rendered at ROOT level, outside all overflow:hidden containers
-const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet; seasonData: SeasonData; onClose: () => void; }) => (
+const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet; seasonData: SeasonData | null; onClose: () => void; }) => (
   <div
     style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 1000, display: "flex", alignItems: "flex-end" }}
     onClick={onClose}
@@ -732,7 +732,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
       {activeSheet === "makeup" && (
         <div style={{ padding: "16px 24px" }}>
           <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 20 }}>Makeup</h2>
-          {[{ label: "Foundation", value: seasonData.makeup.foundation }, { label: "Blush", value: seasonData.makeup.blush }, { label: "Lips", value: seasonData.makeup.lip }, { label: "Eyes", value: seasonData.makeup.eye }].map(item => (
+          {[{ label: "Foundation", value: seasonData?.makeup.foundation }, { label: "Blush", value: seasonData?.makeup.blush }, { label: "Lips", value: seasonData?.makeup.lip }, { label: "Eyes", value: seasonData?.makeup.eye }].map(item => (
             <div key={item.label} style={{ marginBottom: 20, paddingBottom: 20, borderBottom: `1px solid ${DS.colors.border}` }}>
               <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>{item.label}</p>
               <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{item.value}</p>
@@ -746,7 +746,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           <div style={{ marginBottom: 20 }}>
             <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Best colours</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {seasonData.hair.best_colours.map(c => (
+              {seasonData?.hair.best_colours.map(c => (
                 <span key={c} style={{ padding: "6px 14px 6px 10px", background: DS.colors.accentLight, borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.accentDark, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}>
                   <span style={{ width: 12, height: 12, borderRadius: "50%", background: hairColourMap[c.toLowerCase()] || guessColourFromName(c), flexShrink: 0, border: "1px solid rgba(0,0,0,0.1)" }} />
                   {c}
@@ -757,7 +757,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           <div style={{ marginBottom: 20 }}>
             <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 600, color: DS.colors.danger, letterSpacing: "0.06em", textTransform: "uppercase" }}>Avoid</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {seasonData.hair.avoid.map(c => (
+              {seasonData?.hair.avoid.map(c => (
                 <span key={c} style={{ padding: "6px 14px 6px 10px", background: "#FEF2F2", borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.danger, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}>
                   <span style={{ width: 12, height: 12, borderRadius: "50%", background: hairColourMap[c.toLowerCase()] || guessColourFromName(c), flexShrink: 0, border: "1px solid rgba(0,0,0,0.1)" }} />
                   {c}
@@ -767,7 +767,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           </div>
           <div>
             <p style={{ margin: "0 0 8px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Stylist tip</p>
-            <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{seasonData.hair.tip}</p>
+            <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{seasonData?.hair.tip}</p>
           </div>
         </div>
       )}
@@ -777,7 +777,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           <div style={{ marginBottom: 20 }}>
             <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Metals</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {seasonData.jewellery.metals.map(m => (
+              {seasonData?.jewellery.metals.map(m => (
                 <span key={m} style={{ padding: "6px 14px 6px 10px", background: DS.colors.surface, borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.text, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}>
                   <span style={{ width: 12, height: 12, borderRadius: "50%", background: metalColourMap[m.toLowerCase()] || "#C0C0C0", flexShrink: 0, border: "1px solid rgba(0,0,0,0.1)" }} />
                   {m}
@@ -788,7 +788,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           <div style={{ marginBottom: 20 }}>
             <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Stones</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {seasonData.jewellery.stones.map(s => (
+              {seasonData?.jewellery.stones.map(s => (
   <span key={s} style={{ padding: "6px 14px 6px 10px", background: DS.colors.surface, borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.textMuted, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}>
     <span style={{ width: 12, height: 12, borderRadius: "50%", background: stoneColourMap[s.toLowerCase()] || guessColourFromName(s), flexShrink: 0, border: "1px solid rgba(0,0,0,0.1)" }} />
     {s}
@@ -798,14 +798,14 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           </div>
           <div>
             <p style={{ margin: "0 0 8px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Tip</p>
-            <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{seasonData.jewellery.tip}</p>
+            <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{seasonData?.jewellery.tip}</p>
           </div>
         </div>
       )}
       {activeSheet === "style" && (
         <div style={{ padding: "16px 24px" }}>
           <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 20 }}>Style & Fit</h2>
-          {[{ label: "Silhouettes", value: seasonData.style.silhouettes }, { label: "Patterns", value: seasonData.style.patterns }, { label: "Fabrics", value: seasonData.style.fabrics }, { label: "Philosophy", value: seasonData.style.tip }].map(item => (
+          {[{ label: "Silhouettes", value: seasonData?.style.silhouettes }, { label: "Patterns", value: seasonData?.style.patterns }, { label: "Fabrics", value: seasonData?.style.fabrics }, { label: "Philosophy", value: seasonData?.style.tip }].map(item => (
             <div key={item.label} style={{ marginBottom: 20, paddingBottom: 20, borderBottom: `1px solid ${DS.colors.border}` }}>
               <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>{item.label}</p>
               <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{item.value}</p>
@@ -2419,7 +2419,7 @@ export default function App() {
           />
         )}
 {/* SheetOverlay at root level — position:fixed works here, not clipped by any overflow:hidden */}
-        {state.activeSheet && state.activeSheet !== "paywall" && seasonData && (
+        {state.activeSheet && state.activeSheet !== "paywall" && (state.activeSheet === "faq" || seasonData) && (
           <SheetOverlay
             activeSheet={state.activeSheet}
             seasonData={seasonData}
