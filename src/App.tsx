@@ -322,6 +322,7 @@ const BodyShapeIcon = ({ shape, selected, color }: { shape: string; selected: bo
 };
 
 const UploadScreen = ({ onUpload }: { onUpload: (file: File, bodyShape: string) => void }) => {
+  const [showBodyGuide, setShowBodyGuide] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -379,8 +380,14 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File, bodyShape: string) 
 
         {/* Body shape */}
         <div style={{ marginBottom: 28 }}>
-          <p style={{ fontSize: 15, fontWeight: 600, color: DS.colors.text, marginBottom: 4 }}>Your body shape</p>
-          <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 16, lineHeight: 1.5 }}>This helps personalise your style and fit recommendations.</p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+  <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: DS.colors.text }}>Your body shape</p>
+  <button onClick={() => setShowBodyGuide(true)} style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 500, display: "flex", alignItems: "center", gap: 4 }}>
+    <Icon name="info" size={13} color={DS.colors.accent} strokeWidth={2} />
+    Not sure?
+  </button>
+</div>
+<p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 16, lineHeight: 1.5 }}>This helps personalise your style and fit recommendations.</p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
             {bodyShapes.map(shape => {
               const isSelected = bodyShape === shape.id;
@@ -403,6 +410,36 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File, bodyShape: string) 
           <button onClick={() => fileRef.current?.click()} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Choose photo</button>
         )}
       </div>
+      {showBodyGuide && (
+  <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={() => setShowBodyGuide(false)}>
+    <div style={{ width: "100%", maxHeight: "85vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
+      <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+        <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
+      </div>
+      <div style={{ padding: "16px 24px" }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Body shapes guide</h2>
+        <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 20, lineHeight: 1.5 }}>Choose the shape that most closely matches your natural proportions — not your size.</p>
+        {[
+          { id: "Hourglass", desc: "Your shoulders and hips are roughly equal width with a clearly defined, narrow waist." },
+          { id: "Pear", desc: "Your hips are noticeably wider than your shoulders, with a defined waist." },
+          { id: "Apple", desc: "Your midsection is fuller, with less definition at the waist. Shoulders and hips are similar width." },
+          { id: "Rectangle", desc: "Your shoulders, waist and hips are all similar width with little waist definition." },
+          { id: "Inverted Triangle", desc: "Your shoulders are broader than your hips, with a straight or undefined waist." },
+          { id: "Oval", desc: "Fuller through the midsection with narrower shoulders and hips. Similar to Apple but rounder overall." },
+        ].map(shape => (
+          <button key={shape.id} onClick={() => { setBodyShape(shape.id); setShowBodyGuide(false); }} style={{ width: "100%", display: "flex", alignItems: "center", gap: 16, padding: "14px 0", borderBottom: `1px solid ${DS.colors.border}`, textAlign: "left", background: "none" }}>
+            <BodyShapeIcon shape={shape.id} selected={bodyShape === shape.id} color={bodyShape === shape.id ? DS.colors.accent : DS.colors.textFaint} />
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 600, color: bodyShape === shape.id ? DS.colors.accent : DS.colors.text }}>{shape.id}</p>
+              <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted, lineHeight: 1.5 }}>{shape.desc}</p>
+            </div>
+            {bodyShape === shape.id && <Icon name="check" size={16} color={DS.colors.accent} strokeWidth={2.5} />}
+          </button>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };
