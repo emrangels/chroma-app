@@ -146,7 +146,7 @@ const slides = [
   { icon: "camera", title: "Take a selfie", body: "One clear photo in natural light is all we need. No filters, no sunglasses.", bg: "#EDE9FF", accent: DS.colors.accent },
   { icon: "palette", title: "Discover your season", body: "Our AI analyses your skin tone, undertone, eye and hair colour to find your perfect palette.", bg: "#E8F4FD", accent: "#4A90C4" },
   { icon: "sparkles", title: "Get your full guide", body: "Colours, makeup, hair, jewellery and style - everything personalised to you, so getting dressed becomes the easy part.", bg: "#FFF1E6", accent: "#E8845A" },
-  { icon: "shirt", title: "Check any item", body: "Check a single item, a full outfit, or try colour swatches - Chroma reads every colour and tells you what works.", bg: "#E8F5EE", accent: "#1A9E6E" },
+  { icon: "shirt", title: "Check any item", body: "Check a single item, a full outfit, or try colour swatches - Solla reads every colour and tells you what works.", bg: "#E8F5EE", accent: "#1A9E6E" },
 ];
 
 const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
@@ -220,9 +220,9 @@ const AuthScreen = ({ onSignIn, onGuest }: { onSignIn: (user: User) => void; onG
       }
       if (mode === "signup" && userId) await saveProfile(userId, userName, userEmail, data.access_token, generateReferralCode(userName), referralCode);
       const userObj: User = { id: userId, email: userEmail, name: userName, plan };
-      localStorage.setItem("chroma_token", data.access_token);
-      localStorage.setItem("chroma_refresh", data.refresh_token || "");
-      localStorage.setItem("chroma_user", JSON.stringify(userObj));
+      localStorage.setItem("solla_token", data.access_token);
+      localStorage.setItem("solla_refresh", data.refresh_token || "");
+      localStorage.setItem("solla_user", JSON.stringify(userObj));
       onSignIn(userObj);
     } catch (e) { setError(e instanceof Error ? e.message : "Something went wrong. Please try again."); }
     finally { setLoading(false); }
@@ -233,7 +233,7 @@ const AuthScreen = ({ onSignIn, onGuest }: { onSignIn: (user: User) => void; onG
         <div style={{ width: 72, height: 72, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
           <Icon name="sparkles" size={32} color={DS.colors.accent} />
         </div>
-        <h1 style={{ fontSize: 28, fontWeight: 700, color: DS.colors.text, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Welcome to Chroma</h1>
+        <h1 style={{ fontSize: 28, fontWeight: 700, color: DS.colors.text, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Welcome to Solla</h1>
         <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 48 }}>Create an account to save your results and unlock your full colour guide.</p>
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}>
           <button onClick={() => setMode("signup")} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Create account</button>
@@ -248,7 +248,7 @@ const AuthScreen = ({ onSignIn, onGuest }: { onSignIn: (user: User) => void; onG
       <div style={{ padding: "40px 28px 48px", display: "flex", flexDirection: "column", gap: 0 }}>
         <button onClick={() => { setMode("landing"); setError(""); }} style={{ alignSelf: "flex-start", marginBottom: 32, color: DS.colors.textMuted }}><Icon name="chevronLeft" size={20} color={DS.colors.textMuted} /></button>
         <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>{mode === "signup" ? "Create account" : "Welcome back"}</h1>
-        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 32 }}>{mode === "signup" ? "Start your colour journey today" : "Sign in to your Chroma account"}</p>
+        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 32 }}>{mode === "signup" ? "Start your colour journey today" : "Sign in to your Solla account"}</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {mode === "signup" && <input style={inputStyle} placeholder="Your name" value={name} onChange={e => setName(e.target.value)} />}
           <input style={inputStyle} type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} />
@@ -273,7 +273,7 @@ const AuthScreen = ({ onSignIn, onGuest }: { onSignIn: (user: User) => void; onG
           </button>
         </div>
         <button onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setError(""); }} style={{ marginTop: 20, fontSize: 14, color: DS.colors.accent, fontWeight: 500, alignSelf: "center" }}>
-          {mode === "signup" ? "Already have an account? Sign in" : "New to Chroma? Create account"}
+          {mode === "signup" ? "Already have an account? Sign in" : "New to Solla? Create account"}
         </button>
       </div>
     </div>
@@ -467,8 +467,8 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
   if (isGuest && onSignUp) { onSignUp(); return; }
   setLoading(true);
   try {
-    const token = localStorage.getItem("chroma_token");
-    const cachedUser = localStorage.getItem("chroma_user");
+    const token = localStorage.getItem("solla_token");
+    const cachedUser = localStorage.getItem("solla_user");
     if (!token || !cachedUser) { onSignUp?.(); return; }
     const user = JSON.parse(cachedUser);
     const res = await fetch(`${SUPABASE_URL}/functions/v1/stripe-checkout`, {
@@ -1046,7 +1046,7 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade }: {
   const [referralCount, setReferralCount] = useState(0);
 
   useEffect(() => {
-    const token = localStorage.getItem("chroma_token");
+    const token = localStorage.getItem("solla_token");
     if (!token || !user?.id) return;
     fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}&select=referral_code,referral_count`, {
       headers: { ...supabaseHeaders, Authorization: `Bearer ${token}` },
@@ -1255,7 +1255,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const categories = ["All", "Top", "Bottom", "Dress", "Outerwear", "Shoes", "Accessories"];
 
   const getAuthHeaders = () => {
-  const token = localStorage.getItem("chroma_token");
+  const token = localStorage.getItem("solla_token");
   return {
     "Content-Type": "application/json",
     apikey: SUPABASE_ANON_KEY,
@@ -1892,29 +1892,29 @@ export default function App() {
   const update = (patch: Partial<AppState>) => setState(s => ({ ...s, ...patch }));
 
   const handleSignOut = () => {
-    localStorage.removeItem("chroma_token");
-    localStorage.removeItem("chroma_refresh");
-    localStorage.removeItem("chroma_user");
+    localStorage.removeItem("solla_token");
+    localStorage.removeItem("solla_refresh");
+    localStorage.removeItem("solla_user");
     update({ screen: "auth", user: null, seasonData: null, isGuest: false, activeSheet: null, activeTab: "home" });
   };
 
   const handleReanalyse = () => {
-    localStorage.removeItem(`chroma_season_${state.user?.id || "guest"}`);
+    localStorage.removeItem(`solla_season_${state.user?.id || "guest"}`);
     update({ screen: "upload", seasonData: null, activeTab: "home" });
   };
 
   const handleUpgrade = (plan: Plan) => {
     const updatedUser = state.user ? { ...state.user, plan } : null;
-    if (updatedUser) localStorage.setItem("chroma_user", JSON.stringify(updatedUser));
+    if (updatedUser) localStorage.setItem("solla_user", JSON.stringify(updatedUser));
     update({ user: updatedUser, activeSheet: null });
   };
   useEffect(() => {
-  const token = localStorage.getItem("chroma_token");
-  const cachedUser = localStorage.getItem("chroma_user");
+  const token = localStorage.getItem("solla_token");
+  const cachedUser = localStorage.getItem("solla_user");
   if (token && cachedUser) {
     try {
       const parsedUser = JSON.parse(cachedUser);
-      const cachedSeason = localStorage.getItem(`chroma_season_${parsedUser.id}`);
+      const cachedSeason = localStorage.getItem(`solla_season_${parsedUser.id}`);
       if (cachedSeason) {
         const parsedSeason = JSON.parse(cachedSeason);
         update({ screen: "main", user: parsedUser, seasonData: parsedSeason });
@@ -1925,7 +1925,7 @@ export default function App() {
         }).then(r => r.json()).then(data => {
           if (data?.[0]?.season_data) {
             const season = data[0].season_data;
-            localStorage.setItem(`chroma_season_${parsedUser.id}`, JSON.stringify(season));
+            localStorage.setItem(`solla_season_${parsedUser.id}`, JSON.stringify(season));
             update({ seasonData: season });
           }
         }).catch(() => {});
@@ -1943,7 +1943,7 @@ export default function App() {
           body: JSON.stringify({ user_plan: plan, user_billing: billing || "monthly" }),
         }).catch(() => {});
         const updatedUser = { ...parsedUser, plan };
-        localStorage.setItem("chroma_user", JSON.stringify(updatedUser));
+        localStorage.setItem("solla_user", JSON.stringify(updatedUser));
         update({ screen: "main", user: updatedUser, seasonData: cachedSeason ? JSON.parse(cachedSeason) : null });
         window.history.replaceState({}, "", "/");
       }
@@ -1987,9 +1987,9 @@ export default function App() {
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    localStorage.setItem(`chroma_season_${state.user?.id || "guest"}`, JSON.stringify(data));
+    localStorage.setItem(`solla_season_${state.user?.id || "guest"}`, JSON.stringify(data));
     // Save to Supabase if logged in
-    const token = localStorage.getItem("chroma_token");
+    const token = localStorage.getItem("solla_token");
     if (token && state.user?.id) {
       fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${state.user.id}`, {
         method: "PATCH",
@@ -2011,7 +2011,7 @@ export default function App() {
         {screen === "splash" && <SplashScreen onComplete={() => update({ screen: "onboarding" })} />}
         {screen === "onboarding" && <OnboardingScreen onComplete={() => update({ screen: "auth" })} />}
         {screen === "auth" && <AuthScreen onSignIn={u => {
-  const cachedSeason = localStorage.getItem(`chroma_season_${u.id}`);
+  const cachedSeason = localStorage.getItem(`solla_season_${u.id}`);
   if (cachedSeason) {
     try {
       const parsedSeason = JSON.parse(cachedSeason);
