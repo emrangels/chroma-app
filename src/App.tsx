@@ -965,7 +965,6 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
         verdict: item.verdict,
         tip: item.tip,
         starred: false,
-        times_worn: 0,
       }),
     });
     if (res.ok) {
