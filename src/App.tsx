@@ -939,6 +939,7 @@ const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade }: { seasonData: Sea
           <div style={{ width: 64, height: 64, borderRadius: DS.radius.lg, background: selectedColour.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
           <div>
             <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 700, color: DS.colors.text }}>{selectedColour.name}</h3>
+            <p style={{ margin: "0 0 4px", fontSize: 11, color: DS.colors.textFaint }}>Your {seasonData.season} palette</p>
             <button onClick={() => navigator.clipboard.writeText(selectedColour.hex)} style={{ fontSize: 12, color: DS.colors.textFaint, fontWeight: 500, display: "flex", alignItems: "center", gap: 4 }}>
               {selectedColour.hex} · tap to copy
             </button>
