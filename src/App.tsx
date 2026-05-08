@@ -803,7 +803,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
 );
 
 const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade }: { seasonData: SeasonData | null; user: User | null; onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void; }) => {
-  const plan = user?.plan || "free"; const [showShare, setShowShare] = useState(false);
+  const plan = user?.plan || "free"; const [showShare, setShowShare] = useState(false);const [selectedColour, setSelectedColour] = useState<PaletteColour | null>(null);
   if (!seasonData) return (
     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, padding: "40px 28px" }}>
       <Icon name="sparkles" size={40} color={DS.colors.border} />
@@ -855,11 +855,11 @@ const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade }: { seasonData: Sea
           {/* Best colours */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 16 }}>
             {(seasonData.palette.best || []).map(colour => (
-              <div key={colour.hex} style={{ textAlign: "center" }}>
-                <div style={{ width: "100%", aspectRatio: "1", borderRadius: 10, background: colour.hex, marginBottom: 4, border: colour.hex === "#FFFFFF" ? `1px solid ${DS.colors.border}` : "none" }} />
-                <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
-              </div>
-            ))}
+  <button key={colour.hex} onClick={() => setSelectedColour(colour)} style={{ textAlign: "center", background: "none", border: "none", padding: 0 }}>
+    <div style={{ width: "100%", aspectRatio: "1", borderRadius: 10, background: colour.hex, marginBottom: 4, border: colour.hex === "#FFFFFF" ? `1px solid ${DS.colors.border}` : "none" }} />
+    <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
+  </button>
+))}
           </div>
 
           {/* Base colours */}
@@ -928,6 +928,40 @@ const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade }: { seasonData: Sea
           </button>
         ))}
       </div>
+      {selectedColour && (
+  <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={() => setSelectedColour(null)}>
+    <div style={{ width: "100%", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
+      <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+        <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
+      </div>
+      <div style={{ padding: "20px 24px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
+          <div style={{ width: 64, height: 64, borderRadius: DS.radius.lg, background: selectedColour.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
+          <div>
+            <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 700, color: DS.colors.text }}>{selectedColour.name}</h3>
+            <button onClick={() => navigator.clipboard.writeText(selectedColour.hex)} style={{ fontSize: 12, color: DS.colors.textFaint, fontWeight: 500, display: "flex", alignItems: "center", gap: 4 }}>
+              {selectedColour.hex} · tap to copy
+            </button>
+          </div>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ padding: "12px 14px", background: DS.colors.surface, borderRadius: DS.radius.md }}>
+            <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Why it works</p>
+            <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>This colour harmonises with your {seasonData.season} colouring — it shares the same {seasonData.colour_profile?.undertone?.toLowerCase() || "natural"} undertone and {seasonData.colour_profile?.chroma?.toLowerCase() || "balanced"} chroma as your natural features.</p>
+          </div>
+          <div style={{ padding: "12px 14px", background: DS.colors.surface, borderRadius: DS.radius.md }}>
+            <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>How to wear it</p>
+            <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>Wear near your face for maximum impact — as a top, scarf, or jacket. Pairs beautifully with your base neutrals.</p>
+          </div>
+          <div style={{ padding: "12px 14px", background: DS.colors.surface, borderRadius: DS.radius.md }}>
+            <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Shop for this colour</p>
+            <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>When shopping, search for "{selectedColour.name}" or show retailers the hex code <strong>{selectedColour.hex}</strong> on your phone.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };
