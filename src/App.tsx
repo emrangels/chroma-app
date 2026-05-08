@@ -459,8 +459,8 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
   };
 
   const plans: { id: "glow" | "luxe"; name: string; color: string; features: string[] }[] = [
-    { id: "glow", name: "Glow", color: DS.colors.accent, features: ["Season & palette", "Makeup guide", "Hair colours", "Jewellery guide", "Colour checker"] },
-    { id: "luxe", name: "Luxe", color: "#C26B3A", features: ["Everything in Glow", "Style & Fit guide", "Wardrobe tab"] },
+    { id: "glow", name: "Glow", color: DS.colors.accent, features: ["Season & full colour profile", "Makeup guide", "Hair colour guide", "Jewellery guide", "Colour checker — items, outfits & swatches"] },
+    { id: "luxe", name: "Luxe", color: "#C26B3A", features: ["Everything in Glow", "Style & Fit guide", "Wardrobe builder", "Outfit creator", "AI stylist chat"] },
   ];
 
   const handleUpgrade = async () => {
@@ -1081,8 +1081,8 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade }: {
 
   const planFeatures: Record<Plan, string[]> = {
     free: ["Season & palette", "Daily tip"],
-    glow: ["Season & palette", "Makeup guide", "Hair colours", "Jewellery guide", "Colour checker"],
-    luxe: ["Everything in Glow", "Style & Fit guide", "Wardrobe tab"],
+    glow: ["Season & full colour profile", "Makeup guide", "Hair colour guide", "Jewellery guide", "Colour checker"],
+    luxe: ["Everything in Glow", "Style & Fit guide", "Wardrobe builder", "Outfit creator", "AI stylist chat"],
   };
 
   return (
