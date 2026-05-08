@@ -944,7 +944,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
 
     const handleSaveToWardrobe = async (item: { colour_name: string; hex: string; verdict: boolean; tip: string }) => {
   if (!user?.id) return;
-  const token = localStorage.getItem("solla_token");
+  const token = localStorage.getItem("solla_token") || SUPABASE_JWT_KEY;
   const name = prompt("Name this item (e.g. Blue linen top):");
   if (!name) return;
   try {
@@ -2122,7 +2122,24 @@ export default function App() {
     if (updatedUser) localStorage.setItem("solla_user", JSON.stringify(updatedUser));
     update({ user: updatedUser, activeSheet: null });
   };
+  const refreshToken = async () => {
+  const refresh = localStorage.getItem("solla_refresh");
+  if (!refresh) return;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+      method: "POST",
+      headers: supabaseHeaders,
+      body: JSON.stringify({ refresh_token: refresh }),
+    });
+    const data = await res.json();
+    if (data.access_token) {
+      localStorage.setItem("solla_token", data.access_token);
+      localStorage.setItem("solla_refresh", data.refresh_token || refresh);
+    }
+  } catch {}
+};
   useEffect(() => {
+  refreshToken();
   const token = localStorage.getItem("solla_token");
   const cachedUser = localStorage.getItem("solla_user");
   if (token && cachedUser) {
