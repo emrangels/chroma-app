@@ -480,7 +480,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
         billing,
         user_id: user.id,
         email: user.email,
-        return_url: "https://chromaapp.com.au",
+        return_url: "https://solla.com.au",
       }),
     });
     const data = await res.json();
