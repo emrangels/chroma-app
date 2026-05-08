@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import html2canvas from 'html2canvas';
 
 const DS = {
   colors: {
@@ -692,7 +693,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
 );
 
 const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade }: { seasonData: SeasonData | null; user: User | null; onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void; }) => {
-  const plan = user?.plan || "free";
+  const plan = user?.plan || "free"; const [showShare, setShowShare] = useState(false);
   if (!seasonData) return (
     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, padding: "40px 28px" }}>
       <Icon name="sparkles" size={40} color={DS.colors.border} />
@@ -727,7 +728,11 @@ const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade }: { seasonData: Sea
             <span style={{ fontSize: 15, color: accentColor, fontWeight: 500 }}>{seasonData.subseason}</span>
           )}
         </div>
-        <p style={{ margin: 0, fontSize: 14, color: textColor, lineHeight: 1.6, opacity: 0.85, maxWidth: 300 }}>{seasonData.headline}</p>
+        <p style={{ margin: 0, fontSize: 14, color: textColor, lineHeight: 1.6, opacity: 0.85, maxWidth: 300 }}>{seasonData.headline}</p><button onClick={() => setShowShare(true)} style={{ marginTop: 16, display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(255,255,255,0.3)", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 600, color: textColor, border: `1px solid rgba(255,255,255,0.4)` }}>
+  <Icon name="share" size={14} color={textColor} strokeWidth={2} />
+  Share my season
+</button>
+{showShare && <ShareCard seasonData={seasonData} onClose={() => setShowShare(false)} />}
       </div>
       <div style={{ margin: "0 16px", background: DS.colors.bg, borderRadius: `0 0 ${DS.radius.lg} ${DS.radius.lg}`, padding: "12px 16px", borderLeft: `3px solid ${accentColor}`, display: "flex", alignItems: "flex-start", gap: 10 }}>
         <Icon name="sparkles" size={14} color={accentColor} strokeWidth={2} />
@@ -1820,6 +1825,101 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
     </div>
   </div>
 )}
+    </div>
+  );
+};
+const ShareCard = ({ seasonData, onClose }: { seasonData: SeasonData; onClose: () => void }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [generating, setGenerating] = useState(false);
+  const gradient = seasonGradients[seasonData.season] || seasonGradients.Summer;
+  const textColor = seasonTextColors[seasonData.season] || "#1a2a4a";
+  const accentColor = seasonAccentColors[seasonData.season] || "#4A6FD4";
+
+  const handleShare = async () => {
+    if (!cardRef.current) return;
+    setGenerating(true);
+    try {
+      const canvas = await html2canvas(cardRef.current, {
+        scale: 3,
+        useCORS: true,
+        backgroundColor: null,
+        logging: false,
+      });
+      const imageUrl = canvas.toDataURL("image/png");
+      if (navigator.share) {
+        const blob = await (await fetch(imageUrl)).blob();
+        const file = new File([blob], "my-solla-season.png", { type: "image/png" });
+        await navigator.share({ files: [file], title: `My colour season is ${seasonData.season}` });
+      } else {
+        const link = document.createElement("a");
+        link.download = "my-solla-season.png";
+        link.href = imageUrl;
+        link.click();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    finally { setGenerating(false); }
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 2000, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px" }}>
+      <button onClick={onClose} style={{ position: "absolute", top: 48, right: 20, width: 36, height: 36, borderRadius: DS.radius.full, background: "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Icon name="x" size={18} color={DS.colors.white} />
+      </button>
+
+      {/* The actual share card */}
+      <div ref={cardRef} style={{ width: 320, background: gradient, borderRadius: DS.radius.xl, overflow: "hidden", boxShadow: DS.shadow.lg }}>
+        {/* Header */}
+        <div style={{ padding: "40px 28px 28px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+            <div style={{ width: 28, height: 28, borderRadius: DS.radius.md, background: "rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Icon name="sparkles" size={14} color={textColor} strokeWidth={2} />
+            </div>
+            <span style={{ fontSize: 13, fontWeight: 700, color: textColor, letterSpacing: "0.08em", textTransform: "uppercase", opacity: 0.7 }}>Solla</span>
+          </div>
+          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 600, color: accentColor, letterSpacing: "0.08em", textTransform: "uppercase" }}>My colour season</p>
+          <h1 style={{ margin: "0 0 6px", fontSize: 52, fontWeight: 700, color: textColor, letterSpacing: "-2px", lineHeight: 1 }}>{seasonData.season}</h1>
+          <p style={{ margin: "0 0 16px", fontSize: 15, color: accentColor, fontWeight: 500 }}>{seasonData.subseason}</p>
+          {seasonData.colour_profile && (
+            <p style={{ margin: 0, fontSize: 13, color: textColor, opacity: 0.75, fontStyle: "italic" }}>{seasonData.colour_profile.defining_quality}</p>
+          )}
+        </div>
+
+        {/* Palette strip */}
+        <div style={{ padding: "0 28px 20px" }}>
+          <div style={{ display: "flex", gap: 6 }}>
+            {(seasonData.palette.best || []).slice(0, 6).map(colour => (
+              <div key={colour.hex} style={{ flex: 1, height: 40, borderRadius: DS.radius.md, background: colour.hex, border: "1px solid rgba(255,255,255,0.3)" }} />
+            ))}
+          </div>
+        </div>
+
+        {/* Headline */}
+        <div style={{ padding: "0 28px 28px" }}>
+          <p style={{ margin: 0, fontSize: 13, color: textColor, lineHeight: 1.6, opacity: 0.8 }}>{seasonData.headline}</p>
+        </div>
+
+        {/* Divider */}
+        <div style={{ height: 1, background: `${textColor}20`, margin: "0 28px" }} />
+
+        {/* Footer */}
+        <div style={{ padding: "20px 28px 28px" }}>
+          <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: textColor }}>Know your colours. Dress your best.</p>
+          <p style={{ margin: "0 0 2px", fontSize: 11, color: textColor, opacity: 0.6 }}>Colour analysis · Wardrobe tools · AI stylist</p>
+          <p style={{ margin: 0, fontSize: 11, color: accentColor, fontWeight: 600 }}>solla.com.au</p>
+        </div>
+      </div>
+
+      {/* Buttons */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, width: 320, marginTop: 20 }}>
+        <button onClick={handleShare} disabled={generating} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.white, color: DS.colors.text, fontSize: 16, fontWeight: 600 }}>
+          {generating ? "Generating..." : "Save & Share"}
+        </button>
+        <button onClick={onClose} style={{ width: "100%", padding: "14px", fontSize: 14, color: "rgba(255,255,255,0.6)", fontWeight: 500 }}>
+          Close
+        </button>
+      </div>
     </div>
   );
 };
