@@ -897,11 +897,11 @@ const loadExtendedPalette = async () => {
               <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 500, color: DS.colors.textMuted }}>Base neutrals</p>
               <div style={{ display: "flex", gap: 8 }}>
                 {seasonData.palette.base.map(colour => (
-                  <div key={colour.hex} style={{ flex: 1, textAlign: "center" }}>
-                    <div style={{ width: "100%", aspectRatio: "1", borderRadius: 8, background: colour.hex, marginBottom: 4, border: `1px solid ${DS.colors.border}` }} />
-                    <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
-                  </div>
-                ))}
+  <button key={colour.hex} onClick={() => setSelectedColour(colour)} style={{ flex: 1, textAlign: "center", background: "none", border: "none", padding: 0 }}>
+    <div style={{ width: "100%", aspectRatio: "1", borderRadius: 8, background: colour.hex, marginBottom: 4, border: `1px solid ${DS.colors.border}` }} />
+    <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
+  </button>
+))}
               </div>
             </div>
           )}
@@ -912,11 +912,11 @@ const loadExtendedPalette = async () => {
               <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 500, color: DS.colors.textMuted }}>Accent colours</p>
               <div style={{ display: "flex", gap: 8 }}>
                 {seasonData.palette.accent.map(colour => (
-                  <div key={colour.hex} style={{ flex: 1, textAlign: "center" }}>
-                    <div style={{ width: "100%", aspectRatio: "1", borderRadius: 8, background: colour.hex, marginBottom: 4, border: `1px solid ${DS.colors.border}` }} />
-                    <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
-                  </div>
-                ))}
+  <button key={colour.hex} onClick={() => setSelectedColour(colour)} style={{ flex: 1, textAlign: "center", background: "none", border: "none", padding: 0 }}>
+    <div style={{ width: "100%", aspectRatio: "1", borderRadius: 8, background: colour.hex, marginBottom: 4, border: `1px solid ${DS.colors.border}` }} />
+    <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
+  </button>
+))}
               </div>
             </div>
           )}
