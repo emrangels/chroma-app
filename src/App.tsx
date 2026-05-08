@@ -28,6 +28,7 @@ interface SeasonData {
   palette: {
     base: PaletteColour[]; accent: PaletteColour[];
     best: PaletteColour[]; avoid: PaletteColour[];
+    extended?: PaletteColour[];
   };
   makeup: { foundation: string; blush: string; lip: string; eye: string; };
   hair: { best_colours: string[]; avoid: string[]; tip: string; };
@@ -804,6 +805,34 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
 
 const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade }: { seasonData: SeasonData | null; user: User | null; onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void; }) => {
   const plan = user?.plan || "free"; const [showShare, setShowShare] = useState(false);const [selectedColour, setSelectedColour] = useState<PaletteColour | null>(null);
+const [extendedPalette, setExtendedPalette] = useState<PaletteColour[]>([]);
+const [loadingExtended, setLoadingExtended] = useState(false);
+const [showExtended, setShowExtended] = useState(false);
+
+const loadExtendedPalette = async () => {
+  if (extendedPalette.length > 0) { setShowExtended(true); return; }
+  setLoadingExtended(true);
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+      body: JSON.stringify({
+        type: "extended_palette",
+        season: seasonData?.season,
+        subseason: seasonData?.subseason,
+        undertone: seasonData?.colour_profile?.undertone,
+        chroma: seasonData?.colour_profile?.chroma,
+        depth: seasonData?.colour_profile?.depth,
+      }),
+    });
+    const data = await res.json();
+    if (data.colours) {
+      setExtendedPalette(data.colours);
+      setShowExtended(true);
+    }
+  } catch {}
+  finally { setLoadingExtended(false); }
+};
   if (!seasonData) return (
     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, padding: "40px 28px" }}>
       <Icon name="sparkles" size={40} color={DS.colors.border} />
@@ -892,6 +921,36 @@ const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade }: { seasonData: Sea
             </div>
           )}
 
+          {/* Extended palette — Luxe only */}
+          {plan === "luxe" && (
+            <div style={{ paddingTop: 14, borderTop: `1px solid ${DS.colors.border}`, marginBottom: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: DS.colors.textMuted }}>Extended palette</p>
+                {!showExtended && (
+                  <button onClick={loadExtendedPalette} disabled={loadingExtended} style={{ fontSize: 12, fontWeight: 600, color: DS.colors.accent, background: DS.colors.accentLight, padding: "4px 12px", borderRadius: DS.radius.full }}>
+                    {loadingExtended ? "Loading..." : "See all colours"}
+                  </button>
+                )}
+              </div>
+              {showExtended && extendedPalette.length > 0 && (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+                  {extendedPalette.map(colour => (
+                    <button key={colour.hex} onClick={() => setSelectedColour(colour)} style={{ textAlign: "center", background: "none", border: "none", padding: 0 }}>
+                      <div style={{ width: "100%", aspectRatio: "1", borderRadius: 10, background: colour.hex, marginBottom: 4, border: colour.hex === "#FFFFFF" ? `1px solid ${DS.colors.border}` : "none" }} />
+                      <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {!showExtended && (
+                <div style={{ display: "flex", gap: 6 }}>
+                  {[1,2,3,4,5,6,7,8].map(i => (
+                    <div key={i} style={{ flex: 1, aspectRatio: "1", borderRadius: 8, background: DS.colors.surface, border: `1px solid ${DS.colors.border}` }} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           {/* Avoid colours */}
           <div style={{ paddingTop: 14, borderTop: `1px solid ${DS.colors.border}` }}>
             <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 500, color: DS.colors.textMuted }}>Avoid</p>
