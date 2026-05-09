@@ -265,7 +265,7 @@ const AuthScreen = ({ onSignIn, onGuest }: { onSignIn: (user: User) => void; onG
                 <div style={{ width: 20, height: 20, borderRadius: DS.radius.sm, border: `1.5px solid ${agreedToTerms ? DS.colors.accent : DS.colors.border}`, background: agreedToTerms ? DS.colors.accent : DS.colors.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1, transition: "all 0.2s" }}>
                   {agreedToTerms && <Icon name="check" size={12} color={DS.colors.white} strokeWidth={2.5} />}
                 </div>
-                <span style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>I agree to the Terms & Privacy Policy</span>
+                <span style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>I agree to the <a href="https://solla.com.au/terms" target="_blank" style={{ color: DS.colors.accent }}>Terms of Service</a> and <a href="https://solla.com.au/privacy" target="_blank" style={{ color: DS.colors.accent }}>Privacy Policy</a></span>
               </button>
             </>
           )}
@@ -1484,6 +1484,18 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
             <Icon name="logout" size={18} color={DS.colors.danger} />
             <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.danger }}>Sign out</span>
           </button>
+          <div style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, overflow: "hidden", marginTop: 12 }}>
+  {[
+    { label: "Privacy Policy", url: "https://solla.com.au/privacy" },
+    { label: "Terms of Service", url: "https://solla.com.au/terms" },
+    { label: "Cookie Policy", url: "https://solla.com.au/cookies" },
+  ].map((link, i, arr) => (
+    <a key={link.label} href={link.url} target="_blank" style={{ width: "100%", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: i < arr.length - 1 ? `1px solid ${DS.colors.border}` : "none", textDecoration: "none" }}>
+      <span style={{ fontSize: 14, color: DS.colors.text }}>{link.label}</span>
+      <Icon name="chevronRight" size={16} color={DS.colors.textFaint} />
+    </a>
+  ))}
+</div>
         </div>
       </div>
 
