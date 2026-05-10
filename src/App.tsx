@@ -14,7 +14,7 @@ const DS = {
 
 type Screen = "splash" | "onboarding" | "auth" | "upload" | "analysing" | "main";
 type Tab = "home" | "checker" | "wardrobe" | "me";
-type Sheet = "palette" | "makeup" | "hair" | "jewellery" | "style" | "paywall" | "faq" | null;
+type Sheet = "palette" | "makeup" | "hair" | "jewellery" | "style" | "paywall" | "faq" | "privacy" | "terms" | "cookies" | null;
 type Plan = "free" | "glow" | "luxe";
 
 interface User { id: string; email: string; name: string; plan: Plan; }
@@ -265,7 +265,7 @@ const AuthScreen = ({ onSignIn, onGuest }: { onSignIn: (user: User) => void; onG
                 <div style={{ width: 20, height: 20, borderRadius: DS.radius.sm, border: `1.5px solid ${agreedToTerms ? DS.colors.accent : DS.colors.border}`, background: agreedToTerms ? DS.colors.accent : DS.colors.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1, transition: "all 0.2s" }}>
                   {agreedToTerms && <Icon name="check" size={12} color={DS.colors.white} strokeWidth={2.5} />}
                 </div>
-                <span style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>I agree to the <a href="https://solla.com.au/terms" target="_blank" style={{ color: DS.colors.accent }}>Terms of Service</a> and <a href="https://solla.com.au/privacy" target="_blank" style={{ color: DS.colors.accent }}>Privacy Policy</a></span>
+                <span style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>I agree to the Terms of Service and Privacy Policy</span>
               </button>
             </>
           )}
@@ -834,6 +834,60 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           ))}
         </div>
       )}
+      {activeSheet === "privacy" && (
+        <div style={{ padding: "16px 24px" }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Privacy Policy</h2>
+          <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 24 }}>Last updated: 9 May 2026</p>
+          {[
+            { q: "What information do we collect?", a: "We collect your name, email address, and password when you create an account. We also collect photos you upload for colour analysis, and wardrobe item photos and descriptions. We automatically collect log and usage data, and device information." },
+            { q: "How do we use your information?", a: "We use your information to provide personalised AI-powered colour season analysis and styling recommendations, manage your account, process payments, respond to support enquiries, send service communications, and improve our services." },
+            { q: "Who do we share your information with?", a: "We share data with Anthropic (AI processing), Supabase (database), Stripe (payments), and Vercel (hosting and analytics). We do not sell your personal information to third parties." },
+            { q: "How are photos handled?", a: "Photos you upload for colour analysis are transmitted securely to Anthropic for processing and are not stored permanently on our servers after analysis is complete." },
+            { q: "How long do we keep your data?", a: "We retain your personal information for as long as you have an account with us. When you close your account we will delete or anonymise your information unless required by law." },
+            { q: "What are your rights?", a: "Under the Australian Privacy Act 1988 you have the right to access, correct, or delete your personal information. Contact us at hello@solla.com.au to exercise these rights or to lodge a complaint." },
+            { q: "How do we keep your information safe?", a: "We use HTTPS encryption, row-level database security, and JWT authentication. However no method of internet transmission is 100% secure." },
+            { q: "Contact us", a: "For privacy questions contact hello@solla.com.au. You can also lodge a complaint with the Office of the Australian Information Commissioner at oaic.gov.au." },
+          ].map((item, i) => (
+            <FaqItem key={i} question={item.q} answer={item.a} />
+          ))}
+        </div>
+      )}
+      {activeSheet === "terms" && (
+        <div style={{ padding: "16px 24px" }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Terms of Service</h2>
+          <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 24 }}>Last updated: 9 May 2026</p>
+          {[
+            { q: "Who can use Solla?", a: "You must be at least 18 years of age to use Solla. By using our services you confirm that you meet this requirement." },
+            { q: "Subscriptions and payments", a: "Solla Glow is $6.99/month or $49.99/year. Solla Luxe is $14.99/month or $99.99/year. All plans include a 7-day free trial — you will not be charged until day 8. Cancel any time before day 8 to avoid being charged. Payments are processed by Stripe." },
+            { q: "How do I cancel?", a: "Contact us at hello@solla.com.au to cancel your subscription. Cancellations take effect at the end of the current billing period. We do not offer refunds for partial periods." },
+            { q: "AI-generated content", a: "Solla uses AI to generate colour analysis and styling recommendations. These are provided for informational and personal styling purposes only. Results may vary and should be used as guidance rather than definitive advice. We do not guarantee accuracy." },
+            { q: "Acceptable use", a: "You agree not to use Solla for unlawful purposes, upload photos of others without consent, attempt to reverse engineer the app, use automated tools to access our services, or share your account credentials." },
+            { q: "Intellectual property", a: "All content, design, code, and branding within Solla is owned by Emma Nagel (trading as Solla) and protected by Australian and international copyright law." },
+            { q: "Your content", a: "By uploading photos you grant us a limited licence to process them for providing our services. We do not claim ownership of your photos." },
+            { q: "Limitation of liability", a: "To the maximum extent permitted by Australian law, Solla shall not be liable for any indirect or consequential damages. Our total liability shall not exceed the amount you paid us in the 12 months preceding the claim." },
+            { q: "Governing law", a: "These Terms are governed by the laws of South Australia, Australia. Disputes are subject to the exclusive jurisdiction of the courts of South Australia." },
+            { q: "Contact us", a: "For questions about these terms contact hello@solla.com.au." },
+          ].map((item, i) => (
+            <FaqItem key={i} question={item.q} answer={item.a} />
+          ))}
+        </div>
+      )}
+      {activeSheet === "cookies" && (
+        <div style={{ padding: "16px 24px" }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Cookie Policy</h2>
+          <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 24 }}>Last updated: 9 May 2026</p>
+          {[
+            { q: "What are cookies?", a: "Cookies are small data files placed on your device when you visit a website. They help websites remember your preferences and provide a better experience." },
+            { q: "What cookies does Solla use?", a: "We use essential cookies for authentication and session management (Supabase), analytics cookies to understand app usage (Vercel), and functional cookies to remember your preferences." },
+            { q: "What about local storage?", a: "Solla also uses your browser's local storage to save your session, colour analysis results, and preferences. This data stays on your device and is not transmitted to third parties." },
+            { q: "Third-party cookies", a: "Supabase sets cookies for authentication, Vercel sets cookies for analytics, and Stripe sets cookies on checkout pages for payment processing." },
+            { q: "How do I control cookies?", a: "You can manage cookies through your browser settings. Note that blocking essential cookies may prevent you from logging in or using core features of Solla." },
+            { q: "Contact us", a: "For questions about our use of cookies contact hello@solla.com.au." },
+          ].map((item, i) => (
+            <FaqItem key={i} question={item.q} answer={item.a} />
+          ))}
+        </div>
+      )}
     </div>
   </div>
 );
@@ -1319,7 +1373,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
 };
 const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq }: {
   user: User | null; seasonData: SeasonData | null;
-  onSignOut: () => void; onReanalyse: () => void; onUpgrade: () => void; onOpenFaq: () => void;
+  onSignOut: () => void; onReanalyse: () => void; onUpgrade: () => void; onOpenFaq: (sheet?: Sheet) => void;
 }) => {
   const [showReanalyseWarning, setShowReanalyseWarning] = useState(false);
   const [activePill, setActivePill] = useState<{ label: string; value: string; description: string } | null>(null);
@@ -1471,7 +1525,7 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
 
         {/* Actions */}
         <div style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, overflow: "hidden" }}>
-  <button onClick={() => { console.log("FAQ tapped"); onOpenFaq(); }} style={{ width: "100%", padding: "16px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${DS.colors.border}` }}>
+  <button onClick={() => onOpenFaq("faq")} style={{ width: "100%", padding: "16px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${DS.colors.border}` }}>
     <Icon name="info" size={18} color={DS.colors.text} />
     <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.text }}>Colour theory & FAQ</span>
     <span style={{ marginLeft: "auto" }}><Icon name="chevronRight" size={16} color={DS.colors.textFaint} /></span>
@@ -1486,16 +1540,16 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
             <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.danger }}>Sign out</span>
           </button>
           <div style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, overflow: "hidden", marginTop: 12 }}>
-  {[
-    { label: "Privacy Policy", url: "https://solla.com.au/privacy" },
-    { label: "Terms of Service", url: "https://solla.com.au/terms" },
-    { label: "Cookie Policy", url: "https://solla.com.au/cookies" },
-  ].map((link, i, arr) => (
-      <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" style={{ width: "100%", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: i < arr.length - 1 ? `1px solid ${DS.colors.border}` : "none", textDecoration: "none" }}>
-  <span style={{ fontSize: 14, color: DS.colors.text }}>{link.label}</span>
-  <Icon name="chevronRight" size={16} color={DS.colors.textFaint} />
-</a>
-  ))}
+    {[
+  { label: "Privacy Policy", sheet: "privacy" as Sheet },
+  { label: "Terms of Service", sheet: "terms" as Sheet },
+  { label: "Cookie Policy", sheet: "cookies" as Sheet },
+].map((link, i, arr) => (
+  <button key={link.label} onClick={() => onOpenFaq(link.sheet)} style={{ width: "100%", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: i < arr.length - 1 ? `1px solid ${DS.colors.border}` : "none", background: "none", textAlign: "left" }}>
+    <span style={{ fontSize: 14, color: DS.colors.text }}>{link.label}</span>
+    <Icon name="chevronRight" size={16} color={DS.colors.textFaint} />
+  </button>
+))}
 </div>
         </div>
       </div>
@@ -2266,7 +2320,7 @@ const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, 
        ) : activeTab === "checker" ? (
   <CheckerTab seasonData={seasonData} user={user} onUpgrade={onUpgrade} />
 ) : activeTab === "me" ? (
-  <MeTab user={user} seasonData={seasonData} onSignOut={onSignOut} onReanalyse={onReanalyse} onUpgrade={onUpgrade} onOpenFaq={() => onOpenSheet("faq")} />
+  <MeTab user={user} seasonData={seasonData} onSignOut={onSignOut} onReanalyse={onReanalyse} onUpgrade={onUpgrade} onOpenFaq={(sheet) => onOpenSheet(sheet || "faq")} />
 ) : activeTab === "wardrobe" ? (
   <WardrobeTab user={user} seasonData={seasonData} onUpgrade={onUpgrade} />
 ) : (
@@ -2451,7 +2505,7 @@ export default function App() {
           />
         )}
 {/* SheetOverlay at root level — position:fixed works here, not clipped by any overflow:hidden */}
-        {state.activeSheet && state.activeSheet !== "paywall" && (state.activeSheet === "faq" || seasonData) && (
+        {state.activeSheet && state.activeSheet !== "paywall" && (state.activeSheet === "faq" || state.activeSheet === "privacy" || state.activeSheet === "terms" || state.activeSheet === "cookies" || seasonData) && (
           <SheetOverlay
             activeSheet={state.activeSheet}
             seasonData={seasonData}
