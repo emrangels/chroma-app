@@ -828,6 +828,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
             { q: "Can I re-analyse my colours?", a: "Yes — go to the Me tab and tap 'Re-analyse my colours'. This clears your current results and takes you back to the upload screen. For best results use a clear, well-lit selfie in natural light with no filters." },
             { q: "What's the difference between Glow and Luxe?", a: "Glow unlocks your full colour guide including makeup, hair, jewellery and the colour checker. Luxe adds the style & fit guide, wardrobe builder, outfit creator and AI stylist chat." },
             { q: "How does the AI stylist work?", a: "The AI stylist in the Wardrobe tab knows your colour season, body shape and every item in your wardrobe. Ask it anything — what to wear for an occasion, how to style a specific item, or to analyse your whole wardrobe for gaps." },
+            { q: "What does Solla mean?", a: "Solla is a name with warmth woven into it from multiple directions. In Tamil it means 'to say' or 'to tell' — which felt right for an app built around revealing something true about you. In Scandinavian tradition, Solla is a given name derived from the word for sun, carrying connotations of light and warmth. In Sri Lankan slang, a solla moment is a small, simple happiness — the kind you might feel when you finally put on a colour that just works. We liked that. Solla is about knowing your colours, dressing with intention, and finding joy in the small things — like getting dressed in the morning." },
           ].map((item, i) => (
             <FaqItem key={i} question={item.q} answer={item.a} />
           ))}
@@ -1490,10 +1491,10 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
     { label: "Terms of Service", url: "https://solla.com.au/terms" },
     { label: "Cookie Policy", url: "https://solla.com.au/cookies" },
   ].map((link, i, arr) => (
-    <a key={link.label} href={link.url} target="_blank" style={{ width: "100%", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: i < arr.length - 1 ? `1px solid ${DS.colors.border}` : "none", textDecoration: "none" }}>
+      <button key={link.label} onClick={() => window.open(link.url, '_blank', 'noopener,noreferrer')} style={{ width: "100%", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: i < arr.length - 1 ? `1px solid ${DS.colors.border}` : "none", background: "none", textAlign: "left" }}>
       <span style={{ fontSize: 14, color: DS.colors.text }}>{link.label}</span>
       <Icon name="chevronRight" size={16} color={DS.colors.textFaint} />
-    </a>
+    </button>
   ))}
 </div>
         </div>
