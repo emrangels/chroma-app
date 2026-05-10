@@ -66,7 +66,7 @@ const GlobalStyles = () => (
     html, body, #root { height: 100%; width: 100%; min-height: 100dvh; overflow: hidden; background: ${DS.colors.bg}; font-family: ${DS.font}; color: ${DS.colors.text}; -webkit-font-smoothing: antialiased; }
     button { cursor: pointer; border: none; background: none; font-family: inherit; }
     input { font-family: inherit; }
-    ::-webkit-scrollbar { width: 0px; }
+    ::-webkit-scrollbar { width: 0px; }a[target="_blank"] { -webkit-touch-callout: none; }
     .screen { position: absolute; inset: 0; display: flex; flex-direction: column; overflow: hidden; }
     .fade-in { animation: fadeIn 0.4s ease forwards; }
     .slide-up { animation: slideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
@@ -1491,10 +1491,10 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
     { label: "Terms of Service", url: "https://solla.com.au/terms" },
     { label: "Cookie Policy", url: "https://solla.com.au/cookies" },
   ].map((link, i, arr) => (
-      <button key={link.label} onClick={() => window.open(link.url, '_blank', 'noopener,noreferrer')} style={{ width: "100%", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: i < arr.length - 1 ? `1px solid ${DS.colors.border}` : "none", background: "none", textAlign: "left" }}>
-      <span style={{ fontSize: 14, color: DS.colors.text }}>{link.label}</span>
-      <Icon name="chevronRight" size={16} color={DS.colors.textFaint} />
-    </button>
+      <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" style={{ width: "100%", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: i < arr.length - 1 ? `1px solid ${DS.colors.border}` : "none", textDecoration: "none" }}>
+  <span style={{ fontSize: 14, color: DS.colors.text }}>{link.label}</span>
+  <Icon name="chevronRight" size={16} color={DS.colors.textFaint} />
+</a>
   ))}
 </div>
         </div>
