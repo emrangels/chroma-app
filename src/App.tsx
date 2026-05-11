@@ -817,6 +817,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Colour Theory & FAQ</h2>
           <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.5 }}>Everything you need to know about colour season analysis.</p>
           {[
+            { q: "What does Solla mean?", a: "Solla is a name with warmth woven into it from multiple directions. In Tamil it means 'to say' or 'to tell' — which felt right for an app built around revealing something true about you. In Scandinavian tradition, Solla is a given name derived from the word for sun, carrying connotations of light and warmth. In Sri Lankan slang, a solla moment is a small, simple happiness — the kind you might feel when you finally put on a colour that just works. We liked that. Solla is about knowing your colours, dressing with intention, and finding joy in the small things — like getting dressed in the morning." },
             { q: "What is colour season analysis?", a: "Colour season analysis is a method of identifying which colours harmonise with your natural colouring — your skin tone, undertone, eye colour and hair colour. By grouping these into four seasons (Spring, Summer, Autumn, Winter) and 12 sub-seasons, we can identify the colours that make you look vibrant and alive versus those that wash you out or clash." },
             { q: "What are the four seasons?", a: "Spring — warm, clear and bright colouring. Summer — cool, soft and muted colouring. Autumn — warm, deep and earthy colouring. Winter — cool, deep and high contrast colouring. Each season has three sub-seasons that add further nuance." },
             { q: "What is undertone?", a: "Undertone is the subtle hue beneath your skin's surface. Warm undertones have golden or yellow hints. Cool undertones have pink or blue hints. Neutral undertones are a mix of both. It's the single most important factor in colour analysis." },
@@ -828,7 +829,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
             { q: "Can I re-analyse my colours?", a: "Yes — go to the Me tab and tap 'Re-analyse my colours'. This clears your current results and takes you back to the upload screen. For best results use a clear, well-lit selfie in natural light with no filters." },
             { q: "What's the difference between Glow and Luxe?", a: "Glow unlocks your full colour guide including makeup, hair, jewellery and the colour checker. Luxe adds the style & fit guide, wardrobe builder, outfit creator and AI stylist chat." },
             { q: "How does the AI stylist work?", a: "The AI stylist in the Wardrobe tab knows your colour season, body shape and every item in your wardrobe. Ask it anything — what to wear for an occasion, how to style a specific item, or to analyse your whole wardrobe for gaps." },
-            { q: "What does Solla mean?", a: "Solla is a name with warmth woven into it from multiple directions. In Tamil it means 'to say' or 'to tell' — which felt right for an app built around revealing something true about you. In Scandinavian tradition, Solla is a given name derived from the word for sun, carrying connotations of light and warmth. In Sri Lankan slang, a solla moment is a small, simple happiness — the kind you might feel when you finally put on a colour that just works. We liked that. Solla is about knowing your colours, dressing with intention, and finding joy in the small things — like getting dressed in the morning." },
+            { q: "How do I contact Solla?", a: "For any questions, feedback or support email us at hello@solla.com.au. We aim to respond within 1-2 business days." },
           ].map((item, i) => (
             <FaqItem key={i} question={item.q} answer={item.a} />
           ))}
@@ -900,6 +901,15 @@ const [showExtended, setShowExtended] = useState(false);
 
 const loadExtendedPalette = async () => {
   if (extendedPalette.length > 0) { setShowExtended(true); return; }
+  const cacheKey = `solla_extended_${seasonData?.season}_${seasonData?.subseason}`;
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    try {
+      setExtendedPalette(JSON.parse(cached));
+      setShowExtended(true);
+      return;
+    } catch {}
+  }
   setLoadingExtended(true);
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
@@ -916,7 +926,7 @@ const loadExtendedPalette = async () => {
     });
     const data = await res.json();
     if (data.colours) {
-      setExtendedPalette(data.colours);
+      setExtendedPalette(data.colours); localStorage.setItem(cacheKey, JSON.stringify(data.colours));
       setShowExtended(true);
     }
   } catch {}
@@ -1771,8 +1781,7 @@ const handleDeleteOutfit = async (id: string) => {
     setChatInput("");
     setChatLoading(true);
     try {
-      const wardrobeContext = items.map(i => `${i.name} (${i.category}, ${i.colour_name}, ${i.verdict ? "suits season" : "doesn't suit season"})`).join(", ");
-     const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
   method: "POST",
   headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
   body: JSON.stringify({
@@ -1782,7 +1791,10 @@ const handleDeleteOutfit = async (id: string) => {
     season: seasonData.season,
     subseason: seasonData.subseason,
     body_shape: seasonData.body_shape,
-    wardrobe: items.map(i => `${i.name} (${i.category}, ${i.colour_name}, ${i.verdict ? "suits season" : "doesn't suit season"})`).join(", "),
+    wardrobe: [
+      ...items.map(i => `${i.name} (${i.category}, ${i.colour_name}, ${i.verdict ? "suits season" : "doesn't suit season"})`),
+      ...outfits.map(o => `Saved outfit: "${o.name}" (${items.filter(i => o.item_ids.includes(i.id)).map(i => i.name).join(", ")})`)
+    ].join(", "),
   }),
 });
 const data = await res.json();
