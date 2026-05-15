@@ -746,7 +746,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           <div style={{ marginBottom: 20 }}>
             <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Best colours</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {seasonData?.hair.best_colours.map(c => (
+              {seasonData?.hair?.best_colours?.map(c => (
                 <span key={c} style={{ padding: "6px 14px 6px 10px", background: DS.colors.accentLight, borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.accentDark, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}>
                   <span style={{ width: 12, height: 12, borderRadius: "50%", background: hairColourMap[c.toLowerCase()] || guessColourFromName(c), flexShrink: 0, border: "1px solid rgba(0,0,0,0.1)" }} />
                   {c}
@@ -757,7 +757,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           <div style={{ marginBottom: 20 }}>
             <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 600, color: DS.colors.danger, letterSpacing: "0.06em", textTransform: "uppercase" }}>Avoid</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {seasonData?.hair.avoid.map(c => (
+              {seasonData?.hair?.avoid?.map(c => (
                 <span key={c} style={{ padding: "6px 14px 6px 10px", background: "#FEF2F2", borderRadius: DS.radius.full, fontSize: 13, color: DS.colors.danger, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}>
                   <span style={{ width: 12, height: 12, borderRadius: "50%", background: hairColourMap[c.toLowerCase()] || guessColourFromName(c), flexShrink: 0, border: "1px solid rgba(0,0,0,0.1)" }} />
                   {c}
@@ -767,7 +767,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           </div>
           <div>
             <p style={{ margin: "0 0 8px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Stylist tip</p>
-            <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{seasonData?.hair.tip}</p>
+            <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{seasonData?.hair?.tip}</p>
           </div>
         </div>
       )}
