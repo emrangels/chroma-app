@@ -1520,6 +1520,11 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
                 <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{f}</span>
               </div>
             ))}
+         {plan !== "free" && (
+            <p style={{ margin: "12px 0 0", fontSize: 12, color: DS.colors.textFaint, lineHeight: 1.5 }}>
+              To cancel your subscription email <span style={{ color: DS.colors.accent }}>hello@solla.com.au</span>
+            </p>
+          )}
           </div>
         </div>
 
