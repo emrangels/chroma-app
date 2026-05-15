@@ -468,7 +468,7 @@ const AnalysingScreen = () => {
       <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", marginBottom: 32, maxWidth: 260 }}>This usually takes 15–20 seconds. Stay on this screen until your results are ready.</p>
       <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
   {steps.map((s, i) => (
-    <div key={s} style={{ display: "flex", alignItems: "center", gap: 12, width: 280 }}>
+    <div key={s} style={{ display: "flex", alignItems: "center", gap: 12, width: 240, margin: "0 auto" }}>
       <div style={{ width: 24, height: 24, borderRadius: DS.radius.full, background: i <= step ? DS.colors.accent : DS.colors.surface, border: `1.5px solid ${i <= step ? DS.colors.accent : DS.colors.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.3s" }}>
         {i < step && <Icon name="check" size={12} color={DS.colors.white} strokeWidth={2.5} />}
         {i === step && <div style={{ width: 8, height: 8, borderRadius: DS.radius.full, background: DS.colors.white, animation: "pulse 1s ease infinite" }} />}
