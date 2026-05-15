@@ -689,79 +689,6 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
     </div>
   );
 };
-
-  return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={onClose}>
-      <div style={{ width: "100%", maxHeight: "92vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
-          <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
-        </div>
-        <div style={{ padding: "20px 24px 0" }}>
-          <div style={{ width: 48, height: 48, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-            <Icon name="crown" size={22} color={DS.colors.accent} />
-          </div>
-          <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 4 }}>
-            {isGuest ? "Create an account to upgrade" : "Unlock your full guide"}
-          </h2>
-          <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>
-            {isGuest ? "Sign up first, then choose your plan to unlock your complete colour guide." : "Start your 7-day free trial. Cancel anytime."}
-          </p>
-          {!isGuest && (
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#F0FDF4", padding: "4px 12px", borderRadius: DS.radius.full, marginBottom: 20 }}>
-              <Icon name="check" size={12} color={DS.colors.success} strokeWidth={2.5} />
-              <span style={{ fontSize: 12, color: DS.colors.success, fontWeight: 600 }}>7-day free trial — no charge until day 8</span>
-            </div>
-          )}
-          {!isGuest && (
-            <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, marginBottom: 16, gap: 4 }}>
-              {(["monthly", "annual"] as const).map(b => (
-                <button key={b} onClick={() => setBilling(b)} style={{ flex: 1, padding: "8px", borderRadius: DS.radius.md, fontSize: 13, fontWeight: billing === b ? 600 : 400, color: billing === b ? DS.colors.white : DS.colors.textMuted, background: billing === b ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
-                  {b === "monthly" ? "Monthly" : "Annual — save 40%"}
-                </button>
-              ))}
-            </div>
-          )}
-          {!isGuest && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
-              {plans.map(plan => {
-                const isSelected = selected === plan.id;
-                const price = pricing[plan.id][billing];
-                const equiv = billing === "annual" ? pricing[plan.id].monthlyEquiv : null;
-                return (
-                  <button key={plan.id} onClick={() => setSelected(plan.id)} style={{ width: "100%", padding: "14px 16px", borderRadius: DS.radius.lg, textAlign: "left", border: `2px solid ${isSelected ? plan.color : DS.colors.border}`, background: isSelected ? (plan.id === "glow" ? DS.colors.accentLight : "#FFF7ED") : DS.colors.bg, transition: "all 0.2s" }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <span style={{ fontSize: 15, fontWeight: 700, color: isSelected ? plan.color : DS.colors.text }}>{plan.name}</span>
-                        {plan.id === "glow" && <span style={{ fontSize: 10, background: DS.colors.success, color: DS.colors.white, padding: "2px 7px", borderRadius: DS.radius.full, fontWeight: 600 }}>POPULAR</span>}
-                      </div>
-                      <div style={{ textAlign: "right" }}>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: isSelected ? plan.color : DS.colors.textMuted }}>{price}</div>
-                        {equiv && <div style={{ fontSize: 11, color: DS.colors.textFaint }}>{equiv}</div>}
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                      {plan.features.map(f => (
-                        <div key={f} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <Icon name="check" size={12} color={plan.color} strokeWidth={2.5} />
-                          <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{f}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-          <button onClick={handleUpgrade} disabled={loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: isGuest ? DS.colors.accent : selected === "luxe" ? "#C26B3A" : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 8, opacity: loading ? 0.7 : 1 }}>
-            {loading ? "Starting trial..." : isGuest ? "Create account to continue" : `Start 7-day free trial`}
-          </button>
-          {!isGuest && <p style={{ textAlign: "center", fontSize: 11, color: DS.colors.textFaint, marginBottom: 12, lineHeight: 1.5 }}>After your trial, {selected === "glow" ? (billing === "monthly" ? "$6.99/mo" : "$49.99/yr") : (billing === "monthly" ? "$14.99/mo" : "$99.99/yr")} — cancel anytime before day 8.</p>}
-          <button onClick={onClose} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Maybe later</button>
-        </div>
-      </div>
-    </div>
-  );
-};
 const guessColourFromName = (name: string): string => {
   const n = name.toLowerCase();
   if (n.includes("black")) return "#2C2C2C";
@@ -2552,7 +2479,12 @@ export default function App() {
         body: JSON.stringify({ season_data: data }),
       }).catch(() => {});
     }
-    update({ seasonData: data, screen: "main" });
+    if (!data.hair?.best_colours || !data.makeup?.foundation || !data.palette?.best) {
+  update({ screen: "upload" });
+  alert("Analysis incomplete — please try again with a clearer photo in natural light.");
+  return;
+}
+update({ seasonData: data, screen: "main" });
   } catch { update({ screen: "main" }); }
 };
 
