@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import html2canvas from 'html2canvas';
+import { Analytics } from '@vercel/analytics/react';
 
 const DS = {
   colors: {
@@ -2549,6 +2550,7 @@ update({ seasonData: data, screen: "main" });
   />
 )}
       </div>
+    <Analytics />
     </>
   );
 }
