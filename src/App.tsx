@@ -453,7 +453,7 @@ const AnalysingScreen = () => {
     return () => { clearInterval(pi); clearTimeout(t1); clearTimeout(t2); };
   }, []);
   return (
-    <div className="screen fade-in" style={{ background: DS.colors.bg, alignItems: "center", justifyContent: "center", padding: "40px 28px" }}>
+    <div className="screen fade-in" style={{ background: DS.colors.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 28px" }}>
       <div style={{ width: 72, height: 72, marginBottom: 32, position: "relative" }}>
         <svg width="72" height="72" viewBox="0 0 72 72">
           <circle cx="36" cy="36" r="30" fill="none" stroke={DS.colors.border} strokeWidth="4" />
