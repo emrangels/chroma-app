@@ -2277,7 +2277,7 @@ const ShareCard = ({ seasonData, onClose }: { seasonData: SeasonData; onClose: (
         <div style={{ padding: "20px 28px 28px" }}>
           <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: textColor }}>Know your colours. Dress your best.</p>
           <p style={{ margin: "0 0 2px", fontSize: 11, color: textColor, opacity: 0.6 }}>Colour analysis · Wardrobe tools · AI stylist</p>
-          <p style={{ margin: 0, fontSize: 11, color: accentColor, fontWeight: 600 }}>solla.com.au</p>
+          <p style={{ margin: 0, fontSize: 11, color: accentColor, fontWeight: 600 }}>solla.com.au · @sollaapp</p>
         </div>
       </div>
 
