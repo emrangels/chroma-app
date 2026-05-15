@@ -857,7 +857,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
             { q: "How long do we keep your data?", a: "We retain your personal information for as long as you have an account with us. When you close your account we will delete or anonymise your information unless required by law." },
             { q: "What are your rights?", a: "Under the Australian Privacy Act 1988 you have the right to access, correct, or delete your personal information. Contact us at hello@solla.com.au to exercise these rights or to lodge a complaint." },
             { q: "How do we keep your information safe?", a: "We use HTTPS encryption, row-level database security, and JWT authentication. However no method of internet transmission is 100% secure." },
-            { q: "Contact us", a: "For privacy questions contact hello@solla.com.au. You can also lodge a complaint with the Office of the Australian Information Commissioner at oaic.gov.au." },
+            { q: "Contact us", a: "For privacy questions contact hello@solla.com.au or write to Solla, Parcel Locker 10127 32034, 515 Brighton Road, Brighton SA 5048. You can also lodge a complaint with the Office of the Australian Information Commissioner at oaic.gov.au." },
           ].map((item, i) => (
             <FaqItem key={i} question={item.q} answer={item.a} />
           ))}
@@ -877,7 +877,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
             { q: "Your content", a: "By uploading photos you grant us a limited licence to process them for providing our services. We do not claim ownership of your photos." },
             { q: "Limitation of liability", a: "To the maximum extent permitted by Australian law, Solla shall not be liable for any indirect or consequential damages. Our total liability shall not exceed the amount you paid us in the 12 months preceding the claim." },
             { q: "Governing law", a: "These Terms are governed by the laws of South Australia, Australia. Disputes are subject to the exclusive jurisdiction of the courts of South Australia." },
-            { q: "Contact us", a: "For questions about these terms contact hello@solla.com.au." },
+            { q: "Contact us", a: "For questions about these terms contact hello@solla.com.au or write to Solla, Parcel Locker 10127 32034, 515 Brighton Road, Brighton SA 5048." },
           ].map((item, i) => (
             <FaqItem key={i} question={item.q} answer={item.a} />
           ))}
@@ -893,7 +893,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
             { q: "What about local storage?", a: "Solla also uses your browser's local storage to save your session, colour analysis results, and preferences. This data stays on your device and is not transmitted to third parties." },
             { q: "Third-party cookies", a: "Supabase sets cookies for authentication, Vercel sets cookies for analytics, and Stripe sets cookies on checkout pages for payment processing." },
             { q: "How do I control cookies?", a: "You can manage cookies through your browser settings. Note that blocking essential cookies may prevent you from logging in or using core features of Solla." },
-            { q: "Contact us", a: "For questions about our use of cookies contact hello@solla.com.au." },
+            { q: "Contact us", a: "For questions about our use of cookies contact hello@solla.com.au or write to Solla, Parcel Locker 10127 32034, 515 Brighton Road, Brighton SA 5048." },
           ].map((item, i) => (
             <FaqItem key={i} question={item.q} answer={item.a} />
           ))}
