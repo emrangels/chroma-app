@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      const priceId = PRICE_IDS[`${plan}_${billing}`];
+      const priceId = PRICE_IDS[${plan}_${billing}];
       if (!priceId) {
         return new Response(JSON.stringify({ error: "Invalid plan or billing" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
       const customerRes = await fetch("https://api.stripe.com/v1/customers", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${stripeKey}`,
+          "Authorization": Bearer ${stripeKey},
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({ email, "metadata[supabase_user_id]": user_id }).toString(),
@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
       const sessionRes = await fetch("https://api.stripe.com/v1/checkout/sessions", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${stripeKey}`,
+          "Authorization": Bearer ${stripeKey},
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({
@@ -71,8 +71,8 @@ Deno.serve(async (req) => {
           "subscription_data[metadata][supabase_user_id]": user_id,
           "subscription_data[metadata][plan]": plan,
           "subscription_data[metadata][billing]": billing,
-          success_url: `${return_url}?checkout=success&plan=${plan}&billing=${billing}`,
-          cancel_url: `${return_url}?checkout=cancelled`,
+          success_url: ${return_url}?checkout=success&plan=${plan}&billing=${billing},
+          cancel_url: ${return_url}?checkout=cancelled,
           allow_promotion_codes: "true",
         }).toString(),
       });

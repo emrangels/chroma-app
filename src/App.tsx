@@ -947,10 +947,10 @@ const loadExtendedPalette = async () => {
   const canAccessJewellery = plan !== "free";
   const canAccessStyle = plan === "luxe";
   const categoryCards = [
-    { id: "makeup" as Sheet, icon: "droplet", label: "Makeup", teaser: seasonData.makeup.foundation.split(".")[0] + ".", locked: !canAccessMakeup, requiredPlan: "Glow" },
-    { id: "hair" as Sheet, icon: "scissors", label: "Hair", teaser: seasonData.hair.best_colours.slice(0, 2).join(", ") + " and more...", locked: !canAccessHair, requiredPlan: "Glow" },
-    { id: "jewellery" as Sheet, icon: "gem", label: "Jewellery", teaser: seasonData.jewellery.metals.join(", "), locked: !canAccessJewellery, requiredPlan: "Glow" },
-    { id: "style" as Sheet, icon: "shirt", label: "Style & Fit", teaser: seasonData.style.tip, locked: !canAccessStyle, requiredPlan: "Luxe" },
+    { id: "makeup" as Sheet, icon: "droplet", label: "Makeup", teaser: seasonData.makeup?.foundation?.split(".")[0] + "." || "Your personalised makeup guide.", locked: !canAccessMakeup, requiredPlan: "Glow" },
+    { id: "hair" as Sheet, icon: "scissors", label: "Hair", teaser: seasonData.hair?.best_colours?.slice(0, 2).join(", ") + " and more..." || "Your personalised hair guide.", locked: !canAccessHair, requiredPlan: "Glow" },
+    { id: "jewellery" as Sheet, icon: "gem", label: "Jewellery", teaser: seasonData.jewellery?.metals?.join(", ") || "Your personalised jewellery guide.", locked: !canAccessJewellery, requiredPlan: "Glow" },
+    { id: "style" as Sheet, icon: "shirt", label: "Style & Fit", teaser: seasonData.style?.tip || "Your personalised style guide.", locked: !canAccessStyle, requiredPlan: "Luxe" },
   ];
   return (
     <div style={{ flex: 1, overflowY: "auto", background: DS.colors.bg }}>
