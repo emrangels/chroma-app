@@ -561,7 +561,6 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
   currentPlan: Plan; onUpgrade: (plan: Plan) => void;
   onClose: () => void; isGuest?: boolean; onSignUp?: () => void;
 }) => {
-  const [selected, setSelected] = useState<"glow" | "luxe">("luxe");
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
   const [loading, setLoading] = useState(false);
 
@@ -570,41 +569,125 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
     luxe: { monthly: "$14.99", annual: "$99.99", monthlyEquiv: "$8.33/mo" },
   };
 
-  const plans: { id: "glow" | "luxe"; name: string; color: string; features: string[] }[] = [
-    { id: "glow", name: "Glow", color: DS.colors.accent, features: ["Season & full colour profile", "Makeup guide", "Hair colour guide", "Jewellery guide", "Colour checker — items, outfits & swatches"] },
-    { id: "luxe", name: "Luxe", color: "#C26B3A", features: ["Everything in Glow", "Style & Fit guide", "Extended colour palette (24+ colours)", "Wardrobe builder with colour checker", "Outfit creator", "AI stylist chat", "Capsule wardrobe analysis"] },
-  ];
+  const handleUpgrade = async (selectedPlan: "glow" | "luxe") => {
+    if (isGuest && onSignUp) { onSignUp(); return; }
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("solla_token");
+      const cachedUser = localStorage.getItem("solla_user");
+      if (!token || !cachedUser) { onSignUp?.(); return; }
+      const user = JSON.parse(cachedUser);
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/stripe-checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+        body: JSON.stringify({
+          type: "create_checkout",
+          plan: selectedPlan,
+          billing,
+          user_id: user.id,
+          email: user.email,
+          return_url: "https://solla.com.au",
+        }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      if (!data.url) throw new Error("No checkout URL returned");
+      window.location.href = data.url;
+    } catch (e) {
+      console.error("Stripe error:", e);
+      alert("Error: " + (e instanceof Error ? e.message : String(e)));
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const handleUpgrade = async () => {
-  if (isGuest && onSignUp) { onSignUp(); return; }
-  setLoading(true);
-  try {
-    const token = localStorage.getItem("solla_token");
-    const cachedUser = localStorage.getItem("solla_user");
-    if (!token || !cachedUser) { onSignUp?.(); return; }
-    const user = JSON.parse(cachedUser);
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/stripe-checkout`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
-      body: JSON.stringify({
-        type: "create_checkout",
-        plan: selected,
-        billing,
-        user_id: user.id,
-        email: user.email,
-        return_url: "https://solla.com.au",
-      }),
-    });
-    const data = await res.json();
-if (data.error) throw new Error(data.error);
-if (!data.url) throw new Error("No checkout URL returned");
-    window.location.href = data.url;
-  } catch (e) {
-    console.error("Stripe error:", e);
-    alert("Error: " + (e instanceof Error ? e.message : String(e)));
-  } finally {
-    setLoading(false);
-  }
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={onClose}>
+      <div style={{ width: "100%", maxHeight: "92vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+          <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
+        </div>
+        <div style={{ padding: "20px 24px 0" }}>
+          <div style={{ width: 48, height: 48, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+            <Icon name="crown" size={22} color={DS.colors.accent} />
+          </div>
+
+          {isGuest ? (
+            <>
+              <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 4 }}>Create an account to upgrade</h2>
+              <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 24 }}>Sign up first, then choose your plan to unlock your complete colour guide.</p>
+              <button onClick={() => onSignUp?.()} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Create account to continue</button>
+              <button onClick={onClose} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Maybe later</button>
+            </>
+          ) : (
+            <>
+              <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 4 }}>Try everything free for 7 days</h2>
+              <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>Experience the full Luxe plan free. Choose your plan on day 8.</p>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#F0FDF4", padding: "4px 12px", borderRadius: DS.radius.full, marginBottom: 20 }}>
+                <Icon name="check" size={12} color={DS.colors.success} strokeWidth={2.5} />
+                <span style={{ fontSize: 12, color: DS.colors.success, fontWeight: 600 }}>7-day free trial — no charge until day 8</span>
+              </div>
+
+              {/* Billing toggle */}
+              <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, marginBottom: 20, gap: 4 }}>
+                {(["monthly", "annual"] as const).map(b => (
+                  <button key={b} onClick={() => setBilling(b)} style={{ flex: 1, padding: "8px", borderRadius: DS.radius.md, fontSize: 13, fontWeight: billing === b ? 600 : 400, color: billing === b ? DS.colors.white : DS.colors.textMuted, background: billing === b ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
+                    {b === "monthly" ? "Monthly" : "Annual — save 40%"}
+                  </button>
+                ))}
+              </div>
+
+              {/* Luxe trial CTA — primary */}
+              <div style={{ borderRadius: DS.radius.lg, border: `2px solid #C26B3A`, background: "#FFF7ED", padding: "16px", marginBottom: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 16, fontWeight: 700, color: "#C26B3A" }}>Luxe</span>
+                    <span style={{ fontSize: 10, background: DS.colors.success, color: DS.colors.white, padding: "2px 7px", borderRadius: DS.radius.full, fontWeight: 600 }}>RECOMMENDED</span>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#C26B3A" }}>{pricing.luxe[billing]}{billing === "monthly" ? "/mo" : "/yr"}</div>
+                    {billing === "annual" && <div style={{ fontSize: 11, color: DS.colors.textFaint }}>{pricing.luxe.monthlyEquiv}</div>}
+                  </div>
+                </div>
+                {["Everything in Glow", "Style & Fit guide", "Extended colour palette (24+ colours)", "Wardrobe builder with colour checker", "Outfit creator", "AI stylist chat"].map(f => (
+                  <div key={f} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                    <Icon name="check" size={12} color="#C26B3A" strokeWidth={2.5} />
+                    <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{f}</span>
+                  </div>
+                ))}
+                <button onClick={() => handleUpgrade("luxe")} disabled={loading} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: "#C26B3A", color: DS.colors.white, fontSize: 15, fontWeight: 600, marginTop: 14, opacity: loading ? 0.7 : 1 }}>
+                  {loading ? "Starting trial..." : "Start free trial — Luxe"}
+                </button>
+              </div>
+
+              {/* Glow option — secondary */}
+              <div style={{ borderRadius: DS.radius.lg, border: `1.5px solid ${DS.colors.border}`, background: DS.colors.bg, padding: "14px 16px", marginBottom: 16 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                  <span style={{ fontSize: 15, fontWeight: 600, color: DS.colors.text }}>Glow</span>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: DS.colors.textMuted }}>{pricing.glow[billing]}{billing === "monthly" ? "/mo" : "/yr"}</div>
+                    {billing === "annual" && <div style={{ fontSize: 11, color: DS.colors.textFaint }}>{pricing.glow.monthlyEquiv}</div>}
+                  </div>
+                </div>
+                {["Season & full colour profile", "Makeup, hair & jewellery guides", "Colour checker — items, outfits & swatches"].map(f => (
+                  <div key={f} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                    <Icon name="check" size={12} color={DS.colors.accent} strokeWidth={2.5} />
+                    <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{f}</span>
+                  </div>
+                ))}
+                <button onClick={() => handleUpgrade("glow")} disabled={loading} style={{ width: "100%", padding: "12px", borderRadius: DS.radius.lg, background: DS.colors.accentLight, color: DS.colors.accentDark, fontSize: 14, fontWeight: 600, marginTop: 12, opacity: loading ? 0.7 : 1 }}>
+                  {loading ? "Starting trial..." : "Start free trial — Glow"}
+                </button>
+              </div>
+
+              <p style={{ textAlign: "center", fontSize: 11, color: DS.colors.textFaint, marginBottom: 12, lineHeight: 1.5 }}>Cancel anytime before day 8 — no charge.</p>
+              <button onClick={onClose} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Maybe later</button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };
 
   return (
@@ -948,7 +1031,7 @@ const loadExtendedPalette = async () => {
   const canAccessStyle = plan === "luxe";
   const categoryCards = [
     { id: "makeup" as Sheet, icon: "droplet", label: "Makeup", teaser: seasonData.makeup?.foundation?.split(".")[0] + "." || "Your personalised makeup guide.", locked: !canAccessMakeup, requiredPlan: "Glow" },
-    { id: "hair" as Sheet, icon: "scissors", label: "Hair", teaser: seasonData.hair?.best_colours?.slice(0, 2).join(", ") + " and more..." || "Your personalised hair guide.", locked: !canAccessHair, requiredPlan: "Glow" },
+    { id: "hair" as Sheet, icon: "scissors", label: "Hair", teaser: seasonData.hair?.best_colours?.length ? seasonData.hair.best_colours.slice(0, 2).join(", ") + " and more..." : "Your personalised hair guide.",
     { id: "jewellery" as Sheet, icon: "gem", label: "Jewellery", teaser: seasonData.jewellery?.metals?.join(", ") || "Your personalised jewellery guide.", locked: !canAccessJewellery, requiredPlan: "Glow" },
     { id: "style" as Sheet, icon: "shirt", label: "Style & Fit", teaser: seasonData.style?.tip || "Your personalised style guide.", locked: !canAccessStyle, requiredPlan: "Luxe" },
   ];
