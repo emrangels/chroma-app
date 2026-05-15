@@ -561,7 +561,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
   currentPlan: Plan; onUpgrade: (plan: Plan) => void;
   onClose: () => void; isGuest?: boolean; onSignUp?: () => void;
 }) => {
-  const [selected, setSelected] = useState<"glow" | "luxe">("glow");
+  const [selected, setSelected] = useState<"glow" | "luxe">("luxe");
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
   const [loading, setLoading] = useState(false);
 
@@ -1947,11 +1947,6 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
               ))}
             </div>
           )}
-
-          {/* Add item button */}
-          <button onClick={() => setShowAddItem(true)} style={{ position: "fixed", bottom: 96, right: 20, width: 52, height: 52, borderRadius: DS.radius.full, background: DS.colors.accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: DS.shadow.lg }}>
-            <Icon name="plus" size={24} color={DS.colors.white} />
-          </button>
 
           {/* Add item button */}
           <button onClick={() => setShowAddItem(true)} style={{ position: "fixed", bottom: 96, right: 20, width: 52, height: 52, borderRadius: DS.radius.full, background: DS.colors.accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: DS.shadow.lg }}>
