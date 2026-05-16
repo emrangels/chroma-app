@@ -365,7 +365,7 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File, bodyShape: string) 
                 <Icon name="camera" size={28} color={DS.colors.accent} />
               </div>
               <p style={{ fontSize: 15, fontWeight: 500, color: DS.colors.text, marginBottom: 4 }}>Upload your selfie</p>
-              <p style={{ fontSize: 13, color: DS.colors.textMuted }}>Tap to take or choose a photo</p>
+              <p style={{ fontSize: 13, color: DS.colors.textMuted }}>Tap to take or choose a photo. Android users — open your camera app first, take a photo, then choose from gallery.</p>
             </>
           )}
         </div>
