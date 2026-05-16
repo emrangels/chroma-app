@@ -64,7 +64,7 @@ const GlobalStyles = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body, #root { height: 100%; width: 100%; min-height: 100dvh; overflow: hidden; background: ${DS.colors.bg}; font-family: ${DS.font}; color: ${DS.colors.text}; -webkit-font-smoothing: antialiased; }
+    html, body, #root { height: 100%; width: 100%; min-height: -webkit-fill-available; overflow: hidden; background: ${DS.colors.bg}; font-family: ${DS.font}; color: ${DS.colors.text}; -webkit-font-smoothing: antialiased; }
     button { cursor: pointer; border: none; background: none; font-family: inherit; }
     input { font-family: inherit; }
     ::-webkit-scrollbar { width: 0px; }a[target="_blank"] { -webkit-touch-callout: none; }
@@ -2341,7 +2341,7 @@ const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, 
   user: User | null; isGuest: boolean; onSignUp: () => void;
   onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void; onSignOut: () => void; onReanalyse: () => void;
 }) => (
-  <div className="screen fade-in" style={{ background: DS.colors.bg }}>
+  <div className="screen fade-in" style={{ background: DS.colors.bg, height: "100dvh" }}>
     <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
       {activeTab === "home" ? (
   <HomeTab seasonData={seasonData} user={user} onOpenSheet={onOpenSheet} onUpgrade={onUpgrade} />
