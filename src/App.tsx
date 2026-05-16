@@ -332,6 +332,7 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File, bodyShape: string) 
   const handleFile = (file: File) => setPreview(URL.createObjectURL(file));
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) handleFile(f); };
   const handleAnalyse = () => { const f = fileRef.current?.files?.[0]; if (f && bodyShape) onUpload(f, bodyShape); };
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   const bodyShapes = [
     { id: "Hourglass", label: "Hourglass" },
@@ -369,6 +370,7 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File, bodyShape: string) 
           )}
         </div>
         <input ref={fileRef} type="file" accept="image/*" onChange={handleChange} style={{ display: "none" }} />
+        <input ref={cameraRef} type="file" accept="image/*" capture="user" onChange={handleChange} style={{ display: "none" }} />
 
         {/* Tips */}
         <div style={{ display: "flex", gap: 16, marginBottom: 28 }}>
@@ -409,7 +411,10 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File, bodyShape: string) 
             {!bodyShape ? "Select your body shape to continue" : "Analyse my colours"}
           </button>
         ) : (
-          <button onClick={() => fileRef.current?.click()} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Choose photo</button>
+          <>
+            <button onClick={() => fileRef.current?.click()} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Choose from gallery</button>
+            <button onClick={() => { if (cameraRef.current) cameraRef.current.click(); }} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.bg, color: DS.colors.text, fontSize: 16, fontWeight: 500, border: `1.5px solid ${DS.colors.border}` }}>Take a photo</button>
+          </>
         )}
       </div>
       {showBodyGuide && (
