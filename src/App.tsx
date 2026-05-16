@@ -343,8 +343,8 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File, bodyShape: string) 
   ];
 
   return (
-    <div className="screen fade-in" style={{ background: DS.colors.bg, overflowY: "auto" }}>
-      <div style={{ padding: "40px 28px 48px", display: "flex", flexDirection: "column" }}>
+      <div className="screen fade-in" style={{ background: DS.colors.bg, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+      <div style={{ padding: "40px 28px 120px", display: "flex", flexDirection: "column" }}>
         <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Take your selfie</h1>
         <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.6 }}>Use natural light, face the camera directly, and remove sunglasses.</p>
 
