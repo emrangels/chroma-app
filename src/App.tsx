@@ -1402,6 +1402,8 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
   onSignOut: () => void; onReanalyse: () => void; onUpgrade: () => void; onOpenFaq: (sheet?: Sheet) => void;
 }) => {
   const [showReanalyseWarning, setShowReanalyseWarning] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const [activePill, setActivePill] = useState<{ label: string; value: string; description: string } | null>(null);
   const [referralCopied, setReferralCopied] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
@@ -1429,6 +1431,27 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
     }).catch(() => {});
   }, [user?.id]);
 
+  const handleCancelSubscription = async () => {
+  setCancelling(true);
+  try {
+    const token = localStorage.getItem("solla_token");
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/stripe-checkout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+      body: JSON.stringify({ type: "cancel_subscription", user_id: user?.id }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const updatedUser = { ...user!, plan: "free" as Plan };
+    localStorage.setItem("solla_user", JSON.stringify(updatedUser));
+    setShowCancelConfirm(false);
+    alert("Your subscription has been cancelled. You'll keep access until the end of your billing period.");
+  } catch (e) {
+    alert("Something went wrong. Please email hello@solla.com.au to cancel.");
+  } finally {
+    setCancelling(false);
+  }
+};
   const planColors: Record<Plan, string> = { free: DS.colors.textFaint, glow: DS.colors.accent, luxe: "#C26B3A" };
   const planLabel: Record<Plan, string> = { free: "Free", glow: "Glow", luxe: "Luxe" };
   const plan = user?.plan || "free";
@@ -1527,10 +1550,10 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
               </div>
             ))}
          {plan !== "free" && (
-            <p style={{ margin: "12px 0 0", fontSize: 12, color: DS.colors.textFaint, lineHeight: 1.5 }}>
-              To cancel your subscription email <span style={{ color: DS.colors.accent }}>hello@solla.com.au</span>
-            </p>
-          )}
+            <button onClick={() => setShowCancelConfirm(true)} style={{ marginTop: 12, padding: "8px 16px", borderRadius: DS.radius.full, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>
+              Cancel subscription
+             </button>
+           )}
           </div>
         </div>
 
@@ -1585,6 +1608,18 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
         </div>
       </div>
 
+      {showCancelConfirm && (
+  <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 32px" }} onClick={() => setShowCancelConfirm(false)}>
+    <div style={{ background: DS.colors.bg, borderRadius: DS.radius.xl, padding: "28px 24px", width: "100%" }} onClick={e => e.stopPropagation()}>
+      <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.3px" }}>Cancel your subscription?</h3>
+      <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 24 }}>You'll keep access until the end of your current billing period. This cannot be undone.</p>
+      <button onClick={handleCancelSubscription} disabled={cancelling} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: DS.colors.danger, color: DS.colors.white, fontSize: 15, fontWeight: 600, marginBottom: 10, opacity: cancelling ? 0.7 : 1 }}>
+        {cancelling ? "Cancelling..." : "Yes, cancel subscription"}
+      </button>
+      <button onClick={() => setShowCancelConfirm(false)} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Keep my subscription</button>
+    </div>
+  </div>
+)}
       {/* Re-analyse warning */}
       {showReanalyseWarning && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 32px" }} onClick={() => setShowReanalyseWarning(false)}>
