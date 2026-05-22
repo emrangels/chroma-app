@@ -620,8 +620,12 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
 
           {isGuest ? (
             <>
-              <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 4 }}>Create an account to upgrade</h2>
-              <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 24 }}>Sign up first, then choose your plan to unlock your complete colour guide.</p>
+              <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 4 }}>Your colours, completely unlocked</h2>
+              <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>Find out exactly which makeup shades, hair colours and jewellery metals suit your season — try everything free for 7 days.</p>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: DS.colors.accentLight, padding: "4px 12px", borderRadius: DS.radius.full, marginBottom: 8 }}>
+              <Icon name="sparkles" size={12} color={DS.colors.accent} />
+              <span style={{ fontSize: 12, color: DS.colors.accentDark, fontWeight: 600 }}>Loved by women who finally know their colours 🌸</span>
+              </div>
               <button onClick={() => onSignUp?.()} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Create account to continue</button>
               <button onClick={onClose} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Maybe later</button>
             </>
@@ -655,14 +659,14 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
                     {billing === "annual" && <div style={{ fontSize: 11, color: DS.colors.textFaint }}>{pricing.luxe.monthlyEquiv}</div>}
                   </div>
                 </div>
-                {["Everything in Glow", "Style & Fit guide", "Extended colour palette (24+ colours)", "Wardrobe builder with colour checker", "Outfit creator", "AI stylist chat"].map(f => (
+                {["Everything in Glow", "Style guide — exactly what cuts and fits suit your body and season", "24+ colour palette — every shade you can wear confidently", "Wardrobe builder — see which items in your wardrobe actually work", "Outfit creator — build outfits you know will look good", "AI stylist — ask anything about your colours, style and wardrobe"].map(f => (
                   <div key={f} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                     <Icon name="check" size={12} color="#C26B3A" strokeWidth={2.5} />
                     <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{f}</span>
                   </div>
                 ))}
                 <button onClick={() => handleUpgrade("luxe")} disabled={loading} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: "#C26B3A", color: DS.colors.white, fontSize: 15, fontWeight: 600, marginTop: 14, opacity: loading ? 0.7 : 1 }}>
-                  {loading ? "Starting trial..." : "Start free trial — Luxe"}
+                  {loading ? "Starting trial..." : "Try Luxe free for 7 days — no charge until day 8"}
                 </button>
               </div>
 
@@ -675,7 +679,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
                     {billing === "annual" && <div style={{ fontSize: 11, color: DS.colors.textFaint }}>{pricing.glow.monthlyEquiv}</div>}
                   </div>
                 </div>
-                {["Season & full colour profile", "Makeup, hair & jewellery guides", "Colour checker — items, outfits & swatches"].map(f => (
+                {["Your full colour profile — undertone, depth, chroma and contrast explained", "Exact makeup shades, hair colours and jewellery metals for your season", "Colour checker — instantly know if any colour works for you"].map(f => (
                   <div key={f} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                     <Icon name="check" size={12} color={DS.colors.accent} strokeWidth={2.5} />
                     <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{f}</span>
@@ -686,7 +690,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
                 </button>
               </div>
 
-              <p style={{ textAlign: "center", fontSize: 11, color: DS.colors.textFaint, marginBottom: 12, lineHeight: 1.5 }}>Cancel anytime before day 8 — no charge.</p>
+              <p style={{ textAlign: "center", fontSize: 11, color: DS.colors.textFaint, marginBottom: 12, lineHeight: 1.5 }}>Cancel anytime before day 8 and you will not be charged a thing. No questions asked.</p>
               <button onClick={onClose} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Maybe later</button>
             </>
           )}

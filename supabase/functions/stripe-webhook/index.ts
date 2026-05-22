@@ -41,10 +41,11 @@ Deno.serve(async (req) => {
       const plan = session.metadata?.plan;
       const billing = session.metadata?.billing;
       if (userId && plan) {
+        const customerId = session.customer;
         await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json", "apikey": serviceRoleKey!, "Authorization": `Bearer ${serviceRoleKey}`, "Prefer": "return=minimal" },
-          body: JSON.stringify({ user_plan: plan, user_billing: billing || "monthly" }),
+          body: JSON.stringify({ user_plan: plan, user_billing: billing || "monthly", stripe_customer_id: customerId, stripe_status: "active" }),
         });
       }
     }

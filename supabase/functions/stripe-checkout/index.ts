@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      const priceId = PRICE_IDS[${plan}_${billing}];
+      const priceId = PRICE_IDS[`${plan}_${billing}`];
       if (!priceId) {
         return new Response(JSON.stringify({ error: "Invalid plan or billing" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
       const customerRes = await fetch("https://api.stripe.com/v1/customers", {
         method: "POST",
         headers: {
-          "Authorization": Bearer ${stripeKey},
+          "Authorization": `Bearer ${stripeKey}`,
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({ email, "metadata[supabase_user_id]": user_id }).toString(),
@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
       const sessionRes = await fetch("https://api.stripe.com/v1/checkout/sessions", {
         method: "POST",
         headers: {
-          "Authorization": Bearer ${stripeKey},
+          "Authorization": `Bearer ${stripeKey}`,
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({
@@ -71,8 +71,8 @@ Deno.serve(async (req) => {
           "subscription_data[metadata][supabase_user_id]": user_id,
           "subscription_data[metadata][plan]": plan,
           "subscription_data[metadata][billing]": billing,
-          success_url: ${return_url}?checkout=success&plan=${plan}&billing=${billing},
-          cancel_url: ${return_url}?checkout=cancelled,
+          success_url: `${return_url}?checkout=success&plan=${plan}&billing=${billing}`,
+          cancel_url: `${return_url}?checkout=cancelled`,
           allow_promotion_codes: "true",
         }).toString(),
       });
@@ -85,6 +85,70 @@ Deno.serve(async (req) => {
       }
 
       return new Response(JSON.stringify({ url: session.url }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (type === "cancel_subscription") {
+      if (!user_id) {
+        return new Response(JSON.stringify({ error: "Missing user_id" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const profileRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user_id}&select=stripe_customer_id`, {
+        headers: {
+          "apikey": SUPABASE_SERVICE_KEY,
+          "Authorization": `Bearer ${SUPABASE_SERVICE_KEY}`,
+        },
+      });
+      const profiles = await profileRes.json();
+      const stripeCustomerId = profiles?.[0]?.stripe_customer_id;
+
+      if (!stripeCustomerId) {
+        return new Response(JSON.stringify({ error: "No subscription found. Please email hello@solla.com.au to cancel." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const subsRes = await fetch(`https://api.stripe.com/v1/subscriptions?customer=${stripeCustomerId}&status=active`, {
+        headers: { "Authorization": `Bearer ${stripeKey}` },
+      });
+      const subs = await subsRes.json();
+      let subscriptionId = subs?.data?.[0]?.id;
+
+      if (!subscriptionId) {
+        const trialRes = await fetch(`https://api.stripe.com/v1/subscriptions?customer=${stripeCustomerId}&status=trialing`, {
+          headers: { "Authorization": `Bearer ${stripeKey}` },
+        });
+        const trialSubs = await trialRes.json();
+        subscriptionId = trialSubs?.data?.[0]?.id;
+      }
+
+      if (!subscriptionId) {
+        return new Response(JSON.stringify({ error: "No active subscription found." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      await fetch(`https://api.stripe.com/v1/subscriptions/${subscriptionId}`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${stripeKey}`, "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ cancel_at_period_end: "true" }).toString(),
+      });
+
+      await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user_id}`, {
+        method: "PATCH",
+        headers: {
+          "apikey": SUPABASE_SERVICE_KEY,
+          "Authorization": `Bearer ${SUPABASE_SERVICE_KEY}`,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal",
+        },
+        body: JSON.stringify({ stripe_status: "cancelled" }),
+      });
+
+      return new Response(JSON.stringify({ success: true }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
