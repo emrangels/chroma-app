@@ -365,7 +365,7 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File, bodyShape: string) 
                 <Icon name="camera" size={28} color={DS.colors.accent} />
               </div>
               <p style={{ fontSize: 15, fontWeight: 500, color: DS.colors.text, marginBottom: 4 }}>Upload your selfie</p>
-              <p style={{ fontSize: 13, color: DS.colors.textMuted }}>Tap to take or choose a photo. Android users — open your camera app first, take a photo, then choose from gallery.</p>
+              <p style={{ fontSize: 13, color: DS.colors.textMuted }}>Tap to take or choose a photo. Android users - open your camera app first, take a photo, then choose from gallery.</p>
             </>
           )}
         </div>
@@ -425,7 +425,7 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File, bodyShape: string) 
       </div>
       <div style={{ padding: "16px 24px" }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Body shapes guide</h2>
-        <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 20, lineHeight: 1.5 }}>Choose the shape that most closely matches your natural proportions — not your size.</p>
+        <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 20, lineHeight: 1.5 }}>Choose the shape that most closely matches your natural proportions - not your size.</p>
         {[
           { id: "Hourglass", desc: "Your shoulders and hips are roughly equal width with a clearly defined, narrow waist." },
           { id: "Pear", desc: "Your hips are noticeably wider than your shoulders, with a defined waist." },
@@ -621,7 +621,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
           {isGuest ? (
             <>
               <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 4 }}>Your colours, completely unlocked</h2>
-              <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>Find out exactly which makeup shades, hair colours and jewellery metals suit your season — try everything free for 7 days.</p>
+              <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>Find out exactly which makeup shades, hair colours and jewellery metals suit your season - try everything free for 7 days.</p>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: DS.colors.accentLight, padding: "4px 12px", borderRadius: DS.radius.full, marginBottom: 8 }}>
               <Icon name="sparkles" size={12} color={DS.colors.accent} />
               <span style={{ fontSize: 12, color: DS.colors.accentDark, fontWeight: 600 }}>Loved by women who finally know their colours 🌸</span>
@@ -635,14 +635,14 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
               <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>Experience the full Luxe plan free. Choose your plan on day 8.</p>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#F0FDF4", padding: "4px 12px", borderRadius: DS.radius.full, marginBottom: 20 }}>
                 <Icon name="check" size={12} color={DS.colors.success} strokeWidth={2.5} />
-                <span style={{ fontSize: 12, color: DS.colors.success, fontWeight: 600 }}>7-day free trial — no charge until day 8</span>
+                <span style={{ fontSize: 12, color: DS.colors.success, fontWeight: 600 }}>7-day free trial - no charge until day 8</span>
               </div>
 
               {/* Billing toggle */}
               <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, marginBottom: 20, gap: 4 }}>
                 {(["monthly", "annual"] as const).map(b => (
                   <button key={b} onClick={() => setBilling(b)} style={{ flex: 1, padding: "8px", borderRadius: DS.radius.md, fontSize: 13, fontWeight: billing === b ? 600 : 400, color: billing === b ? DS.colors.white : DS.colors.textMuted, background: billing === b ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
-                    {b === "monthly" ? "Monthly" : "Annual — save 40%"}
+                    {b === "monthly" ? "Monthly" : "Annual - save 40%"}
                   </button>
                 ))}
               </div>
@@ -659,14 +659,14 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
                     {billing === "annual" && <div style={{ fontSize: 11, color: DS.colors.textFaint }}>{pricing.luxe.monthlyEquiv}</div>}
                   </div>
                 </div>
-                {["Everything in Glow", "Style guide — exactly what cuts and fits suit your body and season", "24+ colour palette — every shade you can wear confidently", "Wardrobe builder — see which items in your wardrobe actually work", "Outfit creator — build outfits you know will look good", "AI stylist — ask anything about your colours, style and wardrobe"].map(f => (
+                {["Everything in Glow", "Style guide - exactly what cuts and fits suit your body and season", "24+ colour palette - every shade you can wear confidently", "Wardrobe builder - see which items in your wardrobe actually work", "Outfit creator - build outfits you know will look good", "AI stylist - ask anything about your colours, style and wardrobe"].map(f => (
                   <div key={f} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                     <Icon name="check" size={12} color="#C26B3A" strokeWidth={2.5} />
                     <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{f}</span>
                   </div>
                 ))}
                 <button onClick={() => handleUpgrade("luxe")} disabled={loading} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: "#C26B3A", color: DS.colors.white, fontSize: 15, fontWeight: 600, marginTop: 14, opacity: loading ? 0.7 : 1 }}>
-                  {loading ? "Starting trial..." : "Try Luxe free for 7 days — no charge until day 8"}
+                  {loading ? "Starting trial..." : "Try Luxe free for 7 days - no charge until day 8"}
                 </button>
               </div>
 
@@ -679,14 +679,14 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
                     {billing === "annual" && <div style={{ fontSize: 11, color: DS.colors.textFaint }}>{pricing.glow.monthlyEquiv}</div>}
                   </div>
                 </div>
-                {["Your full colour profile — undertone, depth, chroma and contrast explained", "Exact makeup shades, hair colours and jewellery metals for your season", "Colour checker — instantly know if any colour works for you"].map(f => (
+                {["Your full colour profile - undertone, depth, chroma and contrast explained", "Exact makeup shades, hair colours and jewellery metals for your season", "Colour checker - instantly know if any colour works for you"].map(f => (
                   <div key={f} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                     <Icon name="check" size={12} color={DS.colors.accent} strokeWidth={2.5} />
                     <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{f}</span>
                   </div>
                 ))}
                 <button onClick={() => handleUpgrade("glow")} disabled={loading} style={{ width: "100%", padding: "12px", borderRadius: DS.radius.lg, background: DS.colors.accentLight, color: DS.colors.accentDark, fontSize: 14, fontWeight: 600, marginTop: 12, opacity: loading ? 0.7 : 1 }}>
-                  {loading ? "Starting trial..." : "Start free trial — Glow"}
+                  {loading ? "Starting trial..." : "Start free trial - Glow"}
                 </button>
               </div>
 
@@ -837,18 +837,18 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Colour Theory & FAQ</h2>
           <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.5 }}>Everything you need to know about colour season analysis.</p>
           {[
-            { q: "What does Solla mean?", a: "Solla is a name with warmth woven into it from multiple directions. In Tamil it means 'to say' or 'to tell' — which felt right for an app built around revealing something true about you. In Scandinavian tradition, Solla is a given name derived from the word for sun, carrying connotations of light and warmth. In Sri Lankan slang, a solla moment is a small, simple happiness — the kind you might feel when you finally put on a colour that just works. We liked that. Solla is about knowing your colours, dressing with intention, and finding joy in the small things — like getting dressed in the morning." },
+            { q: "What does Solla mean?", a: "Solla is a name with warmth woven into it from multiple directions. In Tamil it means 'to say' or 'to tell' - which felt right for an app built around revealing something true about you. In Scandinavian tradition, Solla is a given name derived from the word for sun, carrying connotations of light and warmth. In Sri Lankan slang, a solla moment is a small, simple happiness - the kind you might feel when you finally put on a colour that just works. We liked that. Solla is about knowing your colours, dressing with intention, and finding joy in the small things - like getting dressed in the morning." },
             { q: "What is colour season analysis?", a: "Colour season analysis is a method of identifying which colours harmonise with your natural colouring — your skin tone, undertone, eye colour and hair colour. By grouping these into four seasons (Spring, Summer, Autumn, Winter) and 12 sub-seasons, we can identify the colours that make you look vibrant and alive versus those that wash you out or clash." },
-            { q: "What are the four seasons?", a: "Spring — warm, clear and bright colouring. Summer — cool, soft and muted colouring. Autumn — warm, deep and earthy colouring. Winter — cool, deep and high contrast colouring. Each season has three sub-seasons that add further nuance." },
+            { q: "What are the four seasons?", a: "Spring — warm, clear and bright colouring. Summer — cool, soft and muted colouring. Autumn - warm, deep and earthy colouring. Winter - cool, deep and high contrast colouring. Each season has three sub-seasons that add further nuance." },
             { q: "What is undertone?", a: "Undertone is the subtle hue beneath your skin's surface. Warm undertones have golden or yellow hints. Cool undertones have pink or blue hints. Neutral undertones are a mix of both. It's the single most important factor in colour analysis." },
-            { q: "What is chroma?", a: "Chroma describes how clear or muted your colouring is. High chroma means vivid, saturated features — you suit bold colours. Low chroma means soft, blended features — you suit muted, toned-down shades." },
+            { q: "What is chroma?", a: "Chroma describes how clear or muted your colouring is. High chroma means vivid, saturated features - you suit bold colours. Low chroma means soft, blended features - you suit muted, toned-down shades." },
             { q: "What is contrast?", a: "Contrast is the difference between your hair, skin and eye colour. High contrast (e.g. dark hair, light skin) suits bold colour combinations. Low contrast suits tonal, harmonious combinations." },
             { q: "How do I use the colour checker?", a: "Go to the Checker tab and upload a photo of any clothing item, full outfit, or colour swatches. Solla will analyse the colours against your season and give you a verdict with styling tips." },
-            { q: "How do I add items to my wardrobe?", a: "Go to the Wardrobe tab and tap the + button. Upload a photo of the item — Solla will automatically identify the colour and check it against your season. Name the item, select a category, and save." },
+            { q: "How do I add items to my wardrobe?", a: "Go to the Wardrobe tab and tap the + button. Upload a photo of the item - Solla will automatically identify the colour and check it against your season. Name the item, select a category, and save." },
             { q: "How do I edit or move an item in my wardrobe?", a: "Tap the edit icon (refresh symbol) on any wardrobe item to change the name or category. To delete, tap the trash icon." },
-            { q: "Can I re-analyse my colours?", a: "Yes — go to the Me tab and tap 'Re-analyse my colours'. This clears your current results and takes you back to the upload screen. For best results use a clear, well-lit selfie in natural light with no filters." },
+            { q: "Can I re-analyse my colours?", a: "Yes - go to the Me tab and tap 'Re-analyse my colours'. This clears your current results and takes you back to the upload screen. For best results use a clear, well-lit selfie in natural light with no filters." },
             { q: "What's the difference between Glow and Luxe?", a: "Glow unlocks your full colour guide including makeup, hair, jewellery and the colour checker. Luxe adds the style & fit guide, wardrobe builder, outfit creator and AI stylist chat." },
-            { q: "How does the AI stylist work?", a: "The AI stylist in the Wardrobe tab knows your colour season, body shape and every item in your wardrobe. Ask it anything — what to wear for an occasion, how to style a specific item, or to analyse your whole wardrobe for gaps." },
+            { q: "How does the AI stylist work?", a: "The AI stylist in the Wardrobe tab knows your colour season, body shape and every item in your wardrobe. Ask it anything - what to wear for an occasion, how to style a specific item, or to analyse your whole wardrobe for gaps." },
             { q: "How do I contact Solla?", a: "For any questions, feedback or support email us at hello@solla.com.au. We aim to respond within 1-2 business days." },
           ].map((item, i) => (
             <FaqItem key={i} question={item.q} answer={item.a} />
@@ -879,7 +879,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 24 }}>Last updated: 9 May 2026</p>
           {[
             { q: "Who can use Solla?", a: "You must be at least 18 years of age to use Solla. By using our services you confirm that you meet this requirement." },
-            { q: "Subscriptions and payments", a: "Solla Glow is $6.99/month or $49.99/year. Solla Luxe is $14.99/month or $99.99/year. All plans include a 7-day free trial — you will not be charged until day 8. Cancel any time before day 8 to avoid being charged. Payments are processed by Stripe." },
+            { q: "Subscriptions and payments", a: "Solla Glow is $6.99/month or $49.99/year. Solla Luxe is $14.99/month or $99.99/year. All plans include a 7-day free trial - you will not be charged until day 8. Cancel any time before day 8 to avoid being charged. Payments are processed by Stripe." },
             { q: "How do I cancel?", a: "Contact us at hello@solla.com.au to cancel your subscription. Cancellations take effect at the end of the current billing period. We do not offer refunds for partial periods." },
             { q: "AI-generated content", a: "Solla uses AI to generate colour analysis and styling recommendations. These are provided for informational and personal styling purposes only. Results may vary and should be used as guidance rather than definitive advice. We do not guarantee accuracy." },
             { q: "Acceptable use", a: "You agree not to use Solla for unlawful purposes, upload photos of others without consent, attempt to reverse engineer the app, use automated tools to access our services, or share your account credentials." },
@@ -1289,7 +1289,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
 
         {/* Mode description */}
         <p style={{ fontSize: 13, color: DS.colors.textFaint, marginBottom: 16, lineHeight: 1.5 }}>
-          {mode === "single" && "Upload a photo of one item. For best results, photograph in natural light against a neutral background — results may vary with filters or poor lighting."}
+          {mode === "single" && "Upload a photo of one item. For best results, photograph in natural light against a neutral background - results may vary with filters or poor lighting."}
           {mode === "outfit" && "Upload a full outfit photo for an overall verdict and per-piece breakdown. Natural light gives the most accurate colour reading."}
           {mode === "swatch" && "Upload a photo of your swatches in natural light (e.g. lipsticks swatched on your arm). The clearer the photo, the more precise each verdict will be."}
         </p>
@@ -1502,10 +1502,10 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
                 <p style={{ margin: "0 0 8px", fontSize: 14, fontWeight: 600, color: DS.colors.text }}>{seasonData.colour_profile.defining_quality}</p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
                   {[
-                    { label: "Undertone", value: seasonData.colour_profile.undertone, description: `Your undertone is ${seasonData.colour_profile.undertone.toLowerCase()} — ${seasonData.colour_profile.undertone === "Warm" ? "meaning your skin has golden or yellow hints beneath the surface. Warm undertones harmonise best with earthy, golden and rich colour families. Gold jewellery, camel, terracotta and olive will all work beautifully with your natural colouring." : seasonData.colour_profile.undertone === "Cool" ? "meaning your skin has pink or blue hints beneath the surface. Cool undertones harmonise best with jewel tones, icy shades and blue-based colours. Silver jewellery, navy, berry and soft whites will all complement your natural colouring." : "meaning your skin has a balance of both warm and cool hints. Neutral undertones are versatile — you can wear both warm and cool colours, making you one of the more flexible seasonal types to dress."}` },
-                    { label: "Depth", value: seasonData.colour_profile.depth, description: `Your depth is ${seasonData.colour_profile.depth.toLowerCase()} — ${seasonData.colour_profile.depth === "Light" ? "meaning your overall colouring is soft and delicate. You look most radiant in lighter, softer shades that don't overpower your natural features. Heavy, very dark colours worn near your face can overwhelm your complexion." : seasonData.colour_profile.depth === "Deep" ? "meaning your overall colouring is rich and striking. You can carry deep, saturated colours that lighter colouring cannot — dark navy, rich chocolate, and bold jewel tones will enhance your natural intensity." : "meaning your colouring sits between light and deep. You have the most flexibility with depth — you can wear both medium-toned and moderately deep colours without being overwhelmed or washed out."}` },
-                    { label: "Chroma", value: seasonData.colour_profile.chroma, description: `Your chroma is ${seasonData.colour_profile.chroma.toLowerCase()} — ${seasonData.colour_profile.chroma === "Bright" ? "meaning your features are vivid and clear. You come alive in bold, saturated colours that match your natural vibrancy. Muted or dusty shades can make you look flat — you need clarity and intensity in your palette." : seasonData.colour_profile.chroma === "Muted" || seasonData.colour_profile.chroma === "Soft" ? "meaning your features have a gentle, blended quality. You look most harmonious in toned-down, less saturated shades. Very bright or highly saturated colours can look jarring against your naturally soft colouring — choose dusty, earthy or muted versions of colours instead." : "meaning your colouring has a balanced level of saturation. You suit colours that are neither extremely bright nor heavily muted — look for colours with a natural, grounded quality."}` },
-                    { label: "Contrast", value: seasonData.colour_profile.contrast, description: `Your contrast is ${seasonData.colour_profile.contrast.toLowerCase()} — ${seasonData.colour_profile.contrast === "High" ? "meaning there is a strong difference between your hair, skin and eye colour. You look striking in bold colour combinations and strong patterns. Tonal, blended outfits can make you look washed out — you need some contrast between your pieces to match your natural intensity." : seasonData.colour_profile.contrast === "Low" ? "meaning your hair, skin and eyes are similar in tone. You look most harmonious in tonal, blended outfits where pieces are close in value. Very high contrast combinations like stark black and white can overpower your naturally soft, blended colouring." : "meaning your features have a moderate level of contrast. You suit both tonal combinations and moderately contrasting outfits — you have more flexibility than very high or very low contrast types."}` },
+                    { label: "Undertone", value: seasonData.colour_profile.undertone, description: `Your undertone is ${seasonData.colour_profile.undertone.toLowerCase()} - ${seasonData.colour_profile.undertone === "Warm" ? "meaning your skin has golden or yellow hints beneath the surface. Warm undertones harmonise best with earthy, golden and rich colour families. Gold jewellery, camel, terracotta and olive will all work beautifully with your natural colouring." : seasonData.colour_profile.undertone === "Cool" ? "meaning your skin has pink or blue hints beneath the surface. Cool undertones harmonise best with jewel tones, icy shades and blue-based colours. Silver jewellery, navy, berry and soft whites will all complement your natural colouring." : "meaning your skin has a balance of both warm and cool hints. Neutral undertones are versatile - you can wear both warm and cool colours, making you one of the more flexible seasonal types to dress."}` },
+                    { label: "Depth", value: seasonData.colour_profile.depth, description: `Your depth is ${seasonData.colour_profile.depth.toLowerCase()} — ${seasonData.colour_profile.depth === "Light" ? "meaning your overall colouring is soft and delicate. You look most radiant in lighter, softer shades that don't overpower your natural features. Heavy, very dark colours worn near your face can overwhelm your complexion." : seasonData.colour_profile.depth === "Deep" ? "meaning your overall colouring is rich and striking. You can carry deep, saturated colours that lighter colouring cannot - dark navy, rich chocolate, and bold jewel tones will enhance your natural intensity." : "meaning your colouring sits between light and deep. You have the most flexibility with depth - you can wear both medium-toned and moderately deep colours without being overwhelmed or washed out."}` },
+                    { label: "Chroma", value: seasonData.colour_profile.chroma, description: `Your chroma is ${seasonData.colour_profile.chroma.toLowerCase()} — ${seasonData.colour_profile.chroma === "Bright" ? "meaning your features are vivid and clear. You come alive in bold, saturated colours that match your natural vibrancy. Muted or dusty shades can make you look flat - you need clarity and intensity in your palette." : seasonData.colour_profile.chroma === "Muted" || seasonData.colour_profile.chroma === "Soft" ? "meaning your features have a gentle, blended quality. You look most harmonious in toned-down, less saturated shades. Very bright or highly saturated colours can look jarring against your naturally soft colouring - choose dusty, earthy or muted versions of colours instead." : "meaning your colouring has a balanced level of saturation. You suit colours that are neither extremely bright nor heavily muted - look for colours with a natural, grounded quality."}` },
+                    { label: "Contrast", value: seasonData.colour_profile.contrast, description: `Your contrast is ${seasonData.colour_profile.contrast.toLowerCase()} — ${seasonData.colour_profile.contrast === "High" ? "meaning there is a strong difference between your hair, skin and eye colour. You look striking in bold colour combinations and strong patterns. Tonal, blended outfits can make you look washed out - you need some contrast between your pieces to match your natural intensity." : seasonData.colour_profile.contrast === "Low" ? "meaning your hair, skin and eyes are similar in tone. You look most harmonious in tonal, blended outfits where pieces are close in value. Very high contrast combinations like stark black and white can overpower your naturally soft, blended colouring." : "meaning your features have a moderate level of contrast. You suit both tonal combinations and moderately contrasting outfits - you have more flexibility than very high or very low contrast types."}` },
                   ].map(item => (
                     <button key={item.label} onClick={() => setActivePill(item)} style={{ padding: "3px 10px", background: DS.colors.accentLight, borderRadius: DS.radius.full, display: "flex", alignItems: "center", gap: 4 }}>
                       <span style={{ fontSize: 11, color: DS.colors.accentDark, fontWeight: 500 }}>{item.label}: {item.value}</span>
@@ -2531,7 +2531,7 @@ export default function App() {
     }
     if (!data.hair?.best_colours || !data.makeup?.foundation || !data.palette?.best) {
   update({ screen: "upload" });
-  alert("Analysis incomplete — please try again with a clearer photo in natural light.");
+  alert("Analysis incomplete - please try again with a clearer photo in natural light.");
   return;
 }
 update({ seasonData: data, screen: "main" });
