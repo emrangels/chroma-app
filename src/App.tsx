@@ -2385,7 +2385,7 @@ const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, 
   <div className="screen fade-in" style={{ background: DS.colors.bg, height: "100dvh" }}>
     <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
       {activeTab === "home" ? (
-  <HomeTab seasonData={seasonData} user={user} onOpenSheet={onOpenSheet} onUpgrade={onUpgrade} onReanalyse={handleReanalyse} />
+  <HomeTab seasonData={seasonData} user={user} onOpenSheet={onOpenSheet} onUpgrade={onUpgrade} onReanalyse={onReanalyse} />
        ) : activeTab === "checker" ? (
   <CheckerTab seasonData={seasonData} user={user} onUpgrade={onUpgrade} />
 ) : activeTab === "me" ? (
