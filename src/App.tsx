@@ -1954,7 +1954,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             <div style={{ textAlign: "center", padding: "40px 0" }}>
               <Icon name="hanger" size={40} color={DS.colors.border} />
               <p style={{ fontSize: 15, color: DS.colors.textMuted, marginTop: 12 }}>No items yet</p>
-              <p style={{ fontSize: 13, color: DS.colors.textFaint, marginTop: 4 }}>Add your first item to get started</p>
+              <p style={{ fontSize: 13, color: DS.colors.textFaint, marginTop: 4 }}>Tap the + button to add your first item</p>
             </div>
           ) : gridView ? (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 80 }}>
@@ -2024,7 +2024,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             <div style={{ textAlign: "center", padding: "40px 0" }}>
               <Icon name="star" size={40} color={DS.colors.border} />
               <p style={{ fontSize: 15, color: DS.colors.textMuted, marginTop: 12 }}>No outfits yet</p>
-              <p style={{ fontSize: 13, color: DS.colors.textFaint, marginTop: 4 }}>Combine wardrobe items into saved outfits</p>
+              <p style={{ fontSize: 13, color: DS.colors.textFaint, marginTop: 4 }}>Pick items from your wardrobe and save them as an outfit</p>
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 80 }}>
@@ -2074,7 +2074,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
 <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: items.length > 0 ? DS.colors.accentLight : DS.colors.surface, borderRadius: DS.radius.full, marginBottom: 8 }}>
   <span style={{ fontSize: 11, color: items.length > 0 ? DS.colors.accentDark : DS.colors.textFaint, fontWeight: 500 }}>{items.length > 0 ? `${items.length} wardrobe item${items.length !== 1 ? "s" : ""} loaded` : "No wardrobe items yet"}</span>
 </div>
-                <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, maxWidth: 240, margin: "0 auto" }}>Ask me anything about your style, outfits, or what to wear for any occasion. Add items to your wardrobe first for personalised outfit suggestions.</p>
+                <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, maxWidth: 240, margin: "0 auto" }}>Ask anything — what to wear tonight, how to style a specific piece, or what your wardrobe is missing.</p>
                 <button onClick={() => { setChatInput("Analyse my wardrobe and tell me what's missing, what doesn't suit my season, and what key pieces I should add."); }} style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.lg, background: DS.colors.accentLight, fontSize: 13, color: DS.colors.accentDark, fontWeight: 600, textAlign: "left", border: `1px solid ${DS.colors.accent}30`, marginTop: 20, marginBottom: 8 }}>
   ✦ Analyse my wardrobe
 </button>
@@ -2371,7 +2371,7 @@ const PlaceholderTab = ({ tab, isGuest, onSignUp }: { tab: Tab; isGuest: boolean
     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, color: DS.colors.textMuted }}>
       <Icon name={tabs.find(t => t.id === tab)?.icon || "sparkles"} size={40} color={DS.colors.border} />
       <p style={{ fontSize: 15, fontWeight: 500 }}>{tab.charAt(0).toUpperCase() + tab.slice(1)} - coming soon</p>
-      <p style={{ fontSize: 13, color: DS.colors.textFaint }}>Foundation deployed</p>
+      <p style={{ fontSize: 13, color: DS.colors.textFaint }}>Coming soon</p>
     </div>
   );
 };
