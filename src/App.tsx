@@ -47,7 +47,7 @@ interface Outfit {
   overall_verdict: boolean; starred: boolean; created_at: string;
 }
 interface ChatMessage {
-  role: "user" | "assistant"; content: string;
+  role: "user" | "assistant"; content: string; message_id?: string; feedback?: "up" | "down";
 }
 interface AppState {
   screen: Screen; activeTab: Tab; activeSheet: Sheet;
@@ -2089,7 +2089,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
               </div>
             )}
             {chatMessages.map((msg, i) => (
-              <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
+              <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: msg.role === "user" ? "flex-end" : "flex-start" }}>
                 <div style={{ maxWidth: "80%", padding: "10px 14px", borderRadius: msg.role === "user" ? `${DS.radius.lg} ${DS.radius.lg} 4px ${DS.radius.lg}` : `${DS.radius.lg} ${DS.radius.lg} ${DS.radius.lg} 4px`, background: msg.role === "user" ? DS.colors.accent : DS.colors.surface, color: msg.role === "user" ? DS.colors.white : DS.colors.text }}>
                   <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: msg.content
   .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
@@ -2097,6 +2097,18 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
   .replace(/\n/g, '<br/>')
 }} />
                 </div>
+                {msg.role === "assistant" && !msg.feedback && (
+                  <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
+                    <button onClick={() => setChatMessages(prev => prev.map((m, j) => j === i ? { ...m, feedback: "up" } : m))} style={{ padding: "3px 10px", borderRadius: DS.radius.full, background: DS.colors.surface, fontSize: 12, color: DS.colors.textMuted }}>👍</button>
+                    <button onClick={() => { setChatMessages(prev => prev.map((m, j) => j === i ? { ...m, feedback: "down" } : m)); setChatInput("That didn't quite work — "); }} style={{ padding: "3px 10px", borderRadius: DS.radius.full, background: DS.colors.surface, fontSize: 12, color: DS.colors.textMuted }}>👎</button>
+                  </div>
+                )}
+                {msg.role === "assistant" && msg.feedback === "up" && (
+                  <span style={{ fontSize: 11, color: DS.colors.textFaint, marginTop: 4 }}>Glad that worked 🌸</span>
+                )}
+                {msg.role === "assistant" && msg.feedback === "down" && (
+                  <span style={{ fontSize: 11, color: DS.colors.textFaint, marginTop: 4 }}>Tell me what didn't work and I'll try again</span>
+                )}
               </div>
             ))}
             {chatLoading && (
