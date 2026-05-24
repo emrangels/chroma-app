@@ -2586,7 +2586,7 @@ export default function App() {
   alert("Analysis incomplete - please try again with a clearer photo in natural light.");
   return;
 }
-update({ seasonData: data, screen: "main" });
+update({ seasonData: data, screen: "main", activeSheet: "welcome" as Sheet });
   } catch { update({ screen: "upload" }); alert("Something went wrong — please try again with a clear selfie in natural light."); }
 };
 
@@ -2629,13 +2629,25 @@ update({ seasonData: data, screen: "main" });
           />
         )}
 {/* SheetOverlay at root level — position:fixed works here, not clipped by any overflow:hidden */}
-        {state.activeSheet && state.activeSheet !== "paywall" && (state.activeSheet === "faq" || state.activeSheet === "privacy" || state.activeSheet === "terms" || state.activeSheet === "cookies" || seasonData) && (
+        {state.activeSheet && state.activeSheet !== "paywall" && state.activeSheet !== "welcome" && (state.activeSheet === "faq" || state.activeSheet === "privacy" || state.activeSheet === "terms" || state.activeSheet === "cookies" || seasonData) && (
           <SheetOverlay
             activeSheet={state.activeSheet}
             seasonData={seasonData}
             onClose={() => update({ activeSheet: null })}
           />
         )}
+        {state.activeSheet === "welcome" && (
+  <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 32px" }} onClick={() => update({ activeSheet: null })}>
+    <div style={{ background: DS.colors.bg, borderRadius: DS.radius.xl, padding: "32px 24px", width: "100%" }} onClick={e => e.stopPropagation()}>
+      <div style={{ width: 56, height: 56, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+        <Icon name="sparkles" size={24} color={DS.colors.accent} />
+      </div>
+      <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>Your season is ready 🌸</h2>
+      <p style={{ fontSize: 14, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>Explore your colour palette, check any item against your season, and unlock your full guide with makeup, hair and jewellery recommendations.</p>
+      <button onClick={() => update({ activeSheet: null })} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Explore my colours</button>
+    </div>
+  </div>
+)}
         {state.activeSheet === "paywall" && (
   <PaywallSheet
     currentPlan={state.user?.plan || "free"}
