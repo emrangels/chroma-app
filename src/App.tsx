@@ -2503,8 +2503,8 @@ export default function App() {
   if (token && cachedUser) {
     try {
       const parsedUser = JSON.parse(cachedUser);
-      const params = new URLSearchParams(window.location.search);
-      const isEmailConfirmation = window.location.hash.includes("access_token") || params.get("token_hash");
+      const confirmParams = new URLSearchParams(window.location.search);
+      const isEmailConfirmation = window.location.hash.includes("access_token") || confirmParams.get("token_hash");
       if (isEmailConfirmation) {
         localStorage.removeItem("solla_token");
         localStorage.removeItem("solla_refresh");
@@ -2531,10 +2531,10 @@ export default function App() {
       }
 
       // Check for successful Stripe checkout
-      const params = new URLSearchParams(window.location.search);
-      const checkout = params.get("checkout");
-      const plan = params.get("plan") as Plan | null;
-      const billing = params.get("billing");
+      const stripeParams = new URLSearchParams(window.location.search);
+      const checkout = stripeParams.get("checkout");
+      const plan = stripeParams.get("plan") as Plan | null;
+      const billing = stripeParams.get("billing");
       if (checkout === "success" && plan && token) {
         fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${parsedUser.id}`, {
           method: "PATCH",
