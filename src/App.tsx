@@ -15,7 +15,7 @@ const DS = {
 
 type Screen = "splash" | "onboarding" | "auth" | "upload" | "analysing" | "main";
 type Tab = "home" | "checker" | "wardrobe" | "me";
-type Sheet = "palette" | "makeup" | "hair" | "jewellery" | "style" | "paywall" | "faq" | "privacy" | "terms" | "cookies" | null;
+type Sheet = "palette" | "makeup" | "hair" | "jewellery" | "style" | "paywall" | "faq" | "privacy" | "terms" | "cookies" | "welcome" | null;
 type Plan = "free" | "glow" | "luxe";
 
 interface User { id: string; email: string; name: string; plan: Plan; }
