@@ -223,11 +223,9 @@ const AuthScreen = ({ onSignIn, onGuest, onOpenTerms }: { onSignIn: (user: User)
       }
       if (mode === "signup" && userId) {
         await saveProfile(userId, userName, userEmail, data.access_token, generateReferralCode(userName), referralCode);
-        if (!data.session) {
-          setError("Check your email to confirm your account. If you don't see it within a few minutes, check your spam folder.");
-          setLoading(false);
-          return;
-        }
+        setError("Check your email to confirm your account. If you don't see it within a few minutes, check your spam folder.");
+        setLoading(false);
+        return;
       }
       const userObj: User = { id: userId, email: userEmail, name: userName, plan };
       localStorage.setItem("solla_token", data.access_token);
