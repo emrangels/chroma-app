@@ -2503,6 +2503,16 @@ export default function App() {
   if (token && cachedUser) {
     try {
       const parsedUser = JSON.parse(cachedUser);
+      const params = new URLSearchParams(window.location.search);
+      const isEmailConfirmation = window.location.hash.includes("access_token") || params.get("token_hash");
+      if (isEmailConfirmation) {
+        localStorage.removeItem("solla_token");
+        localStorage.removeItem("solla_refresh");
+        localStorage.removeItem("solla_user");
+        update({ screen: "auth" });
+        window.history.replaceState({}, "", "/");
+        return;
+      }
       const cachedSeason = localStorage.getItem(`solla_season_${parsedUser.id}`);
       if (cachedSeason) {
         const parsedSeason = JSON.parse(cachedSeason);
