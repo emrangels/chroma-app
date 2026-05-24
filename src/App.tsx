@@ -2582,7 +2582,7 @@ export default function App() {
   return;
 }
 update({ seasonData: data, screen: "main" });
-  } catch { update({ screen: "main" }); }
+  } catch { update({ screen: "upload" }); alert("Something went wrong — please try again with a clear selfie in natural light."); }
 };
 
   const { screen, activeTab, user, isGuest, seasonData } = state;
