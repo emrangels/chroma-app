@@ -53,6 +53,7 @@ interface AppState {
   screen: Screen; activeTab: Tab; activeSheet: Sheet;
   user: User | null; isGuest: boolean; seasonData: SeasonData | null;
   wardrobeItems: WardrobeItem[]; checkerMode: "single" | "swatch"; onboardingIndex: number;
+  tourStep: number | null;
 }
 
 const SUPABASE_URL = "https://hnbpasabtwafnlxzlppr.supabase.co";
@@ -531,6 +532,32 @@ const tabs: { id: Tab; icon: string; label: string }[] = [
   { id: "me", icon: "user", label: "Me" },
 ];
 
+const tourSteps = [
+  { tab: "home" as Tab, title: "Your colour season", body: "Your palette, daily tip and full colour guide live here." },
+  { tab: "checker" as Tab, title: "Colour checker", body: "Upload any item or outfit to see if it suits your season." },
+  { tab: "wardrobe" as Tab, title: "Your wardrobe", body: "Build your wardrobe, create outfits and chat with your AI stylist." },
+  { tab: "me" as Tab, title: "Your profile", body: "Manage your account, plan and preferences here." },
+];
+
+const TourTooltip = ({ step, total, onNext, onSkip, activeTab, onTabChange }: { step: number; total: number; onNext: () => void; onSkip: () => void; activeTab: Tab; onTabChange: (tab: Tab) => void; }) => {
+  const current = tourSteps[step];
+  useEffect(() => { onTabChange(current.tab); }, [step]);
+  return (
+    <div style={{ position: "fixed", bottom: 90, left: 16, right: 16, zIndex: 2000 }}>
+      <div style={{ background: DS.colors.accent, borderRadius: DS.radius.lg, padding: "16px 18px", boxShadow: DS.shadow.lg }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>{step + 1} of {total}</span>
+          <button onClick={onSkip} style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>Skip tour</button>
+        </div>
+        <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 700, color: DS.colors.white }}>{current.title}</p>
+        <p style={{ margin: "0 0 14px", fontSize: 13, color: "rgba(255,255,255,0.85)", lineHeight: 1.5 }}>{current.body}</p>
+        <button onClick={onNext} style={{ width: "100%", padding: "10px", borderRadius: DS.radius.md, background: DS.colors.white, fontSize: 13, fontWeight: 600, color: DS.colors.accent }}>
+          {step < total - 1 ? "Next" : "Get started"}
+        </button>
+      </div>
+    </div>
+  );
+};
 const BottomNav = ({ activeTab, onTabChange }: { activeTab: Tab; onTabChange: (tab: Tab) => void; }) => (
   <div style={{ height: 80, borderTop: `1px solid ${DS.colors.border}`, background: DS.colors.bg, display: "flex", paddingBottom: 16 }}>
     {tabs.map(tab => {
@@ -2459,7 +2486,7 @@ export default function App() {
   const [state, setState] = useState<AppState>({
     screen: "splash", activeTab: "home", activeSheet: null,
     user: null, isGuest: false, seasonData: null,
-    wardrobeItems: [], checkerMode: "single", onboardingIndex: 0,
+    wardrobeItems: [], checkerMode: "single", onboardingIndex: 0, tourStep: null,
   });
   const update = (patch: Partial<AppState>) => setState(s => ({ ...s, ...patch }));
 
@@ -2601,7 +2628,7 @@ export default function App() {
   alert("Analysis incomplete - please try again with a clearer photo in natural light.");
   return;
 }
-update({ seasonData: data, screen: "main", activeSheet: "welcome" as Sheet });
+update({ seasonData: data, screen: "main", activeSheet: "welcome" as Sheet, tourStep: null });
   } catch { update({ screen: "upload" }); alert("Something went wrong — please try again with a clear selfie in natural light."); }
 };
 
@@ -2659,9 +2686,19 @@ update({ seasonData: data, screen: "main", activeSheet: "welcome" as Sheet });
       </div>
       <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>Your season is ready 🌸</h2>
       <p style={{ fontSize: 14, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>Explore your colour palette, check any item against your season, and unlock your full guide with makeup, hair and jewellery recommendations.</p>
-      <button onClick={() => update({ activeSheet: null })} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Explore my colours</button>
+      <button onClick={() => update({ activeSheet: null, tourStep: 0 })} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Explore my colours</button>
     </div>
   </div>
+)}
+        {state.tourStep !== null && state.screen === "main" && (
+  <TourTooltip
+    step={state.tourStep}
+    total={tourSteps.length}
+    onNext={() => update({ tourStep: state.tourStep! + 1 < tourSteps.length ? state.tourStep! + 1 : null })}
+    onSkip={() => update({ tourStep: null })}
+    activeTab={state.activeTab}
+    onTabChange={tab => update({ activeTab: tab })}
+  />
 )}
         {state.activeSheet === "paywall" && (
   <PaywallSheet
