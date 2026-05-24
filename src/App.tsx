@@ -221,7 +221,14 @@ const AuthScreen = ({ onSignIn, onGuest, onOpenTerms }: { onSignIn: (user: User)
           if (profiles?.[0]?.user_plan) plan = profiles[0].user_plan as Plan;
         } catch {}
       }
-      if (mode === "signup" && userId) await saveProfile(userId, userName, userEmail, data.access_token, generateReferralCode(userName), referralCode);
+      if (mode === "signup" && userId) {
+        await saveProfile(userId, userName, userEmail, data.access_token, generateReferralCode(userName), referralCode);
+        if (!data.user?.confirmed_at) {
+          setError("Check your email to confirm your account. If you don't see it within a few minutes, check your spam folder.");
+          setLoading(false);
+          return;
+        }
+      }
       const userObj: User = { id: userId, email: userEmail, name: userName, plan };
       localStorage.setItem("solla_token", data.access_token);
       localStorage.setItem("solla_refresh", data.refresh_token || "");
