@@ -221,8 +221,8 @@ const AuthScreen = ({ onSignIn, onGuest, onOpenTerms }: { onSignIn: (user: User)
           if (profiles?.[0]?.user_plan) plan = profiles[0].user_plan as Plan;
         } catch {}
       }
-      if (mode === "signup" && userId) {
-        await saveProfile(userId, userName, userEmail, data.access_token, generateReferralCode(userName), referralCode);
+      if (mode === "signup") {
+        if (userId) await saveProfile(userId, userName, userEmail, data.access_token, generateReferralCode(userName), referralCode);
         setError("Check your email to confirm your account. If you don't see it within a few minutes, check your spam folder.");
         setLoading(false);
         return;
