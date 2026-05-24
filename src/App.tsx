@@ -1005,7 +1005,7 @@ const loadExtendedPalette = async () => {
     { id: "makeup" as Sheet, icon: "droplet", label: "Makeup", teaser: "Find out exactly which foundation undertone, blush shades and lip colours suit your season", locked: !canAccessMakeup, requiredPlan: "Glow" },
     { id: "hair" as Sheet, icon: "scissors", label: "Hair", teaser: "Discover the exact hair colours and tones that make your natural colouring come alive", locked: !canAccessHair, requiredPlan: "Glow" },
     { id: "jewellery" as Sheet, icon: "gem", label: "Jewellery", teaser: "Discover which metals and stones are made for your colouring", locked: !canAccessJewellery, requiredPlan: "Glow" },
-    { id: "style" as Sheet, icon: "shirt", label: "Style & Fit", teaser: "Discover exactly which cuts, silhouettes and patterns work for your colouring", locked: !canAccessStyle, requiredPlan: "Luxe" },
+    { id: "style" as Sheet, icon: "shirt", label: "Style & Fit", teaser: "Discover exactly which cuts, silhouettes and patterns work for your colouring and body shape", locked: !canAccessStyle, requiredPlan: "Luxe" },
   ];
   return (
     <div style={{ flex: 1, overflowY: "auto", background: DS.colors.bg }}>
