@@ -267,7 +267,7 @@ const AuthScreen = ({ onSignIn, onGuest }: { onSignIn: (user: User) => void; onG
                 <div style={{ width: 20, height: 20, borderRadius: DS.radius.sm, border: `1.5px solid ${agreedToTerms ? DS.colors.accent : DS.colors.border}`, background: agreedToTerms ? DS.colors.accent : DS.colors.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1, transition: "all 0.2s" }}>
                   {agreedToTerms && <Icon name="check" size={12} color={DS.colors.white} strokeWidth={2.5} />}
                 </div>
-                <span style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>I agree to the Terms of Service and Privacy Policy</span>
+                <span style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>I agree to the <span onClick={e => { e.stopPropagation(); onOpenTerms("terms"); }} style={{ color: DS.colors.accent, textDecoration: "underline" }}>Terms of Service</span> and <span onClick={e => { e.stopPropagation(); onOpenTerms("privacy"); }} style={{ color: DS.colors.accent, textDecoration: "underline" }}>Privacy Policy</span></span>
               </button>
             </>
           )}
