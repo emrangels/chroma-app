@@ -189,7 +189,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
   );
 };
 
-const AuthScreen = ({ onSignIn, onGuest }: { onSignIn: (user: User) => void; onGuest: () => void; }) => {
+const AuthScreen = ({ onSignIn, onGuest, onOpenTerms }: { onSignIn: (user: User) => void; onGuest: () => void; onOpenTerms: (sheet: Sheet) => void; }) => {
   const [mode, setMode] = useState<"landing" | "signin" | "signup">("landing");
   const [email, setEmail] = useState(""); const [password, setPassword] = useState("");
   const [name, setName] = useState(""); const [referralCode, setReferralCode] = useState("");
@@ -2562,7 +2562,7 @@ update({ seasonData: data, screen: "main" });
       <div style={{ position: "relative", width: "100vw", height: "100vh", maxWidth: 430, margin: "0 auto" }}>
         {screen === "splash" && <SplashScreen onComplete={() => update({ screen: "onboarding" })} />}
         {screen === "onboarding" && <OnboardingScreen onComplete={() => update({ screen: "auth" })} />}
-        {screen === "auth" && <AuthScreen onSignIn={u => {
+        {screen === "auth" && <AuthScreen onOpenTerms={sheet => update({ activeSheet: sheet })} onSignIn={u => {
   const cachedSeason = localStorage.getItem(`solla_season_${u.id}`);
   if (cachedSeason) {
     try {
