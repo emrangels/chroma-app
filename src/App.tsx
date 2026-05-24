@@ -722,7 +722,8 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
                 </button>
               </div>
 
-              <p style={{ textAlign: "center", fontSize: 11, color: DS.colors.textFaint, marginBottom: 12, lineHeight: 1.5 }}>Cancel anytime before day 8 and you will not be charged a thing. No questions asked.</p>
+              <p style={{ textAlign: "center", fontSize: 11, color: DS.colors.textFaint, marginBottom: 12, lineHeight: 1.5 }}>Cancel anytime before day 8 and you will not be charged a thing.
+               No questions asked. Choose your plan on day 8.</p>
               <button onClick={onClose} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Maybe later</button>
             </>
           )}
