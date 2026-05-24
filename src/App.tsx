@@ -190,7 +190,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
 };
 
 const AuthScreen = ({ onSignIn, onGuest, onOpenTerms }: { onSignIn: (user: User) => void; onGuest: () => void; onOpenTerms: (sheet: Sheet) => void; }) => {
-  const [mode, setMode] = useState<"landing" | "signin" | "signup">("landing");
+  const [mode, setMode] = useState<"landing" | "signin" | "signup" | "forgot">("landing");
   const [email, setEmail] = useState(""); const [password, setPassword] = useState("");
   const [name, setName] = useState(""); const [referralCode, setReferralCode] = useState("");
   const [showReferral, setShowReferral] = useState(false); const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -230,7 +230,33 @@ const AuthScreen = ({ onSignIn, onGuest, onOpenTerms }: { onSignIn: (user: User)
     } catch (e) { setError(e instanceof Error ? e.message : "Something went wrong. Please try again."); }
     finally { setLoading(false); }
   };
-  if (mode === "landing") return (
+  if (mode === "forgot") return (
+    <div className="screen fade-in" style={{ background: DS.colors.bg, overflowY: "auto" }}>
+      <div style={{ padding: "40px 28px 48px", display: "flex", flexDirection: "column", gap: 0 }}>
+        <button onClick={() => { setMode("signin"); setError(""); }} style={{ alignSelf: "flex-start", marginBottom: 32, color: DS.colors.textMuted }}><Icon name="chevronLeft" size={20} color={DS.colors.textMuted} /></button>
+        <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Reset your password</h1>
+        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 32 }}>Enter your email and we'll send you a reset link.</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <input style={inputStyle} type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} />
+          {error && <p style={{ fontSize: 13, color: DS.colors.danger, padding: "8px 12px", background: "#FEF2F2", borderRadius: DS.radius.sm }}>{error}</p>}
+          <button onClick={async () => {
+            setLoading(true); setError("");
+            try {
+              const res = await fetch(`${SUPABASE_URL}/auth/v1/recover`, { method: "POST", headers: { ...supabaseHeaders, "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
+              const data = await res.json();
+              if (data.error) throw new Error(data.error);
+              setError("Check your email for a reset link.");
+            } catch (e) { setError(e instanceof Error ? e.message : "Something went wrong."); }
+            finally { setLoading(false); }
+          }} disabled={loading || !email.trim()} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: !email.trim() ? DS.colors.border : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>
+            {loading ? "Sending..." : "Send reset link"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+if (mode === "landing") return (
     <div className="screen fade-in" style={{ background: DS.colors.bg }}>
       <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 28px" }}>
         <div style={{ width: 72, height: 72, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
@@ -276,9 +302,14 @@ const AuthScreen = ({ onSignIn, onGuest, onOpenTerms }: { onSignIn: (user: User)
             {loading ? "Please wait..." : mode === "signup" ? "Create account" : "Sign in"}
           </button>
         </div>
-        <button onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setError(""); }} style={{ marginTop: 20, fontSize: 14, color: DS.colors.accent, fontWeight: 500, alignSelf: "center" }}>
+       <button onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setError(""); }} style={{ marginTop: 20, fontSize: 14, color: DS.colors.accent, fontWeight: 500, alignSelf: "center" }}>
           {mode === "signup" ? "Already have an account? Sign in" : "New to Solla? Create account"}
         </button>
+        {mode === "signin" && (
+          <button onClick={() => { setMode("forgot"); setError(""); }} style={{ marginTop: 8, fontSize: 13, color: DS.colors.textMuted, fontWeight: 500, alignSelf: "center" }}>
+            Forgot your password?
+          </button>
+        )}
       </div>
     </div>
   );
