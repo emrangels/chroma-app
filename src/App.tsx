@@ -1623,6 +1623,11 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
     <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.text }}>Colour theory & FAQ</span>
     <span style={{ marginLeft: "auto" }}><Icon name="chevronRight" size={16} color={DS.colors.textFaint} /></span>
   </button>
+  <button onClick={() => window.location.href = "mailto:hello@solla.com.au?subject=Solla Support"} style={{ width: "100%", padding: "16px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${DS.colors.border}` }}>
+    <Icon name="bell" size={18} color={DS.colors.text} />
+    <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.text }}>Contact support</span>
+    <span style={{ marginLeft: "auto" }}><Icon name="chevronRight" size={16} color={DS.colors.textFaint} /></span>
+  </button>
   <button onClick={() => setShowReanalyseWarning(true)} style={{ width: "100%", padding: "16px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${DS.colors.border}` }}>
             <Icon name="refresh" size={18} color={DS.colors.text} />
             <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.text }}>Re-analyse my colours</span>
