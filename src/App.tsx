@@ -1087,7 +1087,7 @@ const loadExtendedPalette = async () => {
           </div>
 
           {/* Base colours */}
-          {seasonData.palette.base && seasonData.palette.base.length > 0 && (
+          {plan !== "free" && seasonData.palette.base && seasonData.palette.base.length > 0 && (
             <div style={{ marginBottom: 16, paddingTop: 14, borderTop: `1px solid ${DS.colors.border}` }}>
               <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 500, color: DS.colors.textMuted }}>Base neutrals</p>
               <div style={{ display: "flex", gap: 8 }}>
@@ -1102,7 +1102,7 @@ const loadExtendedPalette = async () => {
           )}
 
           {/* Accent colours */}
-          {seasonData.palette.accent && seasonData.palette.accent.length > 0 && (
+          {plan !== "free" && seasonData.palette.accent && seasonData.palette.accent.length > 0 && (
             <div style={{ marginBottom: 16, paddingTop: 14, borderTop: `1px solid ${DS.colors.border}` }}>
               <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 500, color: DS.colors.textMuted }}>Accent colours</p>
               <div style={{ display: "flex", gap: 8 }}>
@@ -1147,7 +1147,7 @@ const loadExtendedPalette = async () => {
             </div>
           )}
           {/* Avoid colours */}
-          <div style={{ paddingTop: 14, borderTop: `1px solid ${DS.colors.border}` }}>
+          {plan !== "free" && <div style={{ paddingTop: 14, borderTop: `1px solid ${DS.colors.border}` }}>
             <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 500, color: DS.colors.textMuted }}>Avoid</p>
             <div style={{ display: "flex", gap: 8 }}>
               {(seasonData.palette.avoid || []).map(colour => (
@@ -1161,7 +1161,7 @@ const loadExtendedPalette = async () => {
                 </div>
               ))}
             </div>
-          </div>
+          </div>}
         </div>
         {categoryCards.map(card => (
           <button key={card.id} onClick={() => card.locked ? onUpgrade() : onOpenSheet(card.id)} style={{ background: card.locked ? DS.colors.surface : DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "14px 16px", textAlign: "left", width: "100%", display: "flex", flexDirection: "column", gap: 6 }}>
