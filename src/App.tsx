@@ -15,7 +15,7 @@ const DS = {
 
 type Screen = "splash" | "onboarding" | "auth" | "upload" | "analysing" | "main";
 type Tab = "home" | "checker" | "wardrobe" | "me";
-type Sheet = "palette" | "makeup" | "hair" | "jewellery" | "style" | "paywall" | "faq" | "privacy" | "terms" | "cookies" | "welcome" | null;
+type Sheet = "palette" | "makeup" | "hair" | "jewellery" | "style" | "paywall" | "faq" | "privacy" | "terms" | "cookies" | "welcome" | "preview" | null;
 type Plan = "free" | "glow" | "luxe";
 
 interface User { id: string; email: string; name: string; plan: Plan; }
@@ -2637,7 +2637,7 @@ export default function App() {
   alert("Analysis incomplete - please try again with a clearer photo in natural light.");
   return;
 }
-update({ seasonData: data, screen: "main", activeSheet: "welcome" as Sheet, tourStep: null });
+update({ seasonData: data, screen: "main", activeSheet: "preview" as Sheet, tourStep: null });
   } catch { update({ screen: "upload" }); alert("Something went wrong — please try again with a clear selfie in natural light."); }
 };
 
@@ -2687,6 +2687,45 @@ update({ seasonData: data, screen: "main", activeSheet: "welcome" as Sheet, tour
             onClose={() => update({ activeSheet: null })}
           />
         )}
+        {state.activeSheet === "preview" && state.seasonData && (
+  <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={() => update({ activeSheet: "welcome" as Sheet })}>
+    <div style={{ width: "100%", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
+      <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+        <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
+      </div>
+      <div style={{ padding: "20px 24px 0" }}>
+        <div style={{ background: seasonGradients[state.seasonData.season] || seasonGradients.Summer, borderRadius: DS.radius.lg, padding: "20px", marginBottom: 20 }}>
+          <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 600, color: seasonAccentColors[state.seasonData.season] || "#4A6FD4", letterSpacing: "0.08em", textTransform: "uppercase" }}>Your colour season</p>
+          <h2 style={{ margin: "0 0 4px", fontSize: 36, fontWeight: 700, color: seasonTextColors[state.seasonData.season] || "#1a2a4a", letterSpacing: "-1px" }}>{state.seasonData.season}</h2>
+          <p style={{ margin: 0, fontSize: 13, color: seasonTextColors[state.seasonData.season] || "#1a2a4a", opacity: 0.8 }}>{state.seasonData.headline}</p>
+        </div>
+        <p style={{ margin: "0 0 16px", fontSize: 14, fontWeight: 600, color: DS.colors.text }}>Your full guide includes:</p>
+        {[
+          { icon: "droplet", label: "Makeup", desc: `Your exact foundation undertone, blush and lip shades as a ${state.seasonData.season}` },
+          { icon: "scissors", label: "Hair colours", desc: `The exact shades that make your ${state.seasonData.season} colouring come alive` },
+          { icon: "gem", label: "Jewellery", desc: "Your metals and stones — personalised to your season" },
+          { icon: "shirt", label: "Style & Fit", desc: "Cuts, silhouettes and patterns that work for your body and season" },
+        ].map(item => (
+          <div key={item.label} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+            <div style={{ width: 36, height: 36, borderRadius: DS.radius.md, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Icon name={item.icon} size={18} color={DS.colors.accent} strokeWidth={1.5} />
+            </div>
+            <div>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>{item.label}</p>
+              <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted }}>{item.desc}</p>
+            </div>
+          </div>
+        ))}
+        <button onClick={() => update({ activeSheet: "paywall" as Sheet })} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginTop: 8 }}>
+          Unlock my full guide — free for 7 days
+        </button>
+        <button onClick={() => update({ activeSheet: "welcome" as Sheet })} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500, marginTop: 8 }}>
+          Maybe later
+        </button>
+      </div>
+    </div>
+  </div>
+)}
         {state.activeSheet === "welcome" && (
   <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 32px" }} onClick={() => update({ activeSheet: null })}>
     <div style={{ background: DS.colors.bg, borderRadius: DS.radius.xl, padding: "32px 24px", width: "100%" }} onClick={e => e.stopPropagation()}>
