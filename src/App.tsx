@@ -1576,7 +1576,16 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
               <div style={{ padding: "12px 14px", background: DS.colors.bg, borderRadius: DS.radius.md, border: `1px solid ${DS.colors.border}` }}>
                 <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Your colour profile</p>
                 <p style={{ margin: "0 0 8px", fontSize: 14, fontWeight: 600, color: DS.colors.text }}>{seasonData.colour_profile.defining_quality}</p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+                {plan === "free" && (
+                  <button onClick={onUpgrade} style={{ width: "100%", padding: "10px 14px", background: DS.colors.accentLight, borderRadius: DS.radius.md, display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                    <div style={{ textAlign: "left" }}>
+                      <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: DS.colors.accent }}>Unlock your full colour profile</p>
+                      <p style={{ margin: "2px 0 0", fontSize: 11, color: DS.colors.accentDark }}>Undertone · Depth · Chroma · Contrast</p>
+                    </div>
+                    <Icon name="lock" size={14} color={DS.colors.accent} strokeWidth={2} />
+                  </button>
+                )}
+                {plan !== "free" && <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
                   {[
                     { label: "Undertone", value: seasonData.colour_profile.undertone, description: `Your undertone is ${seasonData.colour_profile.undertone.toLowerCase()} - ${seasonData.colour_profile.undertone === "Warm" ? "meaning your skin has golden or yellow hints beneath the surface. Warm undertones harmonise best with earthy, golden and rich colour families. Gold jewellery, camel, terracotta and olive will all work beautifully with your natural colouring." : seasonData.colour_profile.undertone === "Cool" ? "meaning your skin has pink or blue hints beneath the surface. Cool undertones harmonise best with jewel tones, icy shades and blue-based colours. Silver jewellery, navy, berry and soft whites will all complement your natural colouring." : "meaning your skin has a balance of both warm and cool hints. Neutral undertones are versatile - you can wear both warm and cool colours, making you one of the more flexible seasonal types to dress."}` },
                     { label: "Depth", value: seasonData.colour_profile.depth, description: `Your depth is ${seasonData.colour_profile.depth.toLowerCase()} — ${seasonData.colour_profile.depth === "Light" ? "meaning your overall colouring is soft and delicate. You look most radiant in lighter, softer shades that don't overpower your natural features. Heavy, very dark colours worn near your face can overwhelm your complexion." : seasonData.colour_profile.depth === "Deep" ? "meaning your overall colouring is rich and striking. You can carry deep, saturated colours that lighter colouring cannot - dark navy, rich chocolate, and bold jewel tones will enhance your natural intensity." : "meaning your colouring sits between light and deep. You have the most flexibility with depth - you can wear both medium-toned and moderately deep colours without being overwhelmed or washed out."}` },
@@ -1588,7 +1597,7 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
                       <Icon name="info" size={10} color={DS.colors.accent} strokeWidth={2} />
                     </button>
                   ))}
-                </div>
+                </div>}
 
                 {/* Pill explanation modal */}
                 {activePill && (
