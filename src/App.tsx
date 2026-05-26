@@ -631,7 +631,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
   currentPlan: Plan; onUpgrade: (plan: Plan) => void;
   onClose: () => void; isGuest?: boolean; onSignUp?: () => void;
 }) => {
-  const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
+  const [billing, setBilling] = useState<"monthly" | "annual">("annual");
   const [loading, setLoading] = useState(false);
 
   const pricing = {
