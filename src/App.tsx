@@ -1047,7 +1047,7 @@ const loadExtendedPalette = async () => {
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
           {plan === "free" ? (
             <button onClick={onUpgrade} style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: "rgba(255,255,255,0.5)", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, color: accentColor, border: `1px solid ${accentColor}30` }}>
-              <Icon name="lock" size={10} color={accentColor} strokeWidth={2} />Your subseason is locked — unlock with Glow
+              <Icon name="lock" size={10} color={accentColor} strokeWidth={2} />{seasonData.subseason} - unlock
             </button>
           ) : (
             <span style={{ fontSize: 15, color: accentColor, fontWeight: 500 }}>{seasonData.subseason}</span>
