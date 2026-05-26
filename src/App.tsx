@@ -1063,6 +1063,15 @@ const loadExtendedPalette = async () => {
         <Icon name="sparkles" size={14} color={accentColor} strokeWidth={2} />
         <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{seasonData.daily_tip}</p>
       </div>
+      {plan === "free" && (
+        <button onClick={onUpgrade} style={{ margin: "0 16px 4px", padding: "12px 16px", background: DS.colors.accent, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: DS.colors.white }}>Your makeup, hair and jewellery guide is ready</p>
+            <p style={{ margin: "2px 0 0", fontSize: 12, color: "rgba(255,255,255,0.8)" }}>Unlock your full {seasonData.season} guide — free for 7 days</p>
+          </div>
+          <Icon name="chevronRight" size={16} color={DS.colors.white} />
+        </button>
+      )}
       <div style={{ padding: "20px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
         <div style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "16px" }}>
           <p style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 600, color: DS.colors.text }}>Your palette</p>
