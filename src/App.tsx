@@ -1469,6 +1469,12 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
     + Save to wardrobe
   </button>
 )}
+{user?.plan === "glow" && (
+  <button onClick={onUpgrade} style={{ marginTop: 8, padding: "8px 14px", borderRadius: DS.radius.full, background: "#FFF7ED", border: `1px solid #C26B3A`, display: "flex", alignItems: "center", gap: 6 }}>
+    <Icon name="lock" size={12} color="#C26B3A" strokeWidth={2} />
+    <span style={{ fontSize: 12, color: "#C26B3A", fontWeight: 600 }}>Save to wardrobe — unlock with Luxe</span>
+  </button>
+)}
                 </div>
               ))}
             </div>
