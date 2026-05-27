@@ -135,7 +135,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
           <div style={{ width: 88, height: 88, borderRadius: DS.radius.xl, background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", backdropFilter: "blur(8px)", border: "1.5px solid rgba(255,255,255,0.3)" }}>
             <Icon name="sparkles" size={40} color={DS.colors.white} strokeWidth={1.5} />
           </div>
-          <div style={{ fontSize: 42, fontWeight: 700, color: DS.colors.white, letterSpacing: "-1px" }}>Solla</div>
+          <div style={{ fontSize: 42, fontWeight: 700, color: DS.colors.white, letterSpacing: "-1px" }}>Solla™</div>
         </div>
         <div className="tag-anim" style={{ marginTop: 12, fontSize: 15, color: "rgba(255,255,255,0.75)", fontWeight: 400, letterSpacing: "0.02em" }}>Your colour season, revealed</div>
         <div className="dots-anim" style={{ marginTop: 48, display: "flex", gap: 6, justifyContent: "center" }}>
@@ -2425,6 +2425,7 @@ const ShareCard = ({ seasonData, onClose }: { seasonData: SeasonData; onClose: (
           <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: textColor }}>Know your colours. Dress your best.</p>
           <p style={{ margin: "0 0 2px", fontSize: 11, color: textColor, opacity: 0.6 }}>Colour analysis · Wardrobe tools · AI stylist</p>
           <p style={{ margin: 0, fontSize: 11, color: accentColor, fontWeight: 600 }}>solla.com.au · @sollaapp</p>
+          <p style={{ margin: "4px 0 0", fontSize: 10, color: textColor, opacity: 0.5 }}>© 2026 Solla™. All rights reserved.</p>
         </div>
       </div>
 
