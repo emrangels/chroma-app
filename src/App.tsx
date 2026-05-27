@@ -914,7 +914,8 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
             { q: "How do I edit or move an item in my wardrobe?", a: "Tap the edit icon (refresh symbol) on any wardrobe item to change the name or category. To delete, tap the trash icon." },
             { q: "Can I re-analyse my colours?", a: "Yes — go to the Me tab and tap 'Re-analyse my colours'. This clears your current results and takes you back to the upload screen. For best results use a clear, well-lit selfie in natural light with no filters." },
             { q: "My results aren't showing — what do I do?", a: "If your colour guide isn't appearing, try re-analysing your colours. Go to the Me tab and tap 'Re-analyse my colours' to upload a new photo and get your results." },
-            { q: "What's the difference between Glow and Luxe?", a: "Glow unlocks your full colour guide including makeup, hair, jewellery and the colour checker. Luxe adds the style & fit guide, wardrobe builder, outfit creator and AI stylist chat." },
+            { q: "What do I get on the free plan?", a: "The free plan gives you your colour season, your 4 best colours, your season headline and a daily colour tip. It's a great starting point to discover your season." },
+            { q: "What's the difference between Glow and Luxe?", a: "Glow unlocks your subseason, full colour palette, colour profile (undertone, depth, chroma and contrast), makeup guide, hair colour guide, jewellery guide and colour checker. Luxe adds everything in Glow plus your style and fit guide, extended palette of 24+ colours, wardrobe builder, outfit creator and AI stylist chat." },
             { q: "How does the AI stylist work?", a: "The AI stylist in the Wardrobe tab knows your colour season, body shape and every item in your wardrobe. Ask it anything - what to wear for an occasion, how to style a specific item, or to analyse your whole wardrobe for gaps." },
             { q: "How do I contact Solla?", a: "For any questions, feedback or support email us at hello@solla.com.au. We aim to respond within 1-2 business days." },
           ].map((item, i) => (
@@ -1552,9 +1553,9 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
   };
 
   const planFeatures: Record<Plan, string[]> = {
-    free: ["Season & palette", "Daily tip"],
-    glow: ["Season & full colour profile", "Makeup guide", "Hair colour guide", "Jewellery guide", "Colour checker"],
-    luxe: ["Everything in Glow", "Style & Fit guide", "Extended colour palette (24+ colours)", "Wardrobe builder with colour checker", "Outfit creator", "AI stylist chat", "Capsule wardrobe analysis"],
+    free: ["Your colour season", "4 best colours from your palette", "Season headline", "Daily colour tip"],
+    glow: ["Your subseason", "Full colour palette", "Colour profile — undertone, depth, chroma, contrast", "Makeup guide — foundation, blush, lips, eyes", "Hair colour guide", "Jewellery — metals and stones", "Colour checker"],
+    luxe: ["Everything in Glow", "Style & Fit guide — silhouettes, patterns, fabrics", "Extended palette — 24+ colours", "Wardrobe builder", "Outfit creator", "AI stylist chat", "Capsule wardrobe analysis"],
   };
 
   return (
