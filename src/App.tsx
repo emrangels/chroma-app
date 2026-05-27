@@ -54,6 +54,7 @@ interface AppState {
   user: User | null; isGuest: boolean; seasonData: SeasonData | null;
   wardrobeItems: WardrobeItem[]; checkerMode: "single" | "swatch"; onboardingIndex: number;
   tourStep: number | null;
+showDay3Prompt: boolean;
 }
 
 const SUPABASE_URL = "https://hnbpasabtwafnlxzlppr.supabase.co";
@@ -2505,7 +2506,7 @@ export default function App() {
   const [state, setState] = useState<AppState>({
     screen: "splash", activeTab: "home", activeSheet: null,
     user: null, isGuest: false, seasonData: null,
-    wardrobeItems: [], checkerMode: "single", onboardingIndex: 0, tourStep: null,
+    wardrobeItems: [], checkerMode: "single", onboardingIndex: 0, tourStep: null, showDay3Prompt: false,
   });
   const update = (patch: Partial<AppState>) => setState(s => ({ ...s, ...patch }));
 
@@ -2562,7 +2563,9 @@ export default function App() {
       const cachedSeason = localStorage.getItem(`solla_season_${parsedUser.id}`);
       if (cachedSeason) {
         const parsedSeason = JSON.parse(cachedSeason);
-        update({ screen: "main", user: parsedUser, seasonData: parsedSeason });
+        const analysedDate = localStorage.getItem(`solla_analysed_${parsedUser.id}`);
+const daysSince = analysedDate ? Math.floor((Date.now() - new Date(analysedDate).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+update({ screen: "main", user: parsedUser, seasonData: parsedSeason, showDay3Prompt: parsedUser.plan === "free" && daysSince >= 3 });
       } else {
         update({ screen: "main", user: parsedUser });
         fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${parsedUser.id}&select=season_data`, {
@@ -2633,6 +2636,7 @@ export default function App() {
     const data = await res.json();
     if (data.error) throw new Error(data.error);
     localStorage.setItem(`solla_season_${state.user?.id || "guest"}`, JSON.stringify(data));
+    localStorage.setItem(`solla_analysed_${state.user?.id || "guest"}`, new Date().toISOString());
     // Save to Supabase if logged in
     const token = localStorage.getItem("solla_token");
     if (token && state.user?.id) {
@@ -2758,6 +2762,21 @@ update({ seasonData: data, screen: "main", activeSheet: "preview" as Sheet, tour
     onTabChange={tab => update({ activeTab: tab })}
   />
 )}
+{state.showDay3Prompt && state.screen === "main" && state.user?.plan === "free" && (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 32px" }} onClick={() => update({ showDay3Prompt: false })}>
+            <div style={{ background: DS.colors.bg, borderRadius: DS.radius.xl, padding: "32px 24px", width: "100%" }} onClick={e => e.stopPropagation()}>
+              <div style={{ width: 56, height: 56, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+                <Icon name="sparkles" size={24} color={DS.colors.accent} />
+              </div>
+              <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>You found your {state.seasonData?.season} season 🌸</h2>
+              <p style={{ fontSize: 14, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>Most {state.seasonData?.season}s tell us the makeup guide is what changes everything. Your exact foundation undertone, blush and lip shades are ready — unlock them free for 7 days.</p>
+              <button onClick={() => update({ showDay3Prompt: false, activeSheet: "paywall" as Sheet })} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 10 }}>
+                See my makeup guide — free for 7 days
+              </button>
+              <button onClick={() => update({ showDay3Prompt: false })} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Maybe later</button>
+            </div>
+          </div>
+        )}
         {state.activeSheet === "paywall" && (
   <PaywallSheet
     currentPlan={state.user?.plan || "free"}
