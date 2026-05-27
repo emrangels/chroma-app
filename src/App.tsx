@@ -150,7 +150,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
 const slides = [
   { icon: "camera", title: "Take a selfie", body: "One clear photo in natural light is all we need. No filters, no sunglasses.", bg: "#EDE9FF", accent: DS.colors.accent },
   { icon: "palette", title: "Discover your season", body: "Our AI analyses your skin tone, undertone, eye and hair colour to find your perfect palette.", bg: "#E8F4FD", accent: "#4A90C4" },
-  { icon: "sparkles", title: "Get your full guide", body: "Colours, makeup, hair, jewellery and style - everything personalised to you, so getting dressed becomes the easy part.", bg: "#FFF1E6", accent: "#E8845A" },
+  { icon: "sparkles", title: "Get your full guide", body: "Colours, makeup, hair, jewellery, style and wardrobe — everything personalised to your season, so getting dressed becomes the easy part.", bg: "#FFF1E6", accent: "#E8845A" },
   { icon: "shirt", title: "Check any item", body: "Check a single item, a full outfit, or try colour swatches - Solla reads every colour and tells you what works.", bg: "#E8F5EE", accent: "#1A9E6E" },
 ];
 
@@ -271,7 +271,7 @@ if (mode === "landing") return (
         </div>
         <h1 style={{ fontSize: 28, fontWeight: 700, color: DS.colors.text, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Welcome to Solla</h1>
         <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 4 }}>Join women and men who finally know their colours.</p>
-        <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 48 }}>Save your results and unlock your full colour guide.</p>
+        <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 48 }}>Your colour palette, wardrobe and AI stylist — all in one place.</p>
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}>
           <button onClick={() => setMode("signup")} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Create account</button>
           <button onClick={() => setMode("signin")} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.bg, color: DS.colors.text, fontSize: 15, fontWeight: 500, border: `1.5px solid ${DS.colors.border}` }}>Sign in</button>
@@ -386,7 +386,8 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File, bodyShape: string) 
       <div className="screen fade-in" style={{ background: DS.colors.bg, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
       <div style={{ padding: "40px 28px 120px", display: "flex", flexDirection: "column" }}>
         <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Take your selfie</h1>
-        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.6 }}>Use natural light, face the camera directly, and remove sunglasses.</p>
+        <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Take your selfie</h1>
+        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.6 }}>One clear photo is all we need. Your full colour guide — palette, makeup, hair, jewellery and more — will be ready in seconds.</p>
 
         {/* Photo upload */}
         <div onClick={() => !preview && fileRef.current?.click()} onDragOver={e => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={e => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files?.[0]; if (f) handleFile(f); }}
@@ -510,7 +511,7 @@ const AnalysingScreen = () => {
       </div>
       <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>Analysing your colours</h2>
       <p style={{ fontSize: 15, color: DS.colors.accent, fontWeight: 500, marginBottom: 16, transition: "all 0.4s" }}>{steps[step]}...</p>
-      <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", marginBottom: 32, maxWidth: 260 }}>This usually takes 15–20 seconds. Stay on this screen until your results are ready.</p>
+      <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", marginBottom: 32, maxWidth: 260 }}>This usually takes 15–20 seconds. Your full colour guide will be ready shortly — stay on this screen.</p>
       <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
   {steps.map((s, i) => (
     <div key={s} style={{ display: "flex", alignItems: "center", gap: 12, width: 240, margin: "0 auto" }}>
@@ -686,7 +687,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
           {isGuest ? (
             <>
               <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 4 }}>Your colours, completely unlocked</h2>
-              <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>Find out exactly which makeup shades, hair colours and jewellery metals suit your season - try everything free for 7 days.</p>
+              <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>Your full colour guide, wardrobe builder and AI stylist — personalised to your season. Try everything free for 7 days.</p>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: DS.colors.accentLight, padding: "4px 12px", borderRadius: DS.radius.full, marginBottom: 8 }}>
               <Icon name="sparkles" size={12} color={DS.colors.accent} />
               <span style={{ fontSize: 12, color: DS.colors.accentDark, fontWeight: 600 }}>Loved by women and men who finally know their colours 🌸</span>
@@ -947,8 +948,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 24 }}>Last updated: 9 May 2026</p>
           {[
             { q: "Who can use Solla?", a: "You must be at least 18 years of age to use Solla. By using our services you confirm that you meet this requirement." },
-            { q: "Subscriptions and payments", a: "Solla Glow is $6.99/month or $49.99/year. Solla Luxe is $14.99/month or $99.99/year. All plans include a 7-day free trial - you will not be charged until day 8. Cancel any time before day 8 to avoid being charged. Payments are processed by Stripe." },
-            { q: "How do I cancel?", a: "Contact us at hello@solla.com.au to cancel your subscription. Cancellations take effect at the end of the current billing period. We do not offer refunds for partial periods." },
+            { q: "How do I cancel?", a: "You can cancel anytime from the Me tab — tap your plan and select Cancel subscription. Cancellations take effect at the end of the current billing period. You will keep access until then. We do not offer refunds for partial periods. You can also email hello@solla.com.au for help." },
             { q: "AI-generated content", a: "Solla uses AI to generate colour analysis and styling recommendations. These are provided for informational and personal styling purposes only. Results may vary and should be used as guidance rather than definitive advice. We do not guarantee accuracy." },
             { q: "Acceptable use", a: "You agree not to use Solla for unlawful purposes, upload photos of others without consent, attempt to reverse engineer the app, use automated tools to access our services, or share your account credentials." },
             { q: "Intellectual property", a: "All content, design, code, and branding within Solla is owned by Emma Nagel (trading as Solla) and protected by Australian and international copyright law." },
@@ -1341,7 +1341,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
       <Icon name="lock" size={28} color={DS.colors.accent} />
     </div>
     <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Colour Checker</h2>
-    <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 24 }}>Upgrade to Glow to check items, outfits and swatches against your season.</p>
+    <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 24 }}>Photograph any item, outfit or swatches and get an instant verdict against your season — unlock with Glow.</p>
     <button onClick={onUpgrade} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Unlock Checker</button>
   </div>
 );
@@ -1970,7 +1970,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
         <Icon name="hanger" size={28} color={DS.colors.accent} />
       </div>
       <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Your Wardrobe</h2>
-      <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 24 }}>Upgrade to Luxe to build your wardrobe, create outfits, and chat with your AI stylist.</p>
+      <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 24 }}>Build your colour-approved wardrobe, create outfits, and get personalised advice from your AI stylist — all in Luxe.</p>
       <button onClick={onUpgrade} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: "#C26B3A", color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Unlock Wardrobe</button>
     </div>
   );
@@ -2754,7 +2754,7 @@ update({ seasonData: data, screen: "main", activeSheet: "preview" as Sheet, tour
         <Icon name="sparkles" size={24} color={DS.colors.accent} />
       </div>
       <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>Your season is ready 🌸</h2>
-      <p style={{ fontSize: 14, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>Explore your colour palette, check any item against your season, and unlock your full guide with makeup, hair and jewellery recommendations.</p>
+      <p style={{ fontSize: 14, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>Your colour season is ready. Explore your palette, unlock your makeup, hair and jewellery guide, and build your colour-approved wardrobe and AI stylist.</p>
       <button onClick={() => update({ activeSheet: null, tourStep: 0 })} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Explore my colours</button>
     </div>
   </div>
