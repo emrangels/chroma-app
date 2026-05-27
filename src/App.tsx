@@ -1239,10 +1239,10 @@ interface CheckResult {
 
 const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | null; user: User | null; onUpgrade: () => void; }) => {
   const [mode, setMode] = useState<"single" | "outfit" | "swatch">("single");
-  const [preview, setPreview] = useState<string | null>(null);
+  const [previews, setPreviews] = useState<string[]>([]);
   const [swatchLabel, setSwatchLabel] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<CheckResult | null>(null);
+  const [results, setResults] = useState<CheckResult[]>([]);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -1303,33 +1303,38 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
     console.error("Failed:", e);
   }
 };
-  const handleFile = (file: File) => {
-    setPreview(URL.createObjectURL(file));
-    setResult(null);
+  const handleFiles = (files: FileList) => {
+    const urls = Array.from(files).map(f => URL.createObjectURL(f));
+    setPreviews(urls);
+    setResults([]);
     setError("");
   };
 
   const handleCheck = async () => {
-    const file = fileRef.current?.files?.[0];
-    if (!file || !seasonData) return;
+    const files = fileRef.current?.files;
+    if (!files || files.length === 0 || !seasonData) return;
     setLoading(true); setError("");
     try {
-      const base64 = await resizeAndEncode(file);
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
-        body: JSON.stringify({ type: "check_item", image: base64, season: seasonData.season, mode, swatchLabel: swatchLabel || undefined }),
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      setResult(data);
+      const allResults: CheckResult[] = [];
+      for (const file of Array.from(files)) {
+        const base64 = await resizeAndEncode(file);
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+          body: JSON.stringify({ type: "check_item", image: base64, season: seasonData.season, mode, swatchLabel: swatchLabel || undefined }),
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        allResults.push(data);
+      }
+      setResults(allResults);
     } catch (e) { setError(e instanceof Error ? e.message : "Something went wrong."); }
     finally { setLoading(false); }
   };
 
   const reset = () => {
-    setPreview(null);
-    setResult(null);
+    setPreviews([]);
+    setResults([]);
     setError("");
     setSwatchLabel("");
     if (fileRef.current) fileRef.current.value = "";
@@ -1383,14 +1388,18 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
         )}
 
         {/* Upload area */}
-        {!result && (
+        {results.length === 0 && (
           <div
-            onClick={() => !preview && fileRef.current?.click()}
-            style={{ borderRadius: DS.radius.xl, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: preview ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 16, height: 220 }}
+            onClick={() => previews.length === 0 && fileRef.current?.click()}
+            style={{ borderRadius: DS.radius.xl, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: previews.length > 0 ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 16, height: 220 }}
           >
-            {preview ? (
+            {previews.length > 0 ? (
               <>
-                <img src={preview} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <div style={{ display: "flex", width: "100%", height: "100%", overflow: "hidden" }}>
+                  {previews.map((src, i) => (
+                    <img key={i} src={src} alt={`preview ${i + 1}`} style={{ flex: 1, minWidth: 0, height: "100%", objectFit: "cover" }} />
+                  ))}
+                </div>
                 <button onClick={e => { e.stopPropagation(); reset(); }} style={{ position: "absolute", top: 12, right: 12, width: 32, height: 32, borderRadius: DS.radius.full, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <Icon name="x" size={16} color={DS.colors.white} />
                 </button>
@@ -1407,10 +1416,10 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
           </div>
         )}
 
-        <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+        <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={e => { if (e.target.files?.length) handleFiles(e.target.files); }} />
 
         {/* CTA */}
-        {preview && !result && (
+        {previews.length > 0 && results.length === 0 && (
           <button onClick={handleCheck} disabled={loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: loading ? DS.colors.textFaint : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
             {loading ? "Checking..." : "Check this"}
           </button>
@@ -1419,8 +1428,9 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
         {error && <p style={{ fontSize: 13, color: DS.colors.danger, padding: "8px 12px", background: "#FEF2F2", borderRadius: DS.radius.sm, marginBottom: 16 }}>{error}</p>}
 
         {/* Results */}
-        {result && (
-          <div style={{ marginBottom: 32 }}>
+        {results.length > 0 && results.map((result, idx) => (
+          <div key={idx} style={{ marginBottom: 32 }}>
+            {previews[idx] && <img src={previews[idx]} alt={`item ${idx + 1}`} style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: DS.radius.lg, marginBottom: 12 }} />}
             {/* Outfit overall verdict */}
             {result.mode === "outfit" && (
               <div style={{ background: result.overall_verdict ? "#F0FDF4" : "#FEF2F2", borderRadius: DS.radius.lg, padding: "14px 16px", marginBottom: 16, borderLeft: `3px solid ${result.overall_verdict ? DS.colors.success : DS.colors.danger}` }}>
@@ -1433,18 +1443,17 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
             )}
 
             {/* Thumbnail */}
-            {preview && (
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-                <img src={preview} style={{ width: 56, height: 56, borderRadius: DS.radius.md, objectFit: "cover", flexShrink: 0 }} />
-                <div>
-                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>{result.items.length} colour{result.items.length !== 1 ? "s" : ""} analysed</p>
-                  <p style={{ margin: 0, fontSize: 12, color: DS.colors.textFaint }}>{result.items.filter(i => i.verdict).length} of {result.items.length} suit your {seasonData.season} season</p>
-                </div>
-                <button onClick={reset} style={{ marginLeft: "auto", fontSize: 13, color: DS.colors.accent, fontWeight: 500, padding: "6px 12px", borderRadius: DS.radius.full, border: `1px solid ${DS.colors.accentLight}`, background: DS.colors.accentLight }}>
-                  Check another
-                </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+              <div>
+                <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>{result.items.length} colour{result.items.length !== 1 ? "s" : ""} analysed</p>
+                <p style={{ margin: 0, fontSize: 12, color: DS.colors.textFaint }}>{result.items.filter(i => i.verdict).length} of {result.items.length} suit your {seasonData.season} season</p>
               </div>
-            )}
+              {idx === results.length - 1 && (
+                <button onClick={reset} style={{ marginLeft: "auto", fontSize: 13, color: DS.colors.accent, fontWeight: 500, padding: "6px 12px", borderRadius: DS.radius.full, border: `1px solid ${DS.colors.accentLight}`, background: DS.colors.accentLight }}>
+                  Check more
+                </button>
+              )}
+            </div>
 
             {/* Item cards */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -1480,7 +1489,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
               ))}
             </div>
           </div>
-        )}
+        ))}
       </div>
     </div>
   );
