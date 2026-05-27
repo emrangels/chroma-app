@@ -31,7 +31,7 @@ interface SeasonData {
     best: PaletteColour[]; avoid: PaletteColour[];
     extended?: PaletteColour[];
   };
-  makeup: { foundation: string; blush: string; lip: string; eye: string; };
+  makeup: { foundation: string; blush: { advice: string; colours: { name: string; hex: string }[] }; lip: { advice: string; colours: { name: string; hex: string }[] }; eye: { advice: string; colours: { name: string; hex: string }[] }; };
   hair: { best_colours: string[]; avoid: string[]; tip: string; };
   jewellery: { metals: string[]; stones: string[]; tip: string; };
   style: { silhouettes: string; patterns: string; fabrics: string; tip: string; };
@@ -820,10 +820,29 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
       {activeSheet === "makeup" && (
         <div style={{ padding: "16px 24px" }}>
           <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 20 }}>Makeup</h2>
-          {[{ label: "Foundation", value: seasonData?.makeup.foundation }, { label: "Blush", value: seasonData?.makeup.blush }, { label: "Lips", value: seasonData?.makeup.lip }, { label: "Eyes", value: seasonData?.makeup.eye }].map(item => (
+          {/* Foundation */}
+          <div style={{ marginBottom: 20, paddingBottom: 20, borderBottom: `1px solid ${DS.colors.border}` }}>
+            <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Foundation</p>
+            <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{seasonData?.makeup.foundation}</p>
+          </div>
+
+          {/* Blush, Lips, Eyes */}
+          {[{ label: "Blush", value: seasonData?.makeup.blush }, { label: "Lips", value: seasonData?.makeup.lip }, { label: "Eyes", value: seasonData?.makeup.eye }].map(item => (
             <div key={item.label} style={{ marginBottom: 20, paddingBottom: 20, borderBottom: `1px solid ${DS.colors.border}` }}>
               <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>{item.label}</p>
-              <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{item.value}</p>
+              {item.value && typeof item.value === "object" && (
+                <>
+                  <p style={{ margin: "0 0 12px", fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{item.value.advice}</p>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {item.value.colours.map(c => (
+                      <div key={c.hex} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                        <div style={{ width: 36, height: 36, borderRadius: DS.radius.full, background: c.hex, border: "1px solid rgba(0,0,0,0.08)" }} />
+                        <p style={{ margin: 0, fontSize: 10, color: DS.colors.textFaint, textAlign: "center", maxWidth: 48, lineHeight: 1.3 }}>{c.name}</p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>
