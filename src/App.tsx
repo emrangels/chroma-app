@@ -245,7 +245,8 @@ const AuthScreen = ({ onSignIn, onGuest, onOpenTerms }: { onSignIn: (user: User)
         <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 32 }}>Enter your email and we'll send you a reset link.</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <input style={inputStyle} type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} />
-          {error && <p style={{ fontSize: 13, color: DS.colors.danger, padding: "8px 12px", background: "#FEF2F2", borderRadius: DS.radius.sm }}>{error}</p>}
+          {error && <p style={{ fontSize: 13, color: DS.colors.danger, padding: "8px 12px", background: "#FEF2F2", borderRadius: DS.radius.sm, marginBottom: 16 }}>{error}</p>}
+
           <button onClick={async () => {
             setLoading(true); setError("");
             try {
@@ -1244,6 +1245,8 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<CheckResult[]>([]);
   const [error, setError] = useState("");
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [checkingIndex, setCheckingIndex] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const plan = user?.plan || "free";
@@ -1316,7 +1319,9 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
     setLoading(true); setError("");
     try {
       const allResults: CheckResult[] = [];
-      for (const file of Array.from(files)) {
+      for (let i = 0; i < files.length; i++) {
+        setCheckingIndex(i);
+        const file = files[i];
         const base64 = await resizeAndEncode(file);
         const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
           method: "POST",
@@ -1329,7 +1334,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
       }
       setResults(allResults);
     } catch (e) { setError(e instanceof Error ? e.message : "Something went wrong."); }
-    finally { setLoading(false); }
+    finally { setLoading(false); setCheckingIndex(null); }
   };
 
   const reset = () => {
@@ -1372,7 +1377,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
 
         {/* Mode description */}
         <p style={{ fontSize: 13, color: DS.colors.textFaint, marginBottom: 16, lineHeight: 1.5 }}>
-          {mode === "single" && "Upload a photo of one item. For best results, photograph in natural light against a neutral background - results may vary with filters or poor lighting."}
+          {mode === "single" && "Upload one or more items at once. For best results, photograph in natural light against a neutral background — results may vary with filters or poor lighting."}
           {mode === "outfit" && "Upload a full outfit photo for an overall verdict and per-piece breakdown. Natural light gives the most accurate colour reading."}
           {mode === "swatch" && "Upload a photo of your swatches in natural light (e.g. lipsticks swatched on your arm). The clearer the photo, the more precise each verdict will be."}
         </p>
@@ -1421,16 +1426,26 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
         {/* CTA */}
         {previews.length > 0 && results.length === 0 && (
           <button onClick={handleCheck} disabled={loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: loading ? DS.colors.textFaint : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
-            {loading ? "Checking..." : "Check this"}
+            {loading ? (checkingIndex !== null && previews.length > 1 ? `Checking ${checkingIndex + 1} of ${previews.length}...` : "Checking...") : "Check this"}
           </button>
         )}
 
         {error && <p style={{ fontSize: 13, color: DS.colors.danger, padding: "8px 12px", background: "#FEF2F2", borderRadius: DS.radius.sm, marginBottom: 16 }}>{error}</p>}
 
+        {/* Lightbox */}
+        {lightboxSrc && (
+          <div onClick={() => setLightboxSrc(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.9)", zIndex: 3000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+            <img src={lightboxSrc} style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: DS.radius.lg, objectFit: "contain" }} />
+            <button onClick={() => setLightboxSrc(null)} style={{ position: "absolute", top: 48, right: 20, width: 36, height: 36, borderRadius: DS.radius.full, background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Icon name="x" size={18} color={DS.colors.white} />
+            </button>
+          </div>
+        )}
+
         {/* Results */}
         {results.length > 0 && results.map((result, idx) => (
           <div key={idx} style={{ marginBottom: 32 }}>
-            {previews[idx] && <img src={previews[idx]} alt={`item ${idx + 1}`} style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: DS.radius.lg, marginBottom: 12 }} />}
+            {previews[idx] && <img src={previews[idx]} alt={`item ${idx + 1}`} onClick={() => setLightboxSrc(previews[idx])} style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: DS.radius.lg, marginBottom: 12, cursor: "pointer" }} />}
             {/* Outfit overall verdict */}
             {result.mode === "outfit" && (
               <div style={{ background: result.overall_verdict ? "#F0FDF4" : "#FEF2F2", borderRadius: DS.radius.lg, padding: "14px 16px", marginBottom: 16, borderLeft: `3px solid ${result.overall_verdict ? DS.colors.success : DS.colors.danger}` }}>
