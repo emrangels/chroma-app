@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { removeBackground } from "@imgly/background-removal";
 import html2canvas from 'html2canvas';
 import { Analytics } from '@vercel/analytics/react';
 
@@ -1928,16 +1929,21 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
 
   const uploadToStorage = async (file: File, userId: string): Promise<string | null> => {
     try {
-      const ext = file.type === "image/png" ? "png" : "jpg";
+      let uploadFile = file;
+      try {
+        const bgRemovedBlob = await removeBackground(file);
+        uploadFile = new File([bgRemovedBlob], file.name, { type: "image/png" });
+      } catch { /* fall back to original if bg removal fails */ }
+      const ext = uploadFile.type === "image/png" ? "png" : "jpg";
       const path = `${userId}/${Date.now()}.${ext}`;
       const res = await fetch(`${SUPABASE_URL}/storage/v1/object/wardrobe-items/${path}`, {
         method: "POST",
         headers: {
-          "Content-Type": file.type,
+          "Content-Type": uploadFile.type,
           apikey: SUPABASE_ANON_KEY,
           Authorization: `Bearer ${localStorage.getItem("solla_token") || SUPABASE_JWT_KEY}`,
         },
-        body: file,
+        body: uploadFile,
       });
       if (!res.ok) return null;
       return `${SUPABASE_URL}/storage/v1/object/public/wardrobe-items/${path}`;
