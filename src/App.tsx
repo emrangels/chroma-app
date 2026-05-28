@@ -2213,8 +2213,8 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 80 }}>
               {filteredItems.map(item => (
                 <div key={item.id} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, overflow: "hidden" }}>
-                  <div style={{ width: "100%", aspectRatio: "1", background: item.image_url ? DS.colors.surface : item.hex, position: "relative" }}>
-                    {item.image_url && <img src={item.image_url} style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }} />}
+                  <div style={{ width: "100%", aspectRatio: "1", background: item.image_url ? "#F5F5F5" : item.hex, position: "relative" }}>
+                    {item.image_url && <img src={item.image_url} style={{ width: "100%", height: "100%", objectFit: "contain", position: "absolute", inset: 0, padding: 4 }} />}
                     <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 4 }}>
                       <button onClick={() => handleToggleStar(item)} style={{ width: 28, height: 28, borderRadius: DS.radius.full, background: "rgba(255,255,255,0.9)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: item.starred ? "#FFD700" : DS.colors.border }}>★</button>
                     </div>
@@ -2241,7 +2241,9 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                 <div key={item.id} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "14px 16px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                     {item.image_url ? (
-                      <img src={item.image_url} style={{ width: 60, height: 60, borderRadius: DS.radius.md, objectFit: "cover", flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
+                      <div style={{ width: 60, height: 60, borderRadius: DS.radius.md, background: "#F5F5F5", flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                        <img src={item.image_url} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }} />
+                      </div>
                     ) : (
                       <div style={{ width: 60, height: 60, borderRadius: DS.radius.md, background: item.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
                     )}
