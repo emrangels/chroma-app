@@ -1848,12 +1848,13 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const [filterVerdict, setFilterVerdict] = useState<boolean | null>(null);
 
   // Add item form
-  const [itemName, setItemName] = useState("");
-  const [itemCategory, setItemCategory] = useState("Top");
   const [itemPrice, setItemPrice] = useState("");
-  const [itemPreview, setItemPreview] = useState<string | null>(null);
   const [itemChecking, setItemChecking] = useState(false);
-  const [itemResult, setItemResult] = useState<{ colour_name: string; hex: string; verdict: boolean; tip: string } | null>(null);
+  const [itemCheckingIndex, setItemCheckingIndex] = useState<number | null>(null);
+  const [itemResults, setItemResults] = useState<{ colour_name: string; hex: string; verdict: boolean; tip: string; piece?: string }[]>([]);
+  const [itemPreviews, setItemPreviews] = useState<string[]>([]);
+  const [itemNames, setItemNames] = useState<string[]>([]);
+  const [itemCategories, setItemCategories] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Add outfit form
@@ -1923,44 +1924,72 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
       img.src = url;
     });
 
-  const handleItemPhoto = async (file: File) => {
-    setItemPreview(URL.createObjectURL(file));
-    setItemResult(null);
+  const handleItemPhotos = async (files: FileList) => {
+    const previews = Array.from(files).map(f => URL.createObjectURL(f));
+    setItemPreviews(previews);
+    setItemResults([]);
+    setItemNames([]);
+    setItemCategories([]);
     if (!seasonData) return;
     setItemChecking(true);
+    const pieceToCategory: Record<string, string> = {
+      Top: "Top", Bottom: "Bottom", Dress: "Dress",
+      Outerwear: "Outerwear", Shoes: "Shoes", Bag: "Accessories", Accessory: "Accessories"
+    };
     try {
-      const base64 = await resizeAndEncode(file);
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
-        body: JSON.stringify({ type: "check_item", image: base64, season: seasonData.season, mode: "single" }),
-      });
-      const data = await res.json();
-      if (data.items?.[0]) setItemResult(data.items[0]);
+      const results: { colour_name: string; hex: string; verdict: boolean; tip: string; piece?: string }[] = [];
+      const names: string[] = [];
+      const cats: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        setItemCheckingIndex(i);
+        const base64 = await resizeAndEncode(files[i]);
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+          body: JSON.stringify({ type: "check_item", image: base64, season: seasonData.season, mode: "single" }),
+        });
+        const data = await res.json();
+        const item = data.items?.[0];
+        if (item) {
+          results.push(item);
+          names.push(item.piece ? `${item.colour_name} ${item.piece.toLowerCase()}` : item.colour_name);
+          cats.push(item.piece ? (pieceToCategory[item.piece] || "Top") : "Top");
+        }
+      }
+      setItemResults(results);
+      setItemNames(names);
+      setItemCategories(cats);
     } catch {}
-    finally { setItemChecking(false); }
+    finally { setItemChecking(false); setItemCheckingIndex(null); }
   };
 
-  const handleAddItem = async () => {
-    if (!itemName.trim() || !itemResult || !user?.id) return;
+  const handleAddItems = async () => {
+    if (!itemResults.length || !user?.id) return;
     setLoading(true);
     try {
-      const newItem = {
-        user_id: user.id, name: itemName.trim(), category: itemCategory,
-        colour_name: itemResult.colour_name, hex: itemResult.hex,
-        verdict: itemResult.verdict, tip: itemResult.tip,
-        starred: false, price: itemPrice ? parseFloat(itemPrice) : null,
-      };
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items`, {
-        method: "POST",
-        headers: { ...getAuthHeaders(), Prefer: "return=representation" },
-        body: JSON.stringify(newItem),
-      });
-      const data = await res.json();
-      if (Array.isArray(data)) setItems(prev => [data[0], ...prev]);
+      const newItems = itemResults.map((result, i) => ({
+        user_id: user.id,
+        name: (itemNames[i] || result.colour_name).trim(),
+        category: itemCategories[i] || "Top",
+        colour_name: result.colour_name,
+        hex: result.hex,
+        verdict: result.verdict,
+        tip: result.tip,
+        starred: false,
+        price: null,
+      }));
+      for (const newItem of newItems) {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items`, {
+          method: "POST",
+          headers: { ...getAuthHeaders(), Prefer: "return=representation" },
+          body: JSON.stringify(newItem),
+        });
+        const data = await res.json();
+        if (Array.isArray(data)) setItems(prev => [data[0], ...prev]);
+      }
       setShowAddItem(false);
-      setItemName(""); setItemCategory("Top"); setItemPrice("");
-      setItemPreview(null); setItemResult(null);
+      setItemPreviews([]); setItemResults([]); setItemNames([]); setItemCategories([]);
+      setItemPrice("");
       if (fileRef.current) fileRef.current.value = "";
     } catch {}
     finally { setLoading(false); }
@@ -2330,51 +2359,52 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
               <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20 }}>Add item</h2>
 
               {/* Photo upload */}
-              <div onClick={() => fileRef.current?.click()} style={{ borderRadius: DS.radius.lg, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, height: 160, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", overflow: "hidden", position: "relative", marginBottom: 16 }}>
-                {itemPreview ? (
-                  <img src={itemPreview} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <div onClick={() => !itemPreviews.length && fileRef.current?.click()} style={{ borderRadius: DS.radius.lg, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, height: 160, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: itemPreviews.length ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 16 }}>
+                {itemPreviews.length > 0 ? (
+                  <div style={{ display: "flex", width: "100%", height: "100%" }}>
+                    {itemPreviews.map((src, i) => (
+                      <img key={i} src={src} style={{ flex: 1, minWidth: 0, height: "100%", objectFit: "cover" }} />
+                    ))}
+                  </div>
                 ) : (
                   <>
                     <Icon name="camera" size={24} color={DS.colors.accent} />
-                    <p style={{ fontSize: 13, color: DS.colors.textMuted, marginTop: 8 }}>Photo of item</p>
+                    <p style={{ fontSize: 13, color: DS.colors.textMuted, marginTop: 8 }}>Tap to add items</p>
+                    <p style={{ fontSize: 11, color: DS.colors.textFaint, marginTop: 2 }}>Select one or more photos</p>
                   </>
                 )}
                 {itemChecking && (
-                  <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <p style={{ color: DS.colors.white, fontSize: 13 }}>Checking colour...</p>
+                  <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <p style={{ color: DS.colors.white, fontSize: 13 }}>{itemCheckingIndex !== null && itemPreviews.length > 1 ? `Checking ${itemCheckingIndex + 1} of ${itemPreviews.length}...` : "Checking colour..."}</p>
                   </div>
                 )}
               </div>
-              <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) handleItemPhoto(f); }} />
+              <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={e => { if (e.target.files?.length) handleItemPhotos(e.target.files); }} />
 
-              {/* Colour result */}
-              {itemResult && (
-                <div style={{ padding: "10px 14px", borderRadius: DS.radius.md, background: itemResult.verdict ? "#F0FDF4" : "#FEF2F2", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: DS.radius.sm, background: itemResult.hex, flexShrink: 0 }} />
-                  <div>
-                    <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>{itemResult.colour_name} — {itemResult.verdict ? "✓ Suits your season" : "✗ Doesn't suit your season"}</p>
-                    <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted }}>{itemResult.tip}</p>
+              {/* Results — one card per item */}
+              {itemResults.map((result, i) => (
+                <div key={i} style={{ marginBottom: 16, padding: "12px 14px", borderRadius: DS.radius.md, border: `1px solid ${DS.colors.border}`, background: DS.colors.bg }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                    <img src={itemPreviews[i]} style={{ width: 44, height: 44, borderRadius: DS.radius.sm, objectFit: "cover", flexShrink: 0 }} />
+                    <div style={{ width: 28, height: 28, borderRadius: DS.radius.sm, background: result.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
+                    <div style={{ flex: 1 }}>
+                      <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: result.verdict ? DS.colors.success : DS.colors.danger }}>{result.verdict ? "✓ Suits your season" : "✗ Doesn't suit"}</p>
+                      <p style={{ margin: 0, fontSize: 11, color: DS.colors.textFaint }}>{result.colour_name}</p>
+                    </div>
+                  </div>
+                  <input value={itemNames[i] || ""} onChange={e => setItemNames(prev => prev.map((n, j) => j === i ? e.target.value : n))} placeholder="Item name" style={{ width: "100%", padding: "10px 12px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 13, color: DS.colors.text, background: DS.colors.surface, outline: "none", marginBottom: 8, fontFamily: DS.font }} />
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {["Top", "Bottom", "Dress", "Outerwear", "Shoes", "Accessories"].map(cat => (
+                      <button key={cat} onClick={() => setItemCategories(prev => prev.map((c, j) => j === i ? cat : c))} style={{ padding: "4px 10px", borderRadius: DS.radius.full, fontSize: 11, fontWeight: 500, background: itemCategories[i] === cat ? DS.colors.accent : DS.colors.surface, color: itemCategories[i] === cat ? DS.colors.white : DS.colors.textMuted }}>
+                        {cat}
+                      </button>
+                    ))}
                   </div>
                 </div>
-              )}
+              ))}
 
-              {/* Item name */}
-              <input value={itemName} onChange={e => setItemName(e.target.value)} placeholder="Item name (e.g. Blue linen top)" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 12, fontFamily: DS.font }} />
-
-              {/* Category */}
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-                {["Top", "Bottom", "Dress", "Outerwear", "Shoes", "Accessories"].map(cat => (
-                  <button key={cat} onClick={() => setItemCategory(cat)} style={{ padding: "6px 14px", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 500, background: itemCategory === cat ? DS.colors.accent : DS.colors.surface, color: itemCategory === cat ? DS.colors.white : DS.colors.textMuted, transition: "all 0.2s" }}>
-                    {cat}
-                  </button>
-                ))}
-              </div>
-
-              {/* Price (optional) */}
-              <input value={itemPrice} onChange={e => setItemPrice(e.target.value)} placeholder="Price (optional, e.g. 49.99)" type="number" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 20, fontFamily: DS.font }} />
-
-              <button onClick={handleAddItem} disabled={!itemName.trim() || !itemResult || loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: !itemName.trim() || !itemResult ? DS.colors.border : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>
-                {loading ? "Adding..." : "Add to wardrobe"}
+              <button onClick={handleAddItems} disabled={!itemResults.length || loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: !itemResults.length ? DS.colors.border : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>
+                {loading ? "Adding..." : itemResults.length > 1 ? `Add ${itemResults.length} items to wardrobe` : "Add to wardrobe"}
               </button>
             </div>
           </div>
