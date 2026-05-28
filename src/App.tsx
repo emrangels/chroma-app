@@ -1534,9 +1534,12 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                 <p style={{ margin: 0, fontSize: 12, color: DS.colors.textFaint }}>{result.items.filter(i => i.verdict).length} of {result.items.length} suit your {seasonData.season} season</p>
               </div>
               {idx === results.length - 1 && (
-                <button onClick={reset} style={{ marginLeft: "auto", fontSize: 13, color: DS.colors.accent, fontWeight: 500, padding: "6px 12px", borderRadius: DS.radius.full, border: `1px solid ${DS.colors.accentLight}`, background: DS.colors.accentLight }}>
-                  Check more
-                </button>
+                <div style={{ marginLeft: "auto", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+                  <button onClick={reset} style={{ fontSize: 13, color: DS.colors.accent, fontWeight: 500, padding: "6px 12px", borderRadius: DS.radius.full, border: `1px solid ${DS.colors.accentLight}`, background: DS.colors.accentLight }}>
+                    Check more
+                  </button>
+                  <p style={{ margin: 0, fontSize: 11, color: DS.colors.textFaint }}>Not accurate? Try in better light.</p>
+                </div>
               )}
             </div>
 
