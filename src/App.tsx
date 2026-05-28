@@ -1248,6 +1248,7 @@ interface CheckResult {
   overall_tip?: string;
   items: {
     piece?: string;
+    category?: string;
     colour_name: string;
     hex: string;
     verdict: boolean;
@@ -1265,6 +1266,10 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
   const [error, setError] = useState("");
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [checkingIndex, setCheckingIndex] = useState<number | null>(null);
+  const [saveSheet, setSaveSheet] = useState<{ item: CheckResult["items"][0]; previewSrc?: string } | null>(null);
+  const [saveName, setSaveName] = useState("");
+  const [saveCategory, setSaveCategory] = useState("Top");
+  const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const plan = user?.plan || "free";
@@ -1291,39 +1296,54 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
       img.src = url;
     });
 
-    const handleSaveToWardrobe = async (item: { colour_name: string; hex: string; verdict: boolean; tip: string }) => {
-  if (!user?.id) return;
-  const token = localStorage.getItem("solla_token") || SUPABASE_JWT_KEY;
-  const name = prompt("Name this item (e.g. Blue linen top):");
-  if (!name) return;
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${token}`,
-        Prefer: "return=minimal",
-      },
-      body: JSON.stringify({
-        user_id: user.id,
-        name,
-        category: "Top",
-        colour_name: item.colour_name,
-        hex: item.hex,
-        verdict: item.verdict,
-        tip: item.tip,
-        starred: false,
-      }),
-    });
+    const openSaveSheet = (item: CheckResult["items"][0], previewSrc?: string) => {
+    const pieceToCategory: Record<string, string> = {
+      Top: "Top", Bottom: "Bottom", Dress: "Dress",
+      Outerwear: "Outerwear", Shoes: "Shoes", Bag: "Accessories", Accessory: "Accessories"
+    };
+    const guessedCategory = item.piece ? (pieceToCategory[item.piece] || "Top") : "Top";
+    const guessedName = item.piece ? `${item.colour_name} ${item.piece.toLowerCase()}` : item.colour_name;
+    setSaveName(guessedName);
+    setSaveCategory(guessedCategory);
+    setSaveSheet({ item, previewSrc });
+  };
+
+  const handleSaveToWardrobe = async () => {
+    if (!user?.id || !saveSheet) return;
+    const token = localStorage.getItem("solla_token") || SUPABASE_JWT_KEY;
+    setSaving(true);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${token}`,
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify({
+          user_id: user.id,
+          name: saveName,
+          category: saveCategory,
+          colour_name: saveSheet.item.colour_name,
+          hex: saveSheet.item.hex,
+          verdict: saveSheet.item.verdict,
+          tip: saveSheet.item.tip,
+          starred: false,
+        }),
+      });
     if (!res.ok) {
-      const err = await res.json();
-      console.error("Save error:", err);
+        const err = await res.json();
+        console.error("Save error:", err);
+      } else {
+        setSaveSheet(null);
+      }
+    } catch (e) {
+      console.error("Failed:", e);
+    } finally {
+      setSaving(false);
     }
-  } catch (e) {
-    console.error("Failed:", e);
-  }
-};
+  };
   const handleFiles = (files: FileList) => {
     const urls = Array.from(files).map(f => URL.createObjectURL(f));
     setPreviews(urls);
@@ -1450,6 +1470,37 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
 
         {error && <p style={{ fontSize: 13, color: DS.colors.danger, padding: "8px 12px", background: "#FEF2F2", borderRadius: DS.radius.sm, marginBottom: 16 }}>{error}</p>}
 
+        {/* Save to Wardrobe Sheet */}
+        {saveSheet && (
+          <div onClick={() => setSaveSheet(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 3000, display: "flex", alignItems: "flex-end" }}>
+            <div onClick={e => e.stopPropagation()} style={{ width: "100%", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, padding: "0 0 48px" }}>
+              <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+                <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
+              </div>
+              <div style={{ padding: "16px 24px" }}>
+                <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Save to wardrobe</h2>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, padding: "10px 14px", borderRadius: DS.radius.md, background: saveSheet.item.verdict ? "#F0FDF4" : "#FEF2F2" }}>
+                  <div style={{ width: 36, height: 36, borderRadius: DS.radius.sm, background: saveSheet.item.hex, flexShrink: 0 }} />
+                  <div>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>{saveSheet.item.colour_name}</p>
+                    <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted }}>{saveSheet.item.verdict ? "✓ Suits your season" : "✗ Doesn't suit your season"}</p>
+                  </div>
+                </div>
+                <input value={saveName} onChange={e => setSaveName(e.target.value)} placeholder="Item name" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 12, fontFamily: DS.font }} />
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
+                  {["Top", "Bottom", "Dress", "Outerwear", "Shoes", "Accessories"].map(cat => (
+                    <button key={cat} onClick={() => setSaveCategory(cat)} style={{ padding: "6px 14px", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 500, background: saveCategory === cat ? DS.colors.accent : DS.colors.surface, color: saveCategory === cat ? DS.colors.white : DS.colors.textMuted, transition: "all 0.2s" }}>
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+                <button onClick={handleSaveToWardrobe} disabled={!saveName.trim() || saving} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: !saveName.trim() ? DS.colors.border : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>
+                  {saving ? "Saving..." : "Save to wardrobe"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Lightbox */}
         {lightboxSrc && (
           <div onClick={() => setLightboxSrc(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.9)", zIndex: 3000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
@@ -1508,7 +1559,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                   <p style={{ margin: "0 0 4px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{item.reason}</p>
                   <p style={{ margin: 0, fontSize: 13, color: DS.colors.accent, lineHeight: 1.5, fontWeight: 500 }}>{item.tip}</p>
 {user?.plan === "luxe" && (
-  <button onClick={() => handleSaveToWardrobe(item)} style={{ marginTop: 8, padding: "6px 14px", borderRadius: DS.radius.full, background: DS.colors.accentLight, fontSize: 12, color: DS.colors.accentDark, fontWeight: 500 }}>
+  <button onClick={() => openSaveSheet(item)} style={{ marginTop: 8, padding: "6px 14px", borderRadius: DS.radius.full, background: DS.colors.accentLight, fontSize: 12, color: DS.colors.accentDark, fontWeight: 500 }}>
     + Save to wardrobe
   </button>
 )}
