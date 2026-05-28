@@ -139,7 +139,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
           </div>
           <div style={{ fontSize: 42, fontWeight: 700, color: DS.colors.white, letterSpacing: "-1px" }}>Solla™</div>
         </div>
-        <div className="tag-anim" style={{ marginTop: 12, fontSize: 15, color: "rgba(255,255,255,0.75)", fontWeight: 400, letterSpacing: "0.02em" }}>Your colour season, revealed</div>
+        <div className="tag-anim" style={{ marginTop: 12, fontSize: 15, color: "rgba(255,255,255,0.75)", fontWeight: 400, letterSpacing: "0.02em" }}>Never wonder what to wear again</div>
         <div className="dots-anim" style={{ marginTop: 48, display: "flex", gap: 6, justifyContent: "center" }}>
           {[0, 1, 2].map(i => <div key={i} style={{ width: 5, height: 5, borderRadius: DS.radius.full, background: DS.colors.white, animation: `pulse 1.2s ease ${i * 0.2}s infinite` }} />)}
         </div>
@@ -149,7 +149,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
 };
 
 const slides = [
-  { icon: "camera", title: "Take a selfie", body: "One clear photo in natural light is all we need. No filters, no sunglasses.", bg: "#EDE9FF", accent: DS.colors.accent },
+  { icon: "camera", title: "Take a selfie", body: "One clear photo in natural light. No filters, no sunglasses. This is how Solla learns your colours.", bg: "#EDE9FF", accent: DS.colors.accent },
   { icon: "palette", title: "Discover your season", body: "Our AI analyses your skin tone, undertone, eye and hair colour to find your perfect palette.", bg: "#E8F4FD", accent: "#4A90C4" },
   { icon: "sparkles", title: "Get your full guide", body: "Colours, makeup, hair, jewellery, style and wardrobe — everything personalised to your season, so getting dressed becomes the easy part.", bg: "#FFF1E6", accent: "#E8845A" },
   { icon: "shirt", title: "Check any item", body: "Check a single item, a full outfit, or try colour swatches - Solla reads every colour and tells you what works.", bg: "#E8F5EE", accent: "#1A9E6E" },
@@ -273,7 +273,7 @@ if (mode === "landing") return (
         </div>
         <h1 style={{ fontSize: 28, fontWeight: 700, color: DS.colors.text, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Welcome to Solla</h1>
         <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 4 }}>Join women and men who finally know their colours.</p>
-        <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 48 }}>Your colour palette, wardrobe and AI stylist — all in one place.</p>
+        <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 48 }}>Know your colours. Build your wardrobe. Never ask "what do I wear?" again.</p>
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}>
           <button onClick={() => setMode("signup")} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Create account</button>
           <button onClick={() => setMode("signin")} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.bg, color: DS.colors.text, fontSize: 15, fontWeight: 500, border: `1.5px solid ${DS.colors.border}` }}>Sign in</button>
@@ -388,7 +388,7 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File, bodyShape: string) 
       <div className="screen fade-in" style={{ background: DS.colors.bg, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
       <div style={{ padding: "40px 28px 120px", display: "flex", flexDirection: "column" }}>
         <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Take your selfie</h1>
-        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.6 }}>One clear photo is all we need. Your full colour guide — palette, makeup, hair, jewellery and more — will be ready in seconds.</p>
+        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.6 }}>One photo is all it takes. Your personal colour guide and daily outfit engine — ready in seconds.</p>
 
         {/* Photo upload */}
         <div onClick={() => !preview && fileRef.current?.click()} onDragOver={e => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={e => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files?.[0]; if (f) handleFile(f); }}
@@ -512,7 +512,7 @@ const AnalysingScreen = () => {
       </div>
       <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>Analysing your colours</h2>
       <p style={{ fontSize: 15, color: DS.colors.accent, fontWeight: 500, marginBottom: 16, transition: "all 0.4s" }}>{steps[step]}...</p>
-      <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", marginBottom: 32, maxWidth: 260 }}>This usually takes 15–20 seconds. Your full colour guide will be ready shortly — stay on this screen.</p>
+      <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", marginBottom: 32, maxWidth: 260 }}>This usually takes 15–20 seconds. Your personal colour profile and wardrobe guide will be ready shortly — stay on this screen.</p>
       <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
   {steps.map((s, i) => (
     <div key={s} style={{ display: "flex", alignItems: "center", gap: 12, width: 240, margin: "0 auto" }}>
@@ -536,9 +536,9 @@ const tabs: { id: Tab; icon: string; label: string }[] = [
 ];
 
 const tourSteps = [
-  { tab: "home" as Tab, title: "Your colour season", body: "Your palette, daily tip and full colour guide live here." },
+  { tab: "home" as Tab, title: "Your colour season", body: "Your palette, daily tip and personal colour guide — your style starting point." },
   { tab: "checker" as Tab, title: "Colour checker", body: "Upload any item or outfit to see if it suits your season." },
-  { tab: "wardrobe" as Tab, title: "Your wardrobe", body: "Build your wardrobe, create outfits and chat with your AI stylist." },
+  { tab: "wardrobe" as Tab, title: "Your daily outfit engine", body: "Add your clothes, build outfits and wake up knowing exactly what to wear." },
   { tab: "me" as Tab, title: "Your profile", body: "Manage your account, plan and preferences here." },
 ];
 
@@ -688,7 +688,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
           {isGuest ? (
             <>
               <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 4 }}>Your colours, completely unlocked</h2>
-              <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>Your full colour guide, wardrobe builder and AI stylist — personalised to your season. Try everything free for 7 days.</p>
+              <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>Stop staring at your wardrobe every morning. Solla tells you exactly what to wear — personalised to your colours. Try everything free for 7 days.</p>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: DS.colors.accentLight, padding: "4px 12px", borderRadius: DS.radius.full, marginBottom: 8 }}>
               <Icon name="sparkles" size={12} color={DS.colors.accent} />
               <span style={{ fontSize: 12, color: DS.colors.accentDark, fontWeight: 600 }}>Loved by women and men who finally know their colours 🌸</span>
@@ -726,7 +726,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
                     {billing === "annual" && <div style={{ fontSize: 11, color: DS.colors.textFaint }}>{pricing.luxe.monthlyEquiv}</div>}
                   </div>
                 </div>
-                {["Everything in Glow", "Style guide - exactly what cuts and fits suit your body and season", "24+ colour palette - every shade you can wear confidently", "Wardrobe builder - see which items in your wardrobe actually work", "Outfit creator - build outfits you know will look good", "AI stylist - ask anything about your colours, style and wardrobe"].map(f => (
+                {["Everything in Glow", "Daily outfit suggestions — wake up knowing what to wear", "Style guide — exactly what cuts and fits suit your body and season", "24+ colour palette — every shade you can wear confidently", "Wardrobe builder — see which items actually work for you", "Outfit creator — build outfits you know will look good", "AI stylist — ask anything about your colours, style and wardrobe"].map(f => (
                   <div key={f} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                     <Icon name="check" size={12} color="#C26B3A" strokeWidth={2.5} />
                     <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{f}</span>
@@ -935,9 +935,9 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
             { q: "How do I edit or move an item in my wardrobe?", a: "Tap the edit icon (refresh symbol) on any wardrobe item to change the name or category. To delete, tap the trash icon." },
             { q: "Can I re-analyse my colours?", a: "Yes — go to the Me tab and tap 'Re-analyse my colours'. This clears your current results and takes you back to the upload screen. For best results use a clear, well-lit selfie in natural light with no filters." },
             { q: "My results aren't showing — what do I do?", a: "If your colour guide isn't appearing, try re-analysing your colours. Go to the Me tab and tap 'Re-analyse my colours' to upload a new photo and get your results." },
-            { q: "What do I get on the free plan?", a: "The free plan gives you your colour season, your 4 best colours, your season headline and a daily colour tip. It's a great starting point to discover your season." },
-            { q: "What's the difference between Glow and Luxe?", a: "Glow unlocks your subseason, full colour palette, colour profile (undertone, depth, chroma and contrast), makeup guide, hair colour guide, jewellery guide and colour checker. Luxe adds everything in Glow plus your style and fit guide, extended palette of 24+ colours, wardrobe builder, outfit creator and AI stylist chat." },
-            { q: "How does the AI stylist work?", a: "The AI stylist in the Wardrobe tab knows your colour season, body shape and every item in your wardrobe. Ask it anything - what to wear for an occasion, how to style a specific item, or to analyse your whole wardrobe for gaps." },
+            { q: "What do I get on the free plan?", a: "The free plan gives you your colour season, your 4 best colours to wear now, your season headline and a daily colour tip. It's your starting point — upgrade to Glow or Luxe to unlock your full colour guide and daily outfit engine." },
+            { q: "What's the difference between Glow and Luxe?", a: "Glow unlocks your subseason, full colour palette, colour profile (undertone, depth, chroma and contrast), makeup guide, hair colour guide, jewellery guide and colour checker. Luxe adds everything in Glow plus your daily outfit engine — wardrobe builder, outfit creator, AI stylist chat, style and fit guide, and an extended palette of 24+ colours. If you want to stop asking 'what do I wear today?' — Luxe is built for that." },
+            { q: "How does the AI stylist work?", a: "The AI stylist lives in your Wardrobe tab and knows your colour season, body shape and every item you've added. Ask it what to wear today, what to wear for a specific occasion, how to style a piece you're not sure about, or to analyse your whole wardrobe for gaps. The more items you add, the smarter it gets." },
             { q: "How do I contact Solla?", a: "For any questions, feedback or support email us at hello@solla.com.au. We aim to respond within 1-2 business days." },
           ].map((item, i) => (
             <FaqItem key={i} question={item.q} answer={item.a} />
@@ -1044,7 +1044,7 @@ const loadExtendedPalette = async () => {
     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, padding: "40px 28px" }}>
       <Icon name="sparkles" size={40} color={DS.colors.border} />
       <p style={{ fontSize: 15, fontWeight: 500, color: DS.colors.textMuted, textAlign: "center" }}>No season data yet</p>
-      <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center" }}>Upload a selfie to discover your colour season</p>
+      <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center" }}>Upload a selfie to discover your colours and build your daily outfit engine</p>
       <button onClick={onReanalyse} style={{ marginTop: 8, padding: "12px 24px", borderRadius: DS.radius.full, background: DS.colors.accent, color: DS.colors.white, fontSize: 14, fontWeight: 600 }}>Re-analyse my colours</button>
     </div>
   );
@@ -1089,7 +1089,7 @@ const loadExtendedPalette = async () => {
         <button onClick={onUpgrade} style={{ margin: "0 16px 4px", padding: "12px 16px", background: DS.colors.accent, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: DS.colors.white }}>Your makeup, hair and jewellery guide is ready</p>
-            <p style={{ margin: "2px 0 0", fontSize: 12, color: "rgba(255,255,255,0.8)" }}>Unlock your full {seasonData.season} guide — free for 7 days</p>
+            <p style={{ margin: "2px 0 0", fontSize: 12, color: "rgba(255,255,255,0.8)" }}>Unlock your outfit engine and full colour guide — free for 7 days</p>
           </div>
           <Icon name="chevronRight" size={16} color={DS.colors.white} />
         </button>
@@ -1651,9 +1651,9 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
   };
 
   const planFeatures: Record<Plan, string[]> = {
-    free: ["Your colour season", "4 best colours from your palette", "Season headline", "Daily colour tip"],
+    free: ["Your colour season", "4 best colours to wear now", "Your season headline", "Daily colour tip"],
     glow: ["Your subseason", "Full colour palette", "Colour profile — undertone, depth, chroma, contrast", "Makeup guide — foundation, blush, lips, eyes", "Hair colour guide", "Jewellery — metals and stones", "Colour checker"],
-    luxe: ["Everything in Glow", "Style & Fit guide — silhouettes, patterns, fabrics", "Extended palette — 24+ colours", "Wardrobe builder", "Outfit creator", "AI stylist chat", "Capsule wardrobe analysis"],
+    luxe: ["Everything in Glow", "Daily outfit suggestions — wake up knowing what to wear", "Style & Fit guide — silhouettes, patterns, fabrics", "Extended palette — 24+ colours", "Wardrobe builder — see what actually works", "Outfit creator — build looks you know will land", "AI stylist chat — ask anything, get dressed faster", "Capsule wardrobe analysis"],
   };
 
   return (
@@ -2127,7 +2127,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
         <Icon name="hanger" size={28} color={DS.colors.accent} />
       </div>
       <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Your Wardrobe</h2>
-      <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 24 }}>Build your colour-approved wardrobe, create outfits, and get personalised advice from your AI stylist — all in Luxe.</p>
+      <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 24 }}>Stop guessing what to wear. Build your colour-approved wardrobe, get daily outfit suggestions and never open your wardrobe feeling lost again — all in Luxe.</p>
       <button onClick={onUpgrade} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: "#C26B3A", color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Unlock Wardrobe</button>
     </div>
   );
@@ -2206,8 +2206,8 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           {filteredItems.length === 0 ? (
             <div style={{ textAlign: "center", padding: "40px 0" }}>
               <Icon name="hanger" size={40} color={DS.colors.border} />
-              <p style={{ fontSize: 15, color: DS.colors.textMuted, marginTop: 12 }}>No items yet</p>
-              <p style={{ fontSize: 13, color: DS.colors.textFaint, marginTop: 4 }}>Tap the + button to add your first item</p>
+              <p style={{ fontSize: 15, color: DS.colors.textMuted, marginTop: 12 }}>Your wardrobe is empty</p>
+              <p style={{ fontSize: 13, color: DS.colors.textFaint, marginTop: 4 }}>Add your first item and start building your daily outfit engine</p>
             </div>
           ) : gridView ? (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 80 }}>
@@ -2334,7 +2334,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
 <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: items.length > 0 ? DS.colors.accentLight : DS.colors.surface, borderRadius: DS.radius.full, marginBottom: 8 }}>
   <span style={{ fontSize: 11, color: items.length > 0 ? DS.colors.accentDark : DS.colors.textFaint, fontWeight: 500 }}>{items.length > 0 ? `${items.length} wardrobe item${items.length !== 1 ? "s" : ""} loaded` : "No wardrobe items yet"}</span>
 </div>
-                <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, maxWidth: 240, margin: "0 auto" }}>Ask anything — what to wear tonight, how to style a specific piece, or what your wardrobe is missing.</p>
+                <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, maxWidth: 240, margin: "0 auto" }}>Your personal stylist is ready. Ask what to wear today, what to wear for an occasion, or get your whole wardrobe analysed in one go.</p>
                 <button onClick={() => { setChatInput("Analyse my wardrobe and tell me what's missing, what doesn't suit my season, and what key pieces I should add."); }} style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.lg, background: DS.colors.accentLight, fontSize: 13, color: DS.colors.accentDark, fontWeight: 600, textAlign: "left", border: `1px solid ${DS.colors.accent}30`, marginTop: 20, marginBottom: 8 }}>
   ✦ Analyse my wardrobe
 </button>
@@ -2595,8 +2595,8 @@ const ShareCard = ({ seasonData, onClose }: { seasonData: SeasonData; onClose: (
 
         {/* Footer */}
         <div style={{ padding: "20px 28px 28px" }}>
-          <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: textColor }}>Know your colours. Dress your best.</p>
-          <p style={{ margin: "0 0 2px", fontSize: 11, color: textColor, opacity: 0.6 }}>Colour analysis · Wardrobe tools · AI stylist</p>
+          <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: textColor }}>Stop guessing. Start dressing with confidence.</p>
+          <p style={{ margin: "0 0 2px", fontSize: 11, color: textColor, opacity: 0.6 }}>Your daily outfit engine · Powered by colour science</p>
           <p style={{ margin: 0, fontSize: 11, color: accentColor, fontWeight: 600 }}>solla.com.au · @sollaapp</p>
           <p style={{ margin: "4px 0 0", fontSize: 10, color: textColor, opacity: 0.5 }}>© 2026 Solla™. All rights reserved.</p>
         </div>
@@ -2619,7 +2619,7 @@ const PlaceholderTab = ({ tab, isGuest, onSignUp }: { tab: Tab; isGuest: boolean
   if (locked) {
     const tabInfo: Record<string, { icon: string; title: string; body: string }> = {
       checker: { icon: "image", title: "Check your colours", body: "Check any item, outfit or swatches against your season." },
-      wardrobe: { icon: "hanger", title: "Build your wardrobe", body: "Save and manage your colour-approved wardrobe." },
+      wardrobe: { icon: "hanger", title: "Your daily outfit engine", body: "Add your clothes, get daily outfit suggestions and never ask 'what do I wear?' again." },
       me: { icon: "user", title: "Your profile", body: "Manage your profile, plan and preferences." },
     };
     const info = tabInfo[tab];
@@ -2903,7 +2903,7 @@ update({ seasonData: data, screen: "main", activeSheet: "preview" as Sheet, tour
           </div>
         ))}
         <button onClick={() => update({ activeSheet: "paywall" as Sheet })} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginTop: 8 }}>
-          Unlock my full guide — free for 7 days
+          Build my outfit engine — free for 7 days
         </button>
         <button onClick={() => update({ activeSheet: "welcome" as Sheet })} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500, marginTop: 8 }}>
           Maybe later
@@ -2919,7 +2919,7 @@ update({ seasonData: data, screen: "main", activeSheet: "preview" as Sheet, tour
         <Icon name="sparkles" size={24} color={DS.colors.accent} />
       </div>
       <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>Your season is ready 🌸</h2>
-      <p style={{ fontSize: 14, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>Your colour season is ready. Explore your palette, unlock your makeup, hair and jewellery guide, and build your colour-approved wardrobe and AI stylist.</p>
+      <p style={{ fontSize: 14, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>Your colour profile is ready. Now let's build your daily outfit engine — add your wardrobe, create outfits and never ask "what do I wear?" again.</p>
       <button onClick={() => update({ activeSheet: null, tourStep: 0 })} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Explore my colours</button>
     </div>
   </div>
