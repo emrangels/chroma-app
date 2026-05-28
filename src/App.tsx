@@ -1489,7 +1489,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                 </div>
                 <input value={saveName} onChange={e => setSaveName(e.target.value)} placeholder="Item name" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 12, fontFamily: DS.font }} />
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
-                  {["Top", "Bottom", "Dress", "Outerwear", "Shoes", "Accessories"].map(cat => (
+                  {["Top", "Knitwear", "Jackets & Coats", "Bottoms", "Dresses & Jumpsuits", "Shoes", "Bags", "Accessories"].map(cat => (
                     <button key={cat} onClick={() => setSaveCategory(cat)} style={{ padding: "6px 14px", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 500, background: saveCategory === cat ? DS.colors.accent : DS.colors.surface, color: saveCategory === cat ? DS.colors.white : DS.colors.textMuted, transition: "all 0.2s" }}>
                       {cat}
                     </button>
@@ -2394,7 +2394,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                   </div>
                   <input value={itemNames[i] || ""} onChange={e => setItemNames(prev => prev.map((n, j) => j === i ? e.target.value : n))} placeholder="Item name" style={{ width: "100%", padding: "10px 12px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 13, color: DS.colors.text, background: DS.colors.surface, outline: "none", marginBottom: 8, fontFamily: DS.font }} />
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    {["Top", "Bottom", "Dress", "Outerwear", "Shoes", "Accessories"].map(cat => (
+                    {["Top", "Knitwear", "Jackets & Coats", "Bottoms", "Dresses & Jumpsuits", "Shoes", "Bags", "Accessories"].map(cat => (
                       <button key={cat} onClick={() => setItemCategories(prev => prev.map((c, j) => j === i ? cat : c))} style={{ padding: "4px 10px", borderRadius: DS.radius.full, fontSize: 11, fontWeight: 500, background: itemCategories[i] === cat ? DS.colors.accent : DS.colors.surface, color: itemCategories[i] === cat ? DS.colors.white : DS.colors.textMuted }}>
                         {cat}
                       </button>
@@ -2460,7 +2460,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 12, fontFamily: DS.font }}
         />
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
-          {["Top", "Bottom", "Dress", "Outerwear", "Shoes", "Accessories"].map(cat => (
+          {["Top", "Knitwear", "Jackets & Coats", "Bottoms", "Dresses & Jumpsuits", "Shoes", "Bags", "Accessories"].map(cat => (
             <button key={cat} onClick={() => setEditCategory(cat)} style={{ padding: "6px 14px", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 500, background: editCategory === cat ? DS.colors.accent : DS.colors.surface, color: editCategory === cat ? DS.colors.white : DS.colors.textMuted, transition: "all 0.2s" }}>
               {cat}
             </button>
