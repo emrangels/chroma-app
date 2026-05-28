@@ -1926,9 +1926,27 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
       img.src = url;
     });
 
+  const uploadToStorage = async (file: File, userId: string): Promise<string | null> => {
+    try {
+      const ext = file.type === "image/png" ? "png" : "jpg";
+      const path = `${userId}/${Date.now()}.${ext}`;
+      const res = await fetch(`${SUPABASE_URL}/storage/v1/object/wardrobe-items/${path}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": file.type,
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${localStorage.getItem("solla_token") || SUPABASE_JWT_KEY}`,
+        },
+        body: file,
+      });
+      if (!res.ok) return null;
+      return `${SUPABASE_URL}/storage/v1/object/public/wardrobe-items/${path}`;
+    } catch { return null; }
+  };
+
   const handleItemPhotos = async (files: FileList) => {
     const previews = Array.from(files).map(f => URL.createObjectURL(f));
-    setItemPreviews(previews); // initial previews, updated after bg removal
+    setItemPreviews(previews);
     setItemResults([]);
     setItemNames([]);
     setItemCategories([]);
@@ -1971,18 +1989,25 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
     if (!itemResults.length || !user?.id) return;
     setLoading(true);
     try {
-      const newItems = itemResults.map((result, i) => ({
-        user_id: user.id,
-        name: (itemNames[i] || result.colour_name).trim(),
-        category: itemCategories[i] || "Top",
-        colour_name: result.colour_name,
-        hex: result.hex,
-        verdict: result.verdict,
-        tip: result.tip,
-        starred: false,
-        price: null,
-      }));
-      for (const newItem of newItems) {
+      const fileList = fileRef.current?.files;
+      for (let i = 0; i < itemResults.length; i++) {
+        const result = itemResults[i];
+        let image_url: string | null = null;
+        if (fileList?.[i]) {
+          image_url = await uploadToStorage(fileList[i], user.id);
+        }
+        const newItem = {
+          user_id: user.id,
+          name: (itemNames[i] || result.colour_name).trim(),
+          category: itemCategories[i] || "Top",
+          colour_name: result.colour_name,
+          hex: result.hex,
+          verdict: result.verdict,
+          tip: result.tip,
+          starred: false,
+          price: null,
+          image_url,
+        };
         const res = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items`, {
           method: "POST",
           headers: { ...getAuthHeaders(), Prefer: "return=representation" },
@@ -2182,7 +2207,8 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 80 }}>
               {filteredItems.map(item => (
                 <div key={item.id} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, overflow: "hidden" }}>
-                  <div style={{ width: "100%", aspectRatio: "1", background: item.hex, position: "relative" }}>
+                  <div style={{ width: "100%", aspectRatio: "1", background: item.image_url ? DS.colors.surface : item.hex, position: "relative" }}>
+                    {item.image_url && <img src={item.image_url} style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }} />}
                     <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 4 }}>
                       <button onClick={() => handleToggleStar(item)} style={{ width: 28, height: 28, borderRadius: DS.radius.full, background: "rgba(255,255,255,0.9)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: item.starred ? "#FFD700" : DS.colors.border }}>★</button>
                     </div>
@@ -2208,7 +2234,11 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
               {filteredItems.map(item => (
                 <div key={item.id} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "14px 16px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 60, height: 60, borderRadius: DS.radius.md, background: item.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
+                    {item.image_url ? (
+                      <img src={item.image_url} style={{ width: 60, height: 60, borderRadius: DS.radius.md, objectFit: "cover", flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
+                    ) : (
+                      <div style={{ width: 60, height: 60, borderRadius: DS.radius.md, background: item.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
+                    )}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: DS.colors.text }}>{item.name}</p>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
