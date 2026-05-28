@@ -1298,8 +1298,9 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
 
     const openSaveSheet = (item: CheckResult["items"][0], previewSrc?: string) => {
     const pieceToCategory: Record<string, string> = {
-      Top: "Top", Bottom: "Bottom", Dress: "Dress",
-      Outerwear: "Outerwear", Shoes: "Shoes", Bag: "Accessories", Accessory: "Accessories"
+      Top: "Top", Knitwear: "Knitwear", Jacket: "Jackets & Coats", Coat: "Jackets & Coats",
+      Bottom: "Bottoms", Dress: "Dresses & Jumpsuits", Jumpsuit: "Dresses & Jumpsuits",
+      Shoes: "Shoes", Bag: "Bags", Accessory: "Accessories"
     };
     const guessedCategory = item.piece ? (pieceToCategory[item.piece] || "Top") : "Top";
     const guessedName = item.piece ? `${item.colour_name} ${item.piece.toLowerCase()}` : item.colour_name;
@@ -1866,9 +1867,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
-
-  const categories = ["All", "Top", "Bottom", "Dress", "Outerwear", "Shoes", "Accessories"];
-
+  const categories = ["All", "Top", "Knitwear", "Jackets & Coats", "Bottoms", "Dresses & Jumpsuits", "Shoes", "Bags", "Accessories"];
   const getAuthHeaders = () => {
   const token = localStorage.getItem("solla_token");
   return {
@@ -1933,8 +1932,9 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
     if (!seasonData) return;
     setItemChecking(true);
     const pieceToCategory: Record<string, string> = {
-      Top: "Top", Bottom: "Bottom", Dress: "Dress",
-      Outerwear: "Outerwear", Shoes: "Shoes", Bag: "Accessories", Accessory: "Accessories"
+      Top: "Top", Knitwear: "Knitwear", Jacket: "Jackets & Coats", Coat: "Jackets & Coats",
+      Bottom: "Bottoms", Dress: "Dresses & Jumpsuits", Jumpsuit: "Dresses & Jumpsuits",
+      Shoes: "Shoes", Bag: "Bags", Accessory: "Accessories"
     };
     try {
       const results: { colour_name: string; hex: string; verdict: boolean; tip: string; piece?: string }[] = [];
