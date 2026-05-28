@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { removeBackground } from "@imgly/background-removal";
 import html2canvas from 'html2canvas';
 import { Analytics } from '@vercel/analytics/react';
 
@@ -1928,24 +1929,36 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
 
   const handleItemPhotos = async (files: FileList) => {
     const previews = Array.from(files).map(f => URL.createObjectURL(f));
-    setItemPreviews(previews);
+    setItemPreviews(previews); // initial previews, updated after bg removal
     setItemResults([]);
     setItemNames([]);
     setItemCategories([]);
     if (!seasonData) return;
     setItemChecking(true);
+    // Remove background from each image before analysis
+    const processedFiles: File[] = [];
+    for (let i = 0; i < files.length; i++) {
+      try {
+        const blob = await removeBackground(files[i]);
+        processedFiles.push(new File([blob], files[i].name, { type: "image/png" }));
+      } catch {
+        processedFiles.push(files[i]);
+      }
+    }
     const pieceToCategory: Record<string, string> = {
       Top: "Top", Knitwear: "Knitwear", Jacket: "Jackets & Coats", Coat: "Jackets & Coats",
       Bottom: "Bottoms", Dress: "Dresses & Jumpsuits", Jumpsuit: "Dresses & Jumpsuits",
       Shoes: "Shoes", Bag: "Bags", Accessory: "Accessories"
     };
     try {
+      const removedPreviews = processedFiles.map(f => URL.createObjectURL(f));
+      setItemPreviews(removedPreviews);
       const results: { colour_name: string; hex: string; verdict: boolean; tip: string; piece?: string }[] = [];
       const names: string[] = [];
       const cats: string[] = [];
-      for (let i = 0; i < files.length; i++) {
+      for (let i = 0; i < processedFiles.length; i++) {
         setItemCheckingIndex(i);
-        const base64 = await resizeAndEncode(files[i]);
+        const base64 = await resizeAndEncode(processedFiles[i]);
         const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
           method: "POST",
           headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
