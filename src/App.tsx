@@ -1930,10 +1930,6 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const uploadToStorage = async (file: File, userId: string): Promise<string | null> => {
     try {
       let uploadFile = file;
-      try {
-        const bgRemovedBlob = await removeBackground(file);
-        uploadFile = new File([bgRemovedBlob], file.name, { type: "image/png" });
-      } catch { /* fall back to original if bg removal fails */ }
       const ext = uploadFile.type === "image/png" ? "png" : "jpg";
       const path = `${userId}/${Date.now()}.${ext}`;
       const res = await fetch(`${SUPABASE_URL}/storage/v1/object/wardrobe-items/${path}`, {
@@ -2473,7 +2469,11 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                   const selected = selectedItemIds.includes(item.id);
                   return (
                     <button key={item.id} onClick={() => setSelectedItemIds(prev => selected ? prev.filter(id => id !== item.id) : [...prev, item.id])} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${selected ? DS.colors.accent : DS.colors.border}`, background: selected ? DS.colors.accentLight : DS.colors.bg, textAlign: "left" }}>
-                      <div style={{ width: 32, height: 32, borderRadius: DS.radius.sm, background: item.hex, flexShrink: 0 }} />
+                      {item.image_url ? (
+                        <img src={item.image_url} style={{ width: 44, height: 44, borderRadius: DS.radius.sm, objectFit: "cover", flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
+                      ) : (
+                        <div style={{ width: 32, height: 32, borderRadius: DS.radius.sm, background: item.hex, flexShrink: 0 }} />
+                      )}
                       <div style={{ flex: 1 }}>
                         <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>{item.name}</p>
                         <p style={{ margin: 0, fontSize: 11, color: DS.colors.textFaint }}>{item.category} · {item.colour_name}</p>
