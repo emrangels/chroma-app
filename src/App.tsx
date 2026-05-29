@@ -397,7 +397,7 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File, bodyShape: string) 
       <div className="screen fade-in" style={{ background: DS.colors.bg, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
       <div style={{ padding: "40px 28px 120px", display: "flex", flexDirection: "column" }}>
         <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Take your selfie</h1>
-        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.6 }}>One photo is all it takes. Your personal colour guide and daily outfit engine — ready in seconds.</p>
+        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.6 }}>One photo is all it takes. Your personal colour profile and daily outfit engine — ready in under a minute.</p>
 
         {/* Photo upload */}
         <div onClick={() => !preview && fileRef.current?.click()} onDragOver={e => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={e => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files?.[0]; if (f) handleFile(f); }}
@@ -521,7 +521,7 @@ const AnalysingScreen = () => {
       </div>
       <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>Analysing your colours</h2>
       <p style={{ fontSize: 15, color: DS.colors.accent, fontWeight: 500, marginBottom: 16, transition: "all 0.4s" }}>{steps[step]}...</p>
-      <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", marginBottom: 32, maxWidth: 260 }}>This usually takes 15–20 seconds. Your personal colour profile and wardrobe guide will be ready shortly — stay on this screen.</p>
+      <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", marginBottom: 32, maxWidth: 260 }}>Analysing your colours… This takes up to a minute — good things take time. Your personal colour profile and wardrobe guide will be ready shortly.</p>
       <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
   {steps.map((s, i) => (
     <div key={s} style={{ display: "flex", alignItems: "center", gap: 12, width: 240, margin: "0 auto" }}>
