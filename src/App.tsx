@@ -1109,7 +1109,7 @@ const loadExtendedPalette = async () => {
           
           {/* Best colours */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 16 }}>
-            {(seasonData.palette.best || []).map(colour => (
+            {(seasonData.palette?.best || []).map(colour => (
   <button key={colour.hex} onClick={() => setSelectedColour(colour)} style={{ textAlign: "center", background: "none", border: "none", padding: 0 }}>
     <div style={{ width: "100%", aspectRatio: "1", borderRadius: 10, background: colour.hex, marginBottom: 4, border: colour.hex === "#FFFFFF" ? `1px solid ${DS.colors.border}` : "none" }} />
     <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
@@ -1118,11 +1118,11 @@ const loadExtendedPalette = async () => {
           </div>
 
           {/* Base colours */}
-          {plan !== "free" && seasonData.palette.base && seasonData.palette.base.length > 0 && (
+          {plan !== "free" && seasonData.palette?.base && seasonData.palette?.base.length > 0 && (
             <div style={{ marginBottom: 16, paddingTop: 14, borderTop: `1px solid ${DS.colors.border}` }}>
               <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 500, color: DS.colors.textMuted }}>Base neutrals</p>
               <div style={{ display: "flex", gap: 8 }}>
-                {seasonData.palette.base.map(colour => (
+                {seasonData.palette?.base.map(colour => (
   <button key={colour.hex} onClick={() => setSelectedColour(colour)} style={{ flex: 1, textAlign: "center", background: "none", border: "none", padding: 0 }}>
     <div style={{ width: "100%", aspectRatio: "1", borderRadius: 8, background: colour.hex, marginBottom: 4, border: `1px solid ${DS.colors.border}` }} />
     <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
@@ -1133,11 +1133,11 @@ const loadExtendedPalette = async () => {
           )}
 
           {/* Accent colours */}
-          {plan !== "free" && seasonData.palette.accent && seasonData.palette.accent.length > 0 && (
+          {plan !== "free" && seasonData.palette?.accent && seasonData.palette?.accent.length > 0 && (
             <div style={{ marginBottom: 16, paddingTop: 14, borderTop: `1px solid ${DS.colors.border}` }}>
               <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 500, color: DS.colors.textMuted }}>Accent colours</p>
               <div style={{ display: "flex", gap: 8 }}>
-                {seasonData.palette.accent.map(colour => (
+                {seasonData.palette?.accent.map(colour => (
   <button key={colour.hex} onClick={() => setSelectedColour(colour)} style={{ flex: 1, textAlign: "center", background: "none", border: "none", padding: 0 }}>
     <div style={{ width: "100%", aspectRatio: "1", borderRadius: 8, background: colour.hex, marginBottom: 4, border: `1px solid ${DS.colors.border}` }} />
     <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
@@ -1181,7 +1181,7 @@ const loadExtendedPalette = async () => {
           {plan !== "free" && <div style={{ paddingTop: 14, borderTop: `1px solid ${DS.colors.border}` }}>
             <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 500, color: DS.colors.textMuted }}>Avoid</p>
             <div style={{ display: "flex", gap: 8 }}>
-              {(seasonData.palette.avoid || []).map(colour => (
+              {(seasonData.palette?.avoid || []).map(colour => (
                 <div key={colour.hex} style={{ flex: 1, textAlign: "center" }}>
                   <div style={{ width: "100%", aspectRatio: "1", borderRadius: 8, background: colour.hex, marginBottom: 4, border: `1px solid ${DS.colors.border}`, position: "relative", overflow: "hidden" }}>
                     <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -2592,7 +2592,7 @@ const ShareCard = ({ seasonData, onClose }: { seasonData: SeasonData; onClose: (
         {/* Palette strip */}
         <div style={{ padding: "0 28px 20px" }}>
           <div style={{ display: "flex", gap: 6 }}>
-            {(seasonData.palette.best || []).slice(0, 6).map(colour => (
+            {(seasonData.palette?.best || []).slice(0, 6).map(colour => (
               <div key={colour.hex} style={{ flex: 1, height: 40, borderRadius: DS.radius.md, background: colour.hex, border: "1px solid rgba(255,255,255,0.3)" }} />
             ))}
           </div>
