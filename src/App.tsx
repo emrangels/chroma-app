@@ -225,7 +225,14 @@ const AuthScreen = ({ onSignIn, onGuest, onOpenTerms }: { onSignIn: (user: User)
         } catch {}
       }
       if (mode === "signup") {
-        if (userId) await saveProfile(userId, userName, userEmail, data.access_token, generateReferralCode(userName), referralCode);
+        if (userId) {
+          await saveProfile(userId, userName, userEmail, data.access_token, generateReferralCode(userName), referralCode);
+          fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+            body: JSON.stringify({ type: "welcome", email: userEmail, name: userName }),
+          }).catch(() => {});
+        }
         setError("Check your email to confirm your account. If you don't see it within a few minutes, check your spam folder.");
         setLoading(false);
         return;
@@ -2742,6 +2749,42 @@ export default function App() {
         const analysedDate = localStorage.getItem(`solla_analysed_${parsedUser.id}`);
 const daysSince = analysedDate ? Math.floor((Date.now() - new Date(analysedDate).getTime()) / (1000 * 60 * 60 * 24)) : 0;
 update({ screen: "main", user: parsedUser, seasonData: parsedSeason, showDay3Prompt: parsedUser.plan === "free" && daysSince >= 3 });
+
+// Day 3 and Day 7 email triggers
+if (parsedUser.email && parsedSeason?.season) {
+  fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${parsedUser.id}&select=day3_email_sent,day7_email_sent`, {
+    headers: { ...supabaseHeaders, Authorization: `Bearer ${token}` },
+  }).then(r => r.json()).then(data => {
+    const profile = data?.[0];
+    if (!profile) return;
+    if (daysSince >= 3 && !profile.day3_email_sent) {
+      fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+        body: JSON.stringify({ type: "day3", email: parsedUser.email, name: parsedUser.name, season: parsedSeason.season }),
+      }).then(() => {
+        fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${parsedUser.id}`, {
+          method: "PATCH",
+          headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
+          body: JSON.stringify({ day3_email_sent: true }),
+        }).catch(() => {});
+      }).catch(() => {});
+    }
+    if (daysSince >= 7 && !profile.day7_email_sent) {
+      fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+        body: JSON.stringify({ type: "day7", email: parsedUser.email, name: parsedUser.name, season: parsedSeason.season }),
+      }).then(() => {
+        fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${parsedUser.id}`, {
+          method: "PATCH",
+          headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
+          body: JSON.stringify({ day7_email_sent: true }),
+        }).catch(() => {});
+      }).catch(() => {});
+    }
+  }).catch(() => {});
+}
       } else {
         update({ screen: "main", user: parsedUser });
         fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${parsedUser.id}&select=season_data`, {
