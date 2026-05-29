@@ -288,6 +288,7 @@ if (mode === "landing") return (
           <button onClick={onGuest} style={{ width: "100%", padding: "14px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Continue as guest</button>
         </div>
       </div>
+      <p style={{ fontSize: 11, color: DS.colors.textFaint, textAlign: "center", padding: "0 0 24px" }}>© 2026 Solla™. All rights reserved.</p>
     </div>
   );
   return (
