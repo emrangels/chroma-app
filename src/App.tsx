@@ -2305,8 +2305,12 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     <div style={{ display: "flex", gap: 6 }}>
                       {outfitItems.map(item => (
                         <div key={item.id} style={{ textAlign: "center" }}>
-                          <div style={{ width: 36, height: 36, borderRadius: DS.radius.sm, background: item.hex, border: "1px solid rgba(0,0,0,0.08)" }} />
-                          <p style={{ margin: "3px 0 0", fontSize: 9, color: DS.colors.textFaint, maxWidth: 40, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</p>
+                          {item.image_url ? (
+                            <img src={item.image_url} style={{ width: 52, height: 52, borderRadius: DS.radius.sm, objectFit: "contain", background: "#F5F5F5", border: "1px solid rgba(0,0,0,0.08)" }} />
+                          ) : (
+                            <div style={{ width: 52, height: 52, borderRadius: DS.radius.sm, background: item.hex, border: "1px solid rgba(0,0,0,0.08)" }} />
+                          )}
+                          <p style={{ margin: "3px 0 0", fontSize: 9, color: DS.colors.textFaint, maxWidth: 52, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</p>
                         </div>
                       ))}
                     </div>
