@@ -225,7 +225,6 @@ const AuthScreen = ({ onSignIn, onGuest, onOpenTerms }: { onSignIn: (user: User)
         } catch {}
       }
       if (mode === "signup") {
-        console.log("Signup userId:", userId, "email:", userEmail);
         // Send welcome email regardless of userId — email is always available
         fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
           method: "POST",
