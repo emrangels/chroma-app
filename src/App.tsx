@@ -215,7 +215,7 @@ const AuthScreen = ({ onSignIn, onGuest, onOpenTerms }: { onSignIn: (user: User)
       const data = await res.json();
       if (data.error || data.error_description || data.msg) throw new Error(data.error_description || data.msg || data.error || "Auth failed");
       const userId = data.user?.id; const userEmail = data.user?.email || email;
-      const userName = data.user?.user_metadata?.name || name || email.split("@")[0];
+      const userName = name || data.user?.user_metadata?.name || email.split("@")[0];
       let plan: Plan = "free";
       if (userId) {
         try {
