@@ -225,13 +225,15 @@ const AuthScreen = ({ onSignIn, onGuest, onOpenTerms }: { onSignIn: (user: User)
         } catch {}
       }
       if (mode === "signup") {
+        console.log("Signup userId:", userId, "email:", userEmail);
         if (userId) {
           await saveProfile(userId, userName, userEmail, data.access_token, generateReferralCode(userName), referralCode);
+          console.log("Sending welcome email to:", userEmail, userName);
           fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
             method: "POST",
             headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
             body: JSON.stringify({ type: "welcome", email: userEmail, name: userName }),
-          }).catch(() => {});
+          }).catch((err) => console.error("Email error:", err));
         }
         setError("Check your email to confirm your account. If you don't see it within a few minutes, check your spam folder.");
         setLoading(false);
