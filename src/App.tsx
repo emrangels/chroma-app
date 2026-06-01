@@ -1154,24 +1154,22 @@ const generateOutfit = async (temp: number, desc: string) => {
   try {
     const season = seasonData!.season;
     const palette = (seasonData!.palette?.best || []).map((c: PaletteColour) => c.name).slice(0, 3).join(", ");
-    const outfitRes = await fetch("https://api.anthropic.com/v1/messages", {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        messages: [{
-          role: "user",
-          content: `You are a personal stylist AI for Solla, a colour season app. Give a short, warm, specific daily outfit suggestion (2-3 sentences max) for a ${season} colour season. Today's weather is ${temp}°C and ${desc}. Their best colours include ${palette}. Be specific about garments and colours. No intro, just the outfit suggestion.`
-        }]
-      })
+        type: "weather_outfit",
+        season,
+        palette,
+        temp,
+        desc,
+      }),
     });
-    const outfitData = await outfitRes.json();
-    const text = outfitData.content?.[0]?.text;
-    if (text) {
-      setWeatherOutfit(text);
+    const data = await res.json();
+    if (data.outfit) {
+      setWeatherOutfit(data.outfit);
     } else {
-      setWeatherOutfit("Could not generate outfit suggestion — " + JSON.stringify(outfitData).slice(0, 100));
+      setWeatherOutfit("Debug: " + JSON.stringify(data).slice(0, 150));
     }
   } catch (e) {
     setWeatherOutfit("Error: " + (e instanceof Error ? e.message : String(e)));
