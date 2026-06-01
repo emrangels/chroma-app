@@ -252,7 +252,7 @@ const LifestyleOnboardingScreen = ({ onComplete, userId, token }: { onComplete: 
   };
   return (
     <div className="screen fade-in" style={{ background: DS.colors.bg, display: "flex", flexDirection: "column", padding: "0 28px" }}>
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", overflowY: "auto", paddingBottom: 16 }}>
         <div style={{ display: "flex", gap: 6, marginBottom: 32 }}>
           {questions.map((_, i) => (
             <div key={i} style={{ flex: 1, height: 4, borderRadius: DS.radius.full, background: i <= step ? DS.colors.accent : DS.colors.border, transition: "background 0.3s" }} />
