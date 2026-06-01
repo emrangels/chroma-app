@@ -1154,6 +1154,19 @@ const generateOutfit = async (temp: number, desc: string) => {
   try {
     const season = seasonData!.season;
     const palette = (seasonData!.palette?.best || []).map((c: PaletteColour) => c.name).slice(0, 3).join(", ");
+    const token = localStorage.getItem("solla_token");
+    let wardrobeContext = "";
+    if (user?.id && user?.plan === "luxe") {
+      try {
+        const wRes = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?user_id=eq.${user.id}&select=name,category,colour_name,verdict&limit=20`, {
+          headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token || SUPABASE_JWT_KEY}` }
+        });
+        const wData = await wRes.json();
+        if (Array.isArray(wData) && wData.length > 0) {
+          wardrobeContext = wData.filter((i: WardrobeItem) => i.verdict).map((i: WardrobeItem) => `${i.name} (${i.category})`).join(", ");
+        }
+      } catch {}
+    }
     const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
       method: "POST",
       headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
@@ -1163,6 +1176,7 @@ const generateOutfit = async (temp: number, desc: string) => {
         palette,
         temp,
         desc,
+        wardrobe: wardrobeContext,
       }),
     });
     const data = await res.json();
@@ -1178,6 +1192,7 @@ const generateOutfit = async (temp: number, desc: string) => {
 
 useEffect(() => {
   if (!seasonData || plan === "free") return;
+  if (!navigator.geolocation) { return; }
   setLoadingWeather(true);
   navigator.geolocation.getCurrentPosition(async (pos) => {
     try {
@@ -1191,7 +1206,7 @@ useEffect(() => {
       await generateOutfit(temp, desc);
     } catch {}
     finally { setLoadingWeather(false); }
-  }, () => { setLoadingWeather(false); });
+  }, () => { setLoadingWeather(false); setWeather({ temp: -1, desc: "denied", icon: "map-pin" }); }, { timeout: 10000 });
 }, [seasonData?.season, plan]);
 
 const loadExtendedPalette = async () => {
@@ -1281,28 +1296,7 @@ const loadExtendedPalette = async () => {
           {loadingWeather && <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted }}>Finding your perfect outfit for today…</p>}
           {!loadingWeather && weatherOutfit && <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>{weatherOutfit}</p>}
           {!loadingWeather && !weatherOutfit && !weather && (
-  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-    <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted }}>Allow location access to get your daily outfit suggestion.</p>
-    <button onClick={() => {
-      setLoadingWeather(true);
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        try {
-          const { latitude, longitude } = pos.coords;
-          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weathercode&timezone=auto`);
-          const data = await res.json();
-          const temp = Math.round(data.current.temperature_2m);
-          const code = data.current.weathercode;
-          const desc = code <= 1 ? "sunny" : code <= 3 ? "partly cloudy" : code <= 67 ? "rainy" : code <= 77 ? "snowy" : "overcast";
-          const icon = code <= 1 ? "sun" : code <= 3 ? "cloud" : code <= 67 ? "cloud-rain" : "cloud-snow";
-          setWeather({ temp, desc, icon });
-          await generateOutfit(temp, desc);
-        } catch {}
-        finally { setLoadingWeather(false); }
-      }, () => { setLoadingWeather(false); setWeather({ temp: -1, desc: "denied", icon: "map-pin" }); });
-    }} style={{ padding: "10px 16px", borderRadius: DS.radius.md, background: DS.colors.accent, color: DS.colors.white, fontSize: 13, fontWeight: 600, alignSelf: "flex-start" }}>
-      Enable location
-    </button>
-  </div>
+  <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted }}>Getting your location for today's outfit suggestion…</p>
 )}
 {!loadingWeather && !weatherOutfit && weather?.desc === "denied" && (
   <PostcodeWeather seasonData={seasonData} onResult={(temp, desc) => { setWeather({ temp, desc, icon: "map-pin" }); generateOutfit(temp, desc); }} />
