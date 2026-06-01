@@ -252,7 +252,7 @@ const LifestyleOnboardingScreen = ({ onComplete, userId, token }: { onComplete: 
   };
   return (
     <div className="screen fade-in" style={{ background: DS.colors.bg, display: "flex", flexDirection: "column", padding: "0 28px", overflowY: "auto" }}>
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", paddingTop: 40, paddingBottom: 16 }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-start", paddingTop: 40, paddingBottom: 100 }}>
         <div style={{ display: "flex", gap: 6, marginBottom: 32 }}>
           {questions.map((_, i) => (
             <div key={i} style={{ flex: 1, height: 4, borderRadius: DS.radius.full, background: i <= step ? DS.colors.accent : DS.colors.border, transition: "background 0.3s" }} />
@@ -1293,7 +1293,7 @@ const loadExtendedPalette = async () => {
           await generateOutfit(temp, desc);
         } catch {}
         finally { setLoadingWeather(false); }
-      }, (err) => { setLoadingWeather(false); alert("Location error: " + err.message + " (code " + err.code + ")"); });
+      }, () => { setLoadingWeather(false); setWeather({ temp: -1, desc: "denied", icon: "map-pin" }); });
     }} style={{ padding: "10px 16px", borderRadius: DS.radius.md, background: DS.colors.accent, color: DS.colors.white, fontSize: 13, fontWeight: 600, alignSelf: "flex-start" }}>
       Enable location
     </button>
