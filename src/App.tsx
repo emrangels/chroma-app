@@ -1113,6 +1113,43 @@ const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade, onReanalyse }: { se
 const [extendedPalette, setExtendedPalette] = useState<PaletteColour[]>([]);
 const [loadingExtended, setLoadingExtended] = useState(false);
 const [showExtended, setShowExtended] = useState(false);
+const [weather, setWeather] = useState<{ temp: number; desc: string; icon: string } | null>(null);
+const [weatherOutfit, setWeatherOutfit] = useState<string | null>(null);
+const [loadingWeather, setLoadingWeather] = useState(false);
+
+useEffect(() => {
+  if (!seasonData || plan === "free") return;
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    try {
+      setLoadingWeather(true);
+      const { latitude, longitude } = pos.coords;
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weathercode&timezone=auto`);
+      const data = await res.json();
+      const temp = Math.round(data.current.temperature_2m);
+      const code = data.current.weathercode;
+      const desc = code <= 1 ? "sunny" : code <= 3 ? "partly cloudy" : code <= 67 ? "rainy" : code <= 77 ? "snowy" : "overcast";
+      const icon = code <= 1 ? "sun" : code <= 3 ? "cloud" : code <= 67 ? "cloud-rain" : "cloud-snow";
+      setWeather({ temp, desc, icon });
+      const season = seasonData.season;
+      const palette = (seasonData.palette?.best || []).map((c: PaletteColour) => c.name).slice(0, 3).join(", ");
+      const outfitRes = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          messages: [{
+            role: "user",
+            content: `You are a personal stylist AI for Solla, a colour season app. Give a short, warm, specific daily outfit suggestion (2-3 sentences max) for a ${season} colour season. Today's weather is ${temp}°C and ${desc}. Their best colours include ${palette}. Be specific about garments and colours. No intro, just the outfit suggestion.`
+          }]
+        })
+      });
+      const outfitData = await outfitRes.json();
+      setWeatherOutfit(outfitData.content?.[0]?.text || null);
+    } catch {}
+    finally { setLoadingWeather(false); }
+  }, () => setLoadingWeather(false));
+}, [seasonData?.season, plan]);
 
 const loadExtendedPalette = async () => {
   if (extendedPalette.length > 0) { setShowExtended(true); return; }
@@ -1192,6 +1229,17 @@ const loadExtendedPalette = async () => {
         <Icon name="sparkles" size={14} color={accentColor} strokeWidth={2} />
         <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{seasonData.daily_tip}</p>
       </div>
+      {plan !== "free" && (
+        <div style={{ margin: "0 16px 4px", padding: "14px 16px", background: DS.colors.surface, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>Today's outfit</p>
+            {weather && <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted }}>{weather.temp}°C · {weather.desc}</p>}
+          </div>
+          {loadingWeather && <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted }}>Finding your perfect outfit for today…</p>}
+          {!loadingWeather && weatherOutfit && <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>{weatherOutfit}</p>}
+          {!loadingWeather && !weatherOutfit && !weather && <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted }}>Allow location access to get your daily outfit suggestion.</p>}
+        </div>
+      )}
       {plan === "free" && (
         <button onClick={onUpgrade} style={{ margin: "0 16px 4px", padding: "12px 16px", background: DS.colors.accent, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
