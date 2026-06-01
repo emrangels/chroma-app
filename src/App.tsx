@@ -1271,7 +1271,7 @@ const loadExtendedPalette = async () => {
         <div style={{ margin: "0 16px 4px", padding: "14px 16px", background: DS.colors.surface, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>Today's outfit</p>
-            {weather && <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted }}>{weather.temp}°C · {weather.desc}</p>}
+            {weather && weather.desc !== "denied" && <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted }}>{weather.temp}°C · {weather.desc}</p>}
           </div>
           {loadingWeather && <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted }}>Finding your perfect outfit for today…</p>}
           {!loadingWeather && weatherOutfit && <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>{weatherOutfit}</p>}
@@ -1298,6 +1298,9 @@ const loadExtendedPalette = async () => {
       Enable location
     </button>
   </div>
+)}
+{!loadingWeather && !weatherOutfit && weather?.desc === "denied" && (
+  <PostcodeWeather seasonData={seasonData} onResult={(temp, desc) => { setWeather({ temp, desc, icon: "map-pin" }); generateOutfit(temp, desc); }} />
 )}
         </div>
       )}
