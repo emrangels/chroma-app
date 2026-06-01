@@ -251,8 +251,8 @@ const LifestyleOnboardingScreen = ({ onComplete, userId, token }: { onComplete: 
     }
   };
   return (
-    <div className="screen fade-in" style={{ background: DS.colors.bg, display: "flex", flexDirection: "column", padding: "0 28px" }}>
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", overflowY: "auto", paddingBottom: 16 }}>
+    <div className="screen fade-in" style={{ background: DS.colors.bg, display: "flex", flexDirection: "column", padding: "0 28px", overflowY: "auto" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", paddingTop: 40, paddingBottom: 16 }}>
         <div style={{ display: "flex", gap: 6, marginBottom: 32 }}>
           {questions.map((_, i) => (
             <div key={i} style={{ flex: 1, height: 4, borderRadius: DS.radius.full, background: i <= step ? DS.colors.accent : DS.colors.border, transition: "background 0.3s" }} />
@@ -282,7 +282,7 @@ const LifestyleOnboardingScreen = ({ onComplete, userId, token }: { onComplete: 
           ))}
         </div>
       </div>
-      <div style={{ paddingBottom: "calc(48px + env(safe-area-inset-bottom))", paddingTop: 16 }}>
+      <div style={{ paddingTop: 16, paddingBottom: 32, flexShrink: 0 }}>
         <button onClick={onComplete} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>
           Skip for now
         </button>
