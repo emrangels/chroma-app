@@ -1270,7 +1270,7 @@ const loadExtendedPalette = async () => {
           setWeatherOutfit(outfitData.content?.[0]?.text || null);
         } catch {}
         finally { setLoadingWeather(false); }
-      }, () => setLoadingWeather(false));
+      }, (err) => { setLoadingWeather(false); alert("Location error: " + err.message + " (code " + err.code + ")"); });
     }} style={{ padding: "10px 16px", borderRadius: DS.radius.md, background: DS.colors.accent, color: DS.colors.white, fontSize: 13, fontWeight: 600, alignSelf: "flex-start" }}>
       Enable location
     </button>
