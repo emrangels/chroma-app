@@ -1237,7 +1237,45 @@ const loadExtendedPalette = async () => {
           </div>
           {loadingWeather && <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted }}>Finding your perfect outfit for today…</p>}
           {!loadingWeather && weatherOutfit && <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>{weatherOutfit}</p>}
-          {!loadingWeather && !weatherOutfit && !weather && <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted }}>Allow location access to get your daily outfit suggestion.</p>}
+          {!loadingWeather && !weatherOutfit && !weather && (
+  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+    <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted }}>Allow location access to get your daily outfit suggestion.</p>
+    <button onClick={() => {
+      setLoadingWeather(true);
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weathercode&timezone=auto`);
+          const data = await res.json();
+          const temp = Math.round(data.current.temperature_2m);
+          const code = data.current.weathercode;
+          const desc = code <= 1 ? "sunny" : code <= 3 ? "partly cloudy" : code <= 67 ? "rainy" : code <= 77 ? "snowy" : "overcast";
+          const icon = code <= 1 ? "sun" : code <= 3 ? "cloud" : code <= 67 ? "cloud-rain" : "cloud-snow";
+          setWeather({ temp, desc, icon });
+          const season = seasonData!.season;
+          const palette = (seasonData!.palette?.best || []).map((c: PaletteColour) => c.name).slice(0, 3).join(", ");
+          const outfitRes = await fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "claude-sonnet-4-20250514",
+              max_tokens: 1000,
+              messages: [{
+                role: "user",
+                content: `You are a personal stylist AI for Solla, a colour season app. Give a short, warm, specific daily outfit suggestion (2-3 sentences max) for a ${season} colour season. Today's weather is ${temp}°C and ${desc}. Their best colours include ${palette}. Be specific about garments and colours. No intro, just the outfit suggestion.`
+              }]
+            })
+          });
+          const outfitData = await outfitRes.json();
+          setWeatherOutfit(outfitData.content?.[0]?.text || null);
+        } catch {}
+        finally { setLoadingWeather(false); }
+      }, () => setLoadingWeather(false));
+    }} style={{ padding: "10px 16px", borderRadius: DS.radius.md, background: DS.colors.accent, color: DS.colors.white, fontSize: 13, fontWeight: 600, alignSelf: "flex-start" }}>
+      Enable location
+    </button>
+  </div>
+)}
         </div>
       )}
       {plan === "free" && (
