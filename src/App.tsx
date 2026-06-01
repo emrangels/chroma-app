@@ -1294,7 +1294,41 @@ const loadExtendedPalette = async () => {
             {weather && weather.desc !== "denied" && <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted }}>{weather.temp}°C · {weather.desc}</p>}
           </div>
           {loadingWeather && <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted }}>Finding your perfect outfit for today…</p>}
-          {!loadingWeather && weatherOutfit && <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>{weatherOutfit}</p>}
+          {!loadingWeather && weatherOutfit && (() => {
+  try {
+    const outfit = JSON.parse(weatherOutfit);
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {outfit.coat && outfit.coat !== "null" && (
+          <div style={{ display: "flex", gap: 8 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.accent, minWidth: 80 }}>Coat</span>
+            <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{outfit.coat}</span>
+          </div>
+        )}
+        {outfit.base && (
+          <div style={{ display: "flex", gap: 8 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.accent, minWidth: 80 }}>Base</span>
+            <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{outfit.base}</span>
+          </div>
+        )}
+        {outfit.shoes && (
+          <div style={{ display: "flex", gap: 8 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.accent, minWidth: 80 }}>Shoes</span>
+            <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{outfit.shoes}</span>
+          </div>
+        )}
+        {outfit.accessories && (
+          <div style={{ display: "flex", gap: 8 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.accent, minWidth: 80 }}>Accessories</span>
+            <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{outfit.accessories}</span>
+          </div>
+        )}
+      </div>
+    );
+  } catch {
+    return <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>{weatherOutfit}</p>;
+  }
+})()}
           {!loadingWeather && !weatherOutfit && !weather && (
   <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted }}>Getting your location for today's outfit suggestion…</p>
 )}
