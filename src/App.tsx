@@ -1206,7 +1206,7 @@ useEffect(() => {
       await generateOutfit(temp, desc);
     } catch {}
     finally { setLoadingWeather(false); }
-  }, () => { setLoadingWeather(false); setWeather({ temp: -1, desc: "denied", icon: "map-pin" }); }, { timeout: 10000 });
+  }, (err) => { console.log("Location error:", err.code, err.message); setLoadingWeather(false); setWeather({ temp: -1, desc: "denied", icon: "map-pin" }); }, { timeout: 10000 });
 }, [seasonData?.season, plan]);
 
 const loadExtendedPalette = async () => {
