@@ -14,7 +14,7 @@ const DS = {
   shadow: { sm: "0 1px 3px rgba(0,0,0,0.06)", md: "0 4px 16px rgba(0,0,0,0.08)", lg: "0 8px 32px rgba(0,0,0,0.12)" },
 };
 
-type Screen = "splash" | "onboarding" | "auth" | "upload" | "analysing" | "main";
+type Screen = "splash" | "onboarding" | "auth" | "upload" | "analysing" | "lifestyle-onboarding" | "main";
 type Tab = "home" | "checker" | "wardrobe" | "me";
 type Sheet = "palette" | "makeup" | "hair" | "jewellery" | "style" | "paywall" | "faq" | "privacy" | "terms" | "cookies" | "welcome" | "preview" | null;
 type Plan = "free" | "glow" | "luxe";
@@ -191,7 +191,105 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
     </div>
   );
 };
-
+const LifestyleOnboardingScreen = ({ onComplete, userId, token }: { onComplete: () => void; userId: string; token: string }) => {
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const questions = [
+    {
+      key: "lifestyle",
+      title: "What's your lifestyle?",
+      subtitle: "This helps us suggest outfits that actually fit your life.",
+      options: ["Casual & relaxed", "Smart casual", "Professional", "Mix of everything"],
+    },
+    {
+      key: "dress_code",
+      title: "What's your typical dress code?",
+      subtitle: "We'll make sure your outfits always hit the right note.",
+      options: ["Relaxed / everyday", "Business casual", "Formal", "Active & sporty"],
+    },
+    {
+      key: "occasions",
+      title: "What do you mostly dress for?",
+      subtitle: "We'll prioritise what matters most to you.",
+      options: ["Work", "Everyday life", "Going out", "Special occasions", "All of these"],
+    },
+    {
+      key: "style_personality",
+      title: "How would you describe your style?",
+      subtitle: "Your personality, your rules.",
+      options: ["Classic & timeless", "Trendy & fashion-forward", "Minimal & clean", "Feminine & romantic", "Edgy & bold"],
+    },
+    {
+      key: "style_challenge",
+      title: "What's your biggest style challenge?",
+      subtitle: "We'll focus on solving this for you.",
+      options: ["Not knowing what suits me", "Getting dressed takes too long", "Everything feels boring", "I buy things I never wear", "Dressing for my body"],
+    },
+  ];
+  const q = questions[step];
+  const selected = answers[q.key];
+  const saveAndContinue = async (value: string) => {
+    const updated = { ...answers, [q.key]: value };
+    setAnswers(updated);
+    if (step < questions.length - 1) {
+      setStep(step + 1);
+    } else {
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
+          method: "PATCH",
+          headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
+          body: JSON.stringify({
+            lifestyle: updated.lifestyle,
+            dress_code: updated.dress_code,
+            occasions: updated.occasions,
+            style_personality: updated.style_personality,
+            style_challenge: updated.style_challenge,
+          }),
+        });
+      } catch {}
+      onComplete();
+    }
+  };
+  return (
+    <div className="screen fade-in" style={{ background: DS.colors.bg, display: "flex", flexDirection: "column", padding: "0 28px" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <div style={{ display: "flex", gap: 6, marginBottom: 32 }}>
+          {questions.map((_, i) => (
+            <div key={i} style={{ flex: 1, height: 4, borderRadius: DS.radius.full, background: i <= step ? DS.colors.accent : DS.colors.border, transition: "background 0.3s" }} />
+          ))}
+        </div>
+        <div style={{ width: 64, height: 64, borderRadius: DS.radius.xl, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+          <Icon name="sparkles" size={28} color={DS.colors.accent} strokeWidth={1.5} />
+        </div>
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: DS.colors.text, letterSpacing: "-0.5px", marginBottom: 8 }}>{q.title}</h1>
+        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 28, lineHeight: 1.6 }}>{q.subtitle}</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {q.options.map(option => (
+            <button
+              key={option}
+              onClick={() => saveAndContinue(option)}
+              style={{
+                width: "100%", padding: "14px 16px", borderRadius: DS.radius.md, textAlign: "left",
+                fontSize: 15, fontWeight: selected === option ? 600 : 400,
+                color: selected === option ? DS.colors.white : DS.colors.text,
+                background: selected === option ? DS.colors.accent : DS.colors.bg,
+                border: `1.5px solid ${selected === option ? DS.colors.accent : DS.colors.border}`,
+                transition: "all 0.2s",
+              }}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div style={{ paddingBottom: "calc(32px + env(safe-area-inset-bottom))" }}>
+        <button onClick={onComplete} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>
+          Skip for now
+        </button>
+      </div>
+    </div>
+  );
+};
 const AuthScreen = ({ onSignIn, onGuest, onOpenTerms }: { onSignIn: (user: User) => void; onGuest: () => void; onOpenTerms: (sheet: Sheet) => void; }) => {
   const [mode, setMode] = useState<"landing" | "signin" | "signup" | "forgot">("landing");
   const [email, setEmail] = useState(""); const [password, setPassword] = useState("");
@@ -2872,7 +2970,7 @@ if (parsedUser.email && parsedSeason?.season) {
   alert("Analysis incomplete - please try again with a clearer photo in natural light.");
   return;
 }
-update({ seasonData: data, screen: "main", activeSheet: "preview" as Sheet, tourStep: null });
+update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, tourStep: null });
   } catch { update({ screen: "upload" }); alert("Something went wrong — please try again with a clear selfie in natural light."); }
 };
 
@@ -2885,6 +2983,7 @@ update({ seasonData: data, screen: "main", activeSheet: "preview" as Sheet, tour
       <div style={{ position: "relative", width: "100vw", height: "100vh", maxWidth: 430, margin: "0 auto" }}>
         {screen === "splash" && <SplashScreen onComplete={() => update({ screen: "onboarding" })} />}
         {screen === "onboarding" && <OnboardingScreen onComplete={() => update({ screen: "auth" })} />}
+{screen === "lifestyle-onboarding" && <LifestyleOnboardingScreen userId={user?.id || ""} token={localStorage.getItem("solla_token") || ""} onComplete={() => update({ screen: "main", activeSheet: "preview" as Sheet, tourStep: null })} />}
         {screen === "auth" && <AuthScreen onOpenTerms={sheet => update({ activeSheet: sheet })} onSignIn={u => {
   const cachedSeason = localStorage.getItem(`solla_season_${u.id}`);
   if (cachedSeason) {
