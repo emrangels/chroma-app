@@ -153,6 +153,7 @@ const slides = [
   { icon: "palette", title: "Discover your season", body: "Our AI analyses your skin tone, undertone, eye and hair colour to find your perfect palette.", bg: "#E8F4FD", accent: "#4A90C4" },
   { icon: "sparkles", title: "Get your full guide", body: "Colours, makeup, hair, jewellery, style and wardrobe — everything personalised to your season, so getting dressed becomes the easy part.", bg: "#FFF1E6", accent: "#E8845A" },
   { icon: "shirt", title: "Check any item", body: "Check a single item, a full outfit, or try colour swatches - Solla reads every colour and tells you what works.", bg: "#E8F5EE", accent: "#1A9E6E" },
+{ icon: "sparkles", title: "Solla learns you", body: "The more you use Solla and chat with your AI stylist, the better it knows your preferences, lifestyle and style — so every suggestion gets more personal over time.", bg: "#EDE9FF", accent: DS.colors.accent },
 ];
 
 const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
