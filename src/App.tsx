@@ -42,6 +42,7 @@ interface WardrobeItem {
   id: string; user_id: string; name: string; category: string;
   colour_name: string; hex: string; verdict: boolean; tip: string;
   starred: boolean; image_url?: string; price?: number; created_at: string;
+  formality?: string;
 }
 interface Outfit {
   id: string; user_id: string; name: string; item_ids: string[];
@@ -1164,7 +1165,7 @@ const generateOutfit = async (temp: number, desc: string) => {
         });
         const wData = await wRes.json();
         if (Array.isArray(wData) && wData.length > 0) {
-          wardrobeContext = wData.filter((i: WardrobeItem) => i.verdict).map((i: WardrobeItem) => `${i.name} (${i.category})`).join(", ");
+          wardrobeContext = wData.filter((i: WardrobeItem) => i.verdict).map((i: WardrobeItem) => `${i.name} (${i.category}${i.formality ? `, ${i.formality}` : ""})`).join(", ");
         }
       } catch {}
     }
@@ -2113,6 +2114,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const [itemPreviews, setItemPreviews] = useState<string[]>([]);
   const [itemNames, setItemNames] = useState<string[]>([]);
   const [itemCategories, setItemCategories] = useState<string[]>([]);
+  const [itemFormalities, setItemFormalities] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Add outfit form
@@ -2205,6 +2207,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
     setItemResults([]);
     setItemNames([]);
     setItemCategories([]);
+    setItemFormalities([]);
     if (!seasonData) return;
     setItemChecking(true);
 
@@ -2231,6 +2234,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
           results.push(item);
           names.push(item.piece ? `${item.colour_name} ${item.piece.toLowerCase()}` : item.colour_name);
           cats.push(item.piece ? (pieceToCategory[item.piece] || "Top") : "Top");
+          setItemFormalities(prev => [...prev, "Casual"]);
         }
       }
       setItemResults(results);
@@ -2255,6 +2259,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
           user_id: user.id,
           name: (itemNames[i] || result.colour_name).trim(),
           category: itemCategories[i] || "Top",
+          formality: itemFormalities[i] || "Casual",
           colour_name: result.colour_name,
           hex: result.hex,
           verdict: result.verdict,
@@ -2307,7 +2312,7 @@ const handleDeleteOutfit = async (id: string) => {
   await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?id=eq.${editingItem.id}`, {
     method: "PATCH",
     headers: { ...getAuthHeaders(), Prefer: "return=minimal" },
-    body: JSON.stringify({ name: editName, category: editCategory }),
+    body: JSON.stringify({ name: editName, category: editCategory, formality: editingItem.formality }),
   }).catch(() => {});
   setEditingItem(null);
 };
@@ -2356,7 +2361,7 @@ const handleDeleteOutfit = async (id: string) => {
     subseason: seasonData.subseason,
     body_shape: seasonData.body_shape,
     wardrobe: [
-      ...items.map(i => `${i.name} (${i.category}, ${i.colour_name}, ${i.verdict ? "suits season" : "doesn't suit season"})`),
+      ...items.map(i => `${i.name} (${i.category}, ${i.formality || "casual"}, ${i.colour_name}, ${i.verdict ? "suits season" : "doesn't suit season"})`),
       ...outfits.map(o => `Saved outfit: "${o.name}" (${items.filter(i => o.item_ids.includes(i.id)).map(i => i.name).join(", ")})`)
     ].join(", "),
   }),
@@ -2502,6 +2507,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                         <span style={{ fontSize: 11, color: DS.colors.textFaint }}>{item.category}</span>
                         <span style={{ fontSize: 11, color: DS.colors.textFaint }}>·</span>
                         <span style={{ fontSize: 11, color: DS.colors.textFaint }}>{item.colour_name}</span>
+                        {item.formality && <><span style={{ fontSize: 11, color: DS.colors.textFaint }}>·</span><span style={{ fontSize: 11, color: DS.colors.textFaint }}>{item.formality}</span></>}
                       </div>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -2695,6 +2701,14 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                       </button>
                     ))}
                   </div>
+                  <p style={{ margin: "10px 0 6px", fontSize: 12, fontWeight: 600, color: DS.colors.textMuted }}>Formality</p>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {["Casual", "Smart casual", "Work", "Formal", "Active"].map(f => (
+                      <button key={f} onClick={() => setItemFormalities(prev => prev.map((v, j) => j === i ? f : v))} style={{ padding: "4px 10px", borderRadius: DS.radius.full, fontSize: 11, fontWeight: 500, background: itemFormalities[i] === f ? DS.colors.accent : DS.colors.surface, color: itemFormalities[i] === f ? DS.colors.white : DS.colors.textMuted }}>
+                        {f}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               ))}
 
@@ -2758,10 +2772,18 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           placeholder="Item name"
           style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 12, fontFamily: DS.font }}
         />
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
           {["Top", "Knitwear", "Jackets & Coats", "Bottoms", "Dresses & Jumpsuits", "Shoes", "Bags", "Accessories"].map(cat => (
             <button key={cat} onClick={() => setEditCategory(cat)} style={{ padding: "6px 14px", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 500, background: editCategory === cat ? DS.colors.accent : DS.colors.surface, color: editCategory === cat ? DS.colors.white : DS.colors.textMuted, transition: "all 0.2s" }}>
               {cat}
+            </button>
+          ))}
+        </div>
+        <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 600, color: DS.colors.textMuted }}>Formality</p>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
+          {["Casual", "Smart casual", "Work", "Formal", "Active"].map(f => (
+            <button key={f} onClick={() => setEditingItem(prev => prev ? { ...prev, formality: f } : prev)} style={{ padding: "6px 14px", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 500, background: editingItem?.formality === f ? DS.colors.accent : DS.colors.surface, color: editingItem?.formality === f ? DS.colors.white : DS.colors.textMuted, transition: "all 0.2s" }}>
+              {f}
             </button>
           ))}
         </div>
