@@ -282,7 +282,7 @@ const LifestyleOnboardingScreen = ({ onComplete, userId, token }: { onComplete: 
           ))}
         </div>
       </div>
-      <div style={{ paddingBottom: "calc(32px + env(safe-area-inset-bottom))" }}>
+      <div style={{ paddingBottom: "calc(48px + env(safe-area-inset-bottom))", paddingTop: 16 }}>
         <button onClick={onComplete} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>
           Skip for now
         </button>
