@@ -1167,8 +1167,15 @@ const generateOutfit = async (temp: number, desc: string) => {
       })
     });
     const outfitData = await outfitRes.json();
-    setWeatherOutfit(outfitData.content?.[0]?.text || null);
-  } catch {}
+    const text = outfitData.content?.[0]?.text;
+    if (text) {
+      setWeatherOutfit(text);
+    } else {
+      setWeatherOutfit("Could not generate outfit suggestion — " + JSON.stringify(outfitData).slice(0, 100));
+    }
+  } catch (e) {
+    setWeatherOutfit("Error: " + (e instanceof Error ? e.message : String(e)));
+  }
 };
 
 useEffect(() => {
