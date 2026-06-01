@@ -1107,7 +1107,40 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
     </div>
   </div>
 );
-
+const PostcodeWeather = ({ seasonData, onResult }: { seasonData: SeasonData | null; onResult: (temp: number, desc: string) => void }) => {
+  const [postcode, setPostcode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const handleSubmit = async () => {
+    if (!postcode.trim()) return;
+    setLoading(true); setError("");
+    try {
+      const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${postcode}&country=Australia&format=json&limit=1`);
+      const geoData = await geoRes.json();
+      if (!geoData?.[0]) { setError("Postcode not found — try again."); setLoading(false); return; }
+      const { lat, lon } = geoData[0];
+      const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&timezone=auto`);
+      const weatherData = await weatherRes.json();
+      const temp = Math.round(weatherData.current.temperature_2m);
+      const code = weatherData.current.weathercode;
+      const desc = code <= 1 ? "sunny" : code <= 3 ? "partly cloudy" : code <= 67 ? "rainy" : code <= 77 ? "snowy" : "overcast";
+      onResult(temp, desc);
+    } catch { setError("Something went wrong — try again."); }
+    finally { setLoading(false); }
+  };
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted }}>Enter your postcode for a weather-based outfit suggestion.</p>
+      <div style={{ display: "flex", gap: 8 }}>
+        <input value={postcode} onChange={e => setPostcode(e.target.value)} placeholder="e.g. 5048" maxLength={4} style={{ flex: 1, padding: "10px 12px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, fontFamily: DS.font }} />
+        <button onClick={handleSubmit} disabled={loading} style={{ padding: "10px 16px", borderRadius: DS.radius.md, background: DS.colors.accent, color: DS.colors.white, fontSize: 13, fontWeight: 600 }}>
+          {loading ? "..." : "Go"}
+        </button>
+      </div>
+      {error && <p style={{ margin: 0, fontSize: 12, color: DS.colors.danger }}>{error}</p>}
+    </div>
+  );
+};
 const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade, onReanalyse }: { seasonData: SeasonData | null; user: User | null; onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void; onReanalyse: () => void; }) => {
   const plan = user?.plan || "free"; const [showShare, setShowShare] = useState(false);const [selectedColour, setSelectedColour] = useState<PaletteColour | null>(null);
 const [extendedPalette, setExtendedPalette] = useState<PaletteColour[]>([]);
@@ -1117,38 +1150,43 @@ const [weather, setWeather] = useState<{ temp: number; desc: string; icon: strin
 const [weatherOutfit, setWeatherOutfit] = useState<string | null>(null);
 const [loadingWeather, setLoadingWeather] = useState(false);
 
+const generateOutfit = async (temp: number, desc: string) => {
+  try {
+    const season = seasonData!.season;
+    const palette = (seasonData!.palette?.best || []).map((c: PaletteColour) => c.name).slice(0, 3).join(", ");
+    const outfitRes = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{
+          role: "user",
+          content: `You are a personal stylist AI for Solla, a colour season app. Give a short, warm, specific daily outfit suggestion (2-3 sentences max) for a ${season} colour season. Today's weather is ${temp}°C and ${desc}. Their best colours include ${palette}. Be specific about garments and colours. No intro, just the outfit suggestion.`
+        }]
+      })
+    });
+    const outfitData = await outfitRes.json();
+    setWeatherOutfit(outfitData.content?.[0]?.text || null);
+  } catch {}
+};
+
 useEffect(() => {
   if (!seasonData || plan === "free") return;
+  setLoadingWeather(true);
   navigator.geolocation.getCurrentPosition(async (pos) => {
     try {
-      setLoadingWeather(true);
       const { latitude, longitude } = pos.coords;
       const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weathercode&timezone=auto`);
       const data = await res.json();
       const temp = Math.round(data.current.temperature_2m);
       const code = data.current.weathercode;
       const desc = code <= 1 ? "sunny" : code <= 3 ? "partly cloudy" : code <= 67 ? "rainy" : code <= 77 ? "snowy" : "overcast";
-      const icon = code <= 1 ? "sun" : code <= 3 ? "cloud" : code <= 67 ? "cloud-rain" : "cloud-snow";
-      setWeather({ temp, desc, icon });
-      const season = seasonData.season;
-      const palette = (seasonData.palette?.best || []).map((c: PaletteColour) => c.name).slice(0, 3).join(", ");
-      const outfitRes = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          messages: [{
-            role: "user",
-            content: `You are a personal stylist AI for Solla, a colour season app. Give a short, warm, specific daily outfit suggestion (2-3 sentences max) for a ${season} colour season. Today's weather is ${temp}°C and ${desc}. Their best colours include ${palette}. Be specific about garments and colours. No intro, just the outfit suggestion.`
-          }]
-        })
-      });
-      const outfitData = await outfitRes.json();
-      setWeatherOutfit(outfitData.content?.[0]?.text || null);
+      setWeather({ temp, desc, icon: "sun" });
+      await generateOutfit(temp, desc);
     } catch {}
     finally { setLoadingWeather(false); }
-  }, () => setLoadingWeather(false));
+  }, () => { setLoadingWeather(false); });
 }, [seasonData?.season, plan]);
 
 const loadExtendedPalette = async () => {
@@ -1252,22 +1290,7 @@ const loadExtendedPalette = async () => {
           const desc = code <= 1 ? "sunny" : code <= 3 ? "partly cloudy" : code <= 67 ? "rainy" : code <= 77 ? "snowy" : "overcast";
           const icon = code <= 1 ? "sun" : code <= 3 ? "cloud" : code <= 67 ? "cloud-rain" : "cloud-snow";
           setWeather({ temp, desc, icon });
-          const season = seasonData!.season;
-          const palette = (seasonData!.palette?.best || []).map((c: PaletteColour) => c.name).slice(0, 3).join(", ");
-          const outfitRes = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              model: "claude-sonnet-4-20250514",
-              max_tokens: 1000,
-              messages: [{
-                role: "user",
-                content: `You are a personal stylist AI for Solla, a colour season app. Give a short, warm, specific daily outfit suggestion (2-3 sentences max) for a ${season} colour season. Today's weather is ${temp}°C and ${desc}. Their best colours include ${palette}. Be specific about garments and colours. No intro, just the outfit suggestion.`
-              }]
-            })
-          });
-          const outfitData = await outfitRes.json();
-          setWeatherOutfit(outfitData.content?.[0]?.text || null);
+          await generateOutfit(temp, desc);
         } catch {}
         finally { setLoadingWeather(false); }
       }, (err) => { setLoadingWeather(false); alert("Location error: " + err.message + " (code " + err.code + ")"); });
