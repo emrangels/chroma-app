@@ -40,7 +40,7 @@ interface SeasonData {
 }
 interface WardrobeItem {
   id: string; user_id: string; name: string; category: string;
-  colour_name: string; hex: string; verdict: boolean; tip: string;
+  colour_name: string; hex: string; verdict: boolean; verdict_v2?: "yes" | "neutral" | "no"; tip: string;
   starred: boolean; image_url?: string; price?: number; created_at: string;
   formality?: string;
 }
@@ -1507,6 +1507,7 @@ interface CheckResult {
     colour_name: string;
     hex: string;
     verdict: boolean;
+    verdict_v2?: "yes" | "neutral" | "no";
     reason: string;
     tip: string;
   }[];
@@ -1810,9 +1811,9 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                         <span style={{ fontSize: 14, fontWeight: 600, color: DS.colors.text }}>{item.colour_name}</span>
                       </div>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: DS.radius.full, background: item.verdict ? "#F0FDF4" : "#FEF2F2", flexShrink: 0 }}>
-                      <Icon name={item.verdict ? "check" : "x"} size={12} color={item.verdict ? DS.colors.success : DS.colors.danger} strokeWidth={2.5} />
-                      <span style={{ fontSize: 12, fontWeight: 600, color: item.verdict ? DS.colors.success : DS.colors.danger }}>{item.verdict ? "Yes" : "No"}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: DS.radius.full, background: item.verdict_v2 === "yes" ? "#F0FDF4" : item.verdict_v2 === "neutral" ? "#FFFBEB" : "#FEF2F2", flexShrink: 0 }}>
+                      <Icon name={item.verdict_v2 === "yes" ? "check" : item.verdict_v2 === "neutral" ? "info" : "x"} size={12} color={item.verdict_v2 === "yes" ? DS.colors.success : item.verdict_v2 === "neutral" ? "#D97706" : DS.colors.danger} strokeWidth={2.5} />
+                      <span style={{ fontSize: 12, fontWeight: 600, color: item.verdict_v2 === "yes" ? DS.colors.success : item.verdict_v2 === "neutral" ? "#D97706" : DS.colors.danger }}>{item.verdict_v2 === "yes" ? "Yes" : item.verdict_v2 === "neutral" ? "Neutral" : "No"}</span>
                     </div>
                   </div>
                   <p style={{ margin: "0 0 4px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{item.reason}</p>
@@ -2117,7 +2118,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const [itemPrice, setItemPrice] = useState("");
   const [itemChecking, setItemChecking] = useState(false);
   const [itemCheckingIndex, setItemCheckingIndex] = useState<number | null>(null);
-  const [itemResults, setItemResults] = useState<{ colour_name: string; hex: string; verdict: boolean; tip: string; piece?: string }[]>([]);
+  const [itemResults, setItemResults] = useState<{ colour_name: string; hex: string; verdict: boolean; verdict_v2?: "yes" | "neutral" | "no"; tip: string; piece?: string }[]>([]);
   const [itemPreviews, setItemPreviews] = useState<string[]>([]);
   const [itemNames, setItemNames] = useState<string[]>([]);
   const [itemCategories, setItemCategories] = useState<string[]>([]);
@@ -2270,6 +2271,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
           colour_name: result.colour_name,
           hex: result.hex,
           verdict: result.verdict,
+          verdict_v2: result.verdict_v2 || (result.verdict ? "yes" : "no"),
           tip: result.tip,
           starred: false,
           price: null,
@@ -2446,7 +2448,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
   ★ Starred
 </button>
 <button onClick={() => setFilterVerdict(v => v === null ? true : v === true ? false : null)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterVerdict === true ? "#F0FDF4" : filterVerdict === false ? "#FEF2F2" : DS.colors.surface, color: filterVerdict === true ? DS.colors.success : filterVerdict === false ? DS.colors.danger : DS.colors.textMuted, flexShrink: 0 }}>
-  {filterVerdict === true ? "✓ Suits" : filterVerdict === false ? "✗ Doesn't suit" : "All verdicts"}
+  {filterVerdict === true ? "✓ Suits season" : filterVerdict === false ? "✗ Avoid" : "All verdicts"}
 </button>
             {categories.map(cat => {
       const count = cat === "All" ? items.length : items.filter(i => i.category === cat).length;
@@ -2479,8 +2481,8 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 4 }}>
                       <button onClick={() => handleToggleStar(item)} style={{ width: 28, height: 28, borderRadius: DS.radius.full, background: "rgba(255,255,255,0.9)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: item.starred ? "#FFD700" : DS.colors.border }}>★</button>
                     </div>
-                    <div style={{ position: "absolute", bottom: 8, left: 8, padding: "2px 8px", borderRadius: DS.radius.full, background: item.verdict ? "#F0FDF4" : "#FEF2F2" }}>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: item.verdict ? DS.colors.success : DS.colors.danger }}>{item.verdict ? "✓" : "✗"}</span>
+                    <div style={{ position: "absolute", bottom: 8, left: 8, padding: "2px 8px", borderRadius: DS.radius.full, background: item.verdict_v2 === "yes" ? "#F0FDF4" : item.verdict_v2 === "neutral" ? "#FFFBEB" : item.verdict_v2 === "no" ? "#FEF2F2" : item.verdict ? "#F0FDF4" : "#FEF2F2" }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: item.verdict_v2 === "yes" ? DS.colors.success : item.verdict_v2 === "neutral" ? "#D97706" : item.verdict_v2 === "no" ? DS.colors.danger : item.verdict ? DS.colors.success : DS.colors.danger }}>{item.verdict_v2 === "yes" ? "✓" : item.verdict_v2 === "neutral" ? "~" : item.verdict_v2 === "no" ? "✗" : item.verdict ? "✓" : "✗"}</span>
                     </div>
                   </div>
                   <div style={{ padding: "10px 12px" }}>
@@ -2518,8 +2520,8 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                       </div>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <div style={{ padding: "3px 8px", borderRadius: DS.radius.full, background: item.verdict ? "#F0FDF4" : "#FEF2F2" }}>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: item.verdict ? DS.colors.success : DS.colors.danger }}>{item.verdict ? "✓" : "✗"}</span>
+                      <div style={{ padding: "3px 8px", borderRadius: DS.radius.full, background: item.verdict_v2 === "yes" ? "#F0FDF4" : item.verdict_v2 === "neutral" ? "#FFFBEB" : item.verdict_v2 === "no" ? "#FEF2F2" : item.verdict ? "#F0FDF4" : "#FEF2F2" }}>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: item.verdict_v2 === "yes" ? DS.colors.success : item.verdict_v2 === "neutral" ? "#D97706" : item.verdict_v2 === "no" ? DS.colors.danger : item.verdict ? DS.colors.success : DS.colors.danger }}>{item.verdict_v2 === "yes" ? "✓" : item.verdict_v2 === "neutral" ? "~" : item.verdict_v2 === "no" ? "✗" : item.verdict ? "✓" : "✗"}</span>
                       </div>
                       <button onClick={() => handleToggleStar(item)} style={{ fontSize: 16, color: item.starred ? "#FFD700" : DS.colors.border }}>★</button>
                       <button onClick={() => { setEditingItem(item); setEditName(item.name); setEditCategory(item.category); }}><Icon name="refresh" size={14} color={DS.colors.textFaint} /></button>
