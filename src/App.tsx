@@ -1525,6 +1525,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
   const [saveSheet, setSaveSheet] = useState<{ item: CheckResult["items"][0]; previewSrc?: string } | null>(null);
   const [saveName, setSaveName] = useState("");
   const [saveCategory, setSaveCategory] = useState("Top");
+  const [saveFormality, setSaveFormality] = useState("Casual");
   const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -1582,9 +1583,11 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
           user_id: user.id,
           name: saveName,
           category: saveCategory,
+          formality: saveFormality,
           colour_name: saveSheet.item.colour_name,
           hex: saveSheet.item.hex,
           verdict: saveSheet.item.verdict,
+          verdict_v2: saveSheet.item.verdict_v2 || (saveSheet.item.verdict ? "yes" : "no"),
           tip: saveSheet.item.tip,
           starred: false,
         }),
@@ -1744,10 +1747,18 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                   </div>
                 </div>
                 <input value={saveName} onChange={e => setSaveName(e.target.value)} placeholder="Item name" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 12, fontFamily: DS.font }} />
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
                   {["Top", "Knitwear", "Jackets & Coats", "Bottoms", "Dresses & Jumpsuits", "Shoes", "Bags", "Accessories"].map(cat => (
                     <button key={cat} onClick={() => setSaveCategory(cat)} style={{ padding: "6px 14px", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 500, background: saveCategory === cat ? DS.colors.accent : DS.colors.surface, color: saveCategory === cat ? DS.colors.white : DS.colors.textMuted, transition: "all 0.2s" }}>
                       {cat}
+                    </button>
+                  ))}
+                </div>
+                <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 600, color: DS.colors.textMuted }}>Formality</p>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
+                  {["Casual", "Smart casual", "Work", "Formal", "Active"].map(f => (
+                    <button key={f} onClick={() => setSaveFormality(f)} style={{ padding: "6px 14px", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 500, background: saveFormality === f ? DS.colors.accent : DS.colors.surface, color: saveFormality === f ? DS.colors.white : DS.colors.textMuted, transition: "all 0.2s" }}>
+                      {f}
                     </button>
                   ))}
                 </div>
@@ -2698,7 +2709,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     <img src={itemPreviews[i]} style={{ width: 44, height: 44, borderRadius: DS.radius.sm, objectFit: "cover", flexShrink: 0 }} />
                     <div style={{ width: 28, height: 28, borderRadius: DS.radius.sm, background: result.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
                     <div style={{ flex: 1 }}>
-                      <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: result.verdict ? DS.colors.success : DS.colors.danger }}>{result.verdict ? "✓ Suits your season" : "✗ Doesn't suit"}</p>
+                      <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: result.verdict_v2 === "yes" ? DS.colors.success : result.verdict_v2 === "neutral" ? "#D97706" : DS.colors.danger }}>{result.verdict_v2 === "yes" ? "✓ Suits your season" : result.verdict_v2 === "neutral" ? "~ Neutral — works away from face" : "✗ Doesn't suit your season"}</p>
                       <p style={{ margin: 0, fontSize: 11, color: DS.colors.textFaint }}>{result.colour_name}</p>
                     </div>
                   </div>
