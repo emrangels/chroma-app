@@ -1,7 +1,11 @@
 {
   "routes": [
     { "src": "/colour-season-analysis", "dest": "/colour-season-analysis.html" },
-    { "src": "/colour-season-analysis.html", "dest": "/colour-season-analysis.html" },
+    { "src": "/free-colour-analysis", "dest": "/free-colour-analysis.html" },
+    { "src": "/dark-winter-colour-analysis", "dest": "/dark-winter-colour-analysis.html" },
+    { "src": "/true-summer-colour-analysis", "dest": "/true-summer-colour-analysis.html" },
+    { "src": "/olive-skin-colour-analysis", "dest": "/olive-skin-colour-analysis.html" },
+    { "src": "/what-colours-suit-me", "dest": "/what-colours-suit-me.html" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
