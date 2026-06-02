@@ -2336,6 +2336,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
     }).catch(() => {});
   };
 const handleDeleteOutfit = async (id: string) => {
+  if (!window.confirm("Delete this outfit? This can't be undone.")) return;
   setOutfits(prev => prev.filter(o => o.id !== id));
   await fetch(`${SUPABASE_URL}/rest/v1/outfits?id=eq.${id}`, {
     method: "DELETE", headers: getAuthHeaders(),
