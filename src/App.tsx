@@ -1143,7 +1143,7 @@ const PostcodeWeather = ({ seasonData, onResult }: { seasonData: SeasonData | nu
     </div>
   );
 };
-const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade, onReanalyse }: { seasonData: SeasonData | null; user: User | null; onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void; onReanalyse: () => void; }) => {
+const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade, onReanalyse, onTabChange }: { seasonData: SeasonData | null; user: User | null; onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void; onReanalyse: () => void; onTabChange: (tab: Tab) => void; }) => {
   const plan = user?.plan || "free"; const [showShare, setShowShare] = useState(false);const [selectedColour, setSelectedColour] = useState<PaletteColour | null>(null);
 const [extendedPalette, setExtendedPalette] = useState<PaletteColour[]>([]);
 const [loadingExtended, setLoadingExtended] = useState(false);
@@ -1168,7 +1168,7 @@ useEffect(() => {
       selectedNudge = {
         message: "Your outfit engine is empty — add your first items and wake up knowing what to wear.",
         action: "Add items",
-        onAction: () => onOpenSheet("palette" as any),
+        onAction: () => onTabChange("wardrobe"),
       };
     }
   } else if (plan === "glow") {
@@ -3117,16 +3117,16 @@ const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, 
   <div className="screen fade-in" style={{ background: DS.colors.bg, height: "100dvh" }}>
     <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
       {activeTab === "home" ? (
-  <HomeTab seasonData={seasonData} user={user} onOpenSheet={onOpenSheet} onUpgrade={onUpgrade} onReanalyse={onReanalyse} />
-       ) : activeTab === "checker" ? (
-  <CheckerTab seasonData={seasonData} user={user} onUpgrade={onUpgrade} />
-) : activeTab === "me" ? (
-  <MeTab user={user} seasonData={seasonData} onSignOut={onSignOut} onReanalyse={onReanalyse} onUpgrade={onUpgrade} onOpenFaq={(sheet) => onOpenSheet(sheet || "faq")} />
-) : activeTab === "wardrobe" ? (
-  <WardrobeTab user={user} seasonData={seasonData} onUpgrade={onUpgrade} />
-) : (
-  <PlaceholderTab tab={activeTab} isGuest={isGuest} onSignUp={onSignUp} />
-)}
+        <HomeTab seasonData={seasonData} user={user} onOpenSheet={onOpenSheet} onUpgrade={onUpgrade} onReanalyse={onReanalyse} onTabChange={onTabChange} />
+      ) : activeTab === "checker" ? (
+        <CheckerTab seasonData={seasonData} user={user} onUpgrade={onUpgrade} />
+      ) : activeTab === "me" ? (
+        <MeTab user={user} seasonData={seasonData} onSignOut={onSignOut} onReanalyse={onReanalyse} onUpgrade={onUpgrade} onOpenFaq={(sheet) => onOpenSheet(sheet || "faq")} />
+      ) : activeTab === "wardrobe" ? (
+        <WardrobeTab user={user} seasonData={seasonData} onUpgrade={onUpgrade} />
+      ) : (
+        <PlaceholderTab tab={activeTab} isGuest={isGuest} onSignUp={onSignUp} />
+      )}
     </div>
     <BottomNav activeTab={activeTab} onTabChange={onTabChange} />
   </div>
