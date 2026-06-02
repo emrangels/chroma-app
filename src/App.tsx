@@ -3027,7 +3027,7 @@ update({ screen: "main", user: parsedUser, seasonData: parsedSeason, showDay3Pro
 
 // Day 3 and Day 7 email triggers
 if (parsedUser.email && parsedSeason?.season) {
-  fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${parsedUser.id}&select=day3_email_sent,day7_email_sent`, {
+  fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${parsedUser.id}&select=day3_email_sent,day7_email_sent,trial_end_date,trial_ending_email_sent,cancelled_at,winback_email_sent,wardrobe_nudge_sent`, {
     headers: { ...supabaseHeaders, Authorization: `Bearer ${token}` },
   }).then(r => r.json()).then(data => {
     const profile = data?.[0];
