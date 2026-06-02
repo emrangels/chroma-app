@@ -745,6 +745,19 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
 }) => {
   const [billing, setBilling] = useState<"monthly" | "annual">("annual");
   const [loading, setLoading] = useState(false);
+  const [userCount, setUserCount] = useState(16);
+
+  useEffect(() => {
+    fetch(`${SUPABASE_URL}/rest/v1/profiles?select=id`, {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, Prefer: "count=exact" },
+    }).then(r => {
+      const count = r.headers.get("content-range");
+      if (count) {
+        const total = parseInt(count.split("/")[1]);
+        if (total > 0) setUserCount(total);
+      }
+    }).catch(() => {});
+  }, []);
 
   const pricing = {
     glow: { monthly: "$6.99", annual: "$49.99", monthlyEquiv: "$4.17/mo" },
@@ -800,7 +813,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
               <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>Stop staring at your wardrobe every morning. Solla tells you exactly what to wear — personalised to your colours. Try everything free for 7 days.</p>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: DS.colors.accentLight, padding: "4px 12px", borderRadius: DS.radius.full, marginBottom: 8 }}>
               <Icon name="sparkles" size={12} color={DS.colors.accent} />
-              <span style={{ fontSize: 12, color: DS.colors.accentDark, fontWeight: 600 }}>Loved by women and men who finally know their colours 🌸</span>
+              <span style={{ fontSize: 12, color: DS.colors.accentDark, fontWeight: 600 }}>Join {userCount}+ people who finally know their colours 🌸</span>
               </div>
               <button onClick={() => onSignUp?.()} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Create account to continue</button>
               <button onClick={onClose} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Maybe later</button>
@@ -809,6 +822,10 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
             <>
               <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 4 }}>Try everything free for 7 days</h2>
               <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>Experience the full Luxe plan free. Choose your plan on day 8.</p>
+              <div style={{ background: DS.colors.surface, borderRadius: DS.radius.md, padding: "12px 14px", marginBottom: 12, borderLeft: `3px solid ${DS.colors.accent}` }}>
+                <p style={{ margin: "0 0 4px", fontSize: 13, color: DS.colors.text, lineHeight: 1.6, fontStyle: "italic" }}>"I finally understand why some outfits just work and others don't. Game changer."</p>
+                <p style={{ margin: 0, fontSize: 11, color: DS.colors.textFaint, fontWeight: 500 }}>— Solla member</p>
+              </div>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#F0FDF4", padding: "4px 12px", borderRadius: DS.radius.full, marginBottom: 20 }}>
                 <Icon name="check" size={12} color={DS.colors.success} strokeWidth={2.5} />
                 <span style={{ fontSize: 12, color: DS.colors.success, fontWeight: 600 }}>7-day free trial - no charge until day 8</span>
