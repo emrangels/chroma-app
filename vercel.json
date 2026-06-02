@@ -1,0 +1,7 @@
+{
+  "routes": [
+    { "src": "/colour-season-analysis", "dest": "/colour-season-analysis.html" },
+    { "src": "/colour-season-analysis.html", "dest": "/colour-season-analysis.html" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
