@@ -1151,6 +1151,42 @@ const [showExtended, setShowExtended] = useState(false);
 const [weather, setWeather] = useState<{ temp: number; desc: string; icon: string } | null>(null);
 const [weatherOutfit, setWeatherOutfit] = useState<string | null>(null);
 const [loadingWeather, setLoadingWeather] = useState(false);
+const [nudge, setNudge] = useState<{ message: string; action: string; onAction: () => void } | null>(null);
+const [nudgeDismissed, setNudgeDismissed] = useState(false);
+
+useEffect(() => {
+  const today = new Date().toDateString();
+  const lastNudge = localStorage.getItem("solla_nudge_date");
+  if (lastNudge === today) { setNudgeDismissed(true); return; }
+  if (!user || !seasonData) return;
+
+  let selectedNudge: { message: string; action: string; onAction: () => void } | null = null;
+
+  if (plan === "luxe") {
+    const wardrobeCount = parseInt(localStorage.getItem(`solla_wardrobe_count_${user.id}`) || "0");
+    if (wardrobeCount === 0) {
+      selectedNudge = {
+        message: "Your outfit engine is empty — add your first items and wake up knowing what to wear.",
+        action: "Add items",
+        onAction: () => onOpenSheet("palette" as any),
+      };
+    }
+  } else if (plan === "glow") {
+    selectedNudge = {
+      message: "Ready to never ask 'what do I wear?' again? Build your outfit engine with Luxe.",
+      action: "Upgrade to Luxe",
+      onAction: () => onUpgrade(),
+    };
+  } else if (plan === "free") {
+    selectedNudge = {
+      message: `Your makeup guide is ready — see exactly which foundation and lip colours suit your ${seasonData.season} colouring.`,
+      action: "Unlock now",
+      onAction: () => onUpgrade(),
+    };
+  }
+
+  setNudge(selectedNudge);
+}, [user?.id, plan, seasonData?.season]);
 
 const generateOutfit = async (temp: number, desc: string) => {
   try {
@@ -1289,6 +1325,19 @@ const loadExtendedPalette = async () => {
         <Icon name="sparkles" size={14} color={accentColor} strokeWidth={2} />
         <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{seasonData.daily_tip}</p>
       </div>
+      {nudge && !nudgeDismissed && (
+        <div style={{ margin: "0 16px 4px", padding: "12px 14px", background: DS.colors.accentLight, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ flex: 1 }}>
+            <p style={{ margin: 0, fontSize: 13, color: DS.colors.accentDark, lineHeight: 1.5 }}>{nudge.message}</p>
+            <button onClick={() => { nudge.onAction(); setNudgeDismissed(true); localStorage.setItem("solla_nudge_date", new Date().toDateString()); }} style={{ marginTop: 6, fontSize: 12, fontWeight: 600, color: DS.colors.accent }}>
+              {nudge.action} →
+            </button>
+          </div>
+          <button onClick={() => { setNudgeDismissed(true); localStorage.setItem("solla_nudge_date", new Date().toDateString()); }} style={{ padding: 4, flexShrink: 0 }}>
+            <Icon name="x" size={14} color={DS.colors.textFaint} />
+          </button>
+        </div>
+      )}
       {plan !== "free" && (
         <div style={{ margin: "0 16px 4px", padding: "14px 16px", background: DS.colors.surface, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -2111,10 +2160,29 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
       {showCancelConfirm && (
   <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 32px" }} onClick={() => setShowCancelConfirm(false)}>
     <div style={{ background: DS.colors.bg, borderRadius: DS.radius.xl, padding: "28px 24px", width: "100%" }} onClick={e => e.stopPropagation()}>
-      <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.3px" }}>Cancel your subscription?</h3>
-      <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 24 }}>You'll keep access until the end of your current billing period. This cannot be undone.</p>
-      <button onClick={handleCancelSubscription} disabled={cancelling} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: DS.colors.danger, color: DS.colors.white, fontSize: 15, fontWeight: 600, marginBottom: 10, opacity: cancelling ? 0.7 : 1 }}>
-        {cancelling ? "Cancelling..." : "Yes, cancel subscription"}
+      <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.3px" }}>Before you cancel...</h3>
+      <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 20 }}>Would you like to pause your subscription for a month instead? You won't be charged and your wardrobe and colour profile will be waiting when you're back.</p>
+      <button onClick={async () => {
+        setCancelling(true);
+        try {
+          const token = localStorage.getItem("solla_token");
+          const res = await fetch(`${SUPABASE_URL}/functions/v1/stripe-checkout`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+            body: JSON.stringify({ type: "pause_subscription", user_id: user?.id }),
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+          setShowCancelConfirm(false);
+          alert("Your subscription has been paused for one month. We'll resume it automatically after that — you can cancel anytime.");
+        } catch {
+          alert("Something went wrong pausing your subscription. Please email hello@solla.com.au for help.");
+        } finally { setCancelling(false); }
+      }} disabled={cancelling} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 15, fontWeight: 600, marginBottom: 10, opacity: cancelling ? 0.7 : 1 }}>
+        {cancelling ? "Pausing..." : "Pause for 1 month instead"}
+      </button>
+      <button onClick={handleCancelSubscription} disabled={cancelling} style={{ width: "100%", padding: "12px", borderRadius: DS.radius.lg, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.danger, fontWeight: 500, marginBottom: 8, opacity: cancelling ? 0.7 : 1 }}>
+        {cancelling ? "Cancelling..." : "No, cancel my subscription"}
       </button>
       <button onClick={() => setShowCancelConfirm(false)} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Keep my subscription</button>
     </div>
@@ -2198,7 +2266,10 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?user_id=eq.${user!.id}&order=created_at.desc`, { headers: getAuthHeaders() });
       const data = await res.json();
-      if (Array.isArray(data)) setItems(data);
+      if (Array.isArray(data)) {
+        setItems(data);
+        localStorage.setItem(`solla_wardrobe_count_${user!.id}`, data.length.toString());
+      }
     } catch {}
   };
 
