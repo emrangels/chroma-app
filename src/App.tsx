@@ -2139,6 +2139,9 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const [loading, setLoading] = useState(false);
   const [showAddItem, setShowAddItem] = useState(false);
   const [showAddOutfit, setShowAddOutfit] = useState(false);
+  const [editingOutfit, setEditingOutfit] = useState<Outfit | null>(null);
+  const [editOutfitName, setEditOutfitName] = useState("");
+  const [editOutfitItemIds, setEditOutfitItemIds] = useState<string[]>([]);
   const [filterCategory, setFilterCategory] = useState("All");
   const [filterStarred, setFilterStarred] = useState(false);
   const [editingItem, setEditingItem] = useState<WardrobeItem | null>(null);
@@ -2376,7 +2379,24 @@ const handleDeleteOutfit = async (id: string) => {
     } catch {}
     finally { setLoading(false); }
   };
-
+const handleEditOutfit = async () => {
+    if (!editingOutfit || !editOutfitName.trim() || editOutfitItemIds.length < 2) return;
+    setLoading(true);
+    try {
+      const outfitItems = items.filter(i => editOutfitItemIds.includes(i.id));
+      const overall_verdict = outfitItems.filter(i => (i.verdict_v2 || (i.verdict ? "yes" : "no")) !== "no").length >= outfitItems.length / 2;
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/outfits?id=eq.${editingOutfit.id}`, {
+        method: "PATCH",
+        headers: { ...getAuthHeaders(), Prefer: "return=representation" },
+        body: JSON.stringify({ name: editOutfitName.trim(), item_ids: editOutfitItemIds, overall_verdict }),
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) setOutfits(prev => prev.map(o => o.id === editingOutfit.id ? data[0] : o));
+      else setOutfits(prev => prev.map(o => o.id === editingOutfit.id ? { ...o, name: editOutfitName.trim(), item_ids: editOutfitItemIds, overall_verdict } : o));
+      setEditingOutfit(null);
+    } catch {}
+    finally { setLoading(false); }
+  };
   const handleToggleOutfitStar = async (outfit: Outfit) => {
     const updated = { ...outfit, starred: !outfit.starred };
     setOutfits(prev => prev.map(o => o.id === outfit.id ? updated : o));
@@ -2601,6 +2621,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                         </div>
                       </div>
                       <button onClick={() => handleToggleOutfitStar(outfit)} style={{ fontSize: 16, color: outfit.starred ? "#FFD700" : DS.colors.border }}>★</button>
+                      <button onClick={() => { setEditingOutfit(outfit); setEditOutfitName(outfit.name); setEditOutfitItemIds(outfit.item_ids); }}><Icon name="refresh" size={14} color={DS.colors.textFaint} /></button>
                       <button onClick={() => handleDeleteOutfit(outfit.id)}><Icon name="trash" size={14} color={DS.colors.textFaint} /></button>
                     </div>
                     <div style={{ display: "flex", gap: 6 }}>
@@ -2765,7 +2786,43 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           </div>
         </div>
       )}
-
+      {/* Edit Outfit Sheet */}
+      {editingOutfit && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={() => setEditingOutfit(null)}>
+          <div style={{ width: "100%", maxHeight: "90vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+              <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
+            </div>
+            <div style={{ padding: "16px 24px" }}>
+              <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20 }}>Edit outfit</h2>
+              <input value={editOutfitName} onChange={e => setEditOutfitName(e.target.value)} placeholder="Outfit name" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 16, fontFamily: DS.font }} />
+              <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 12 }}>Select items (minimum 2):</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
+                {items.map(item => {
+                  const selected = editOutfitItemIds.includes(item.id);
+                  return (
+                    <button key={item.id} onClick={() => setEditOutfitItemIds(prev => selected ? prev.filter(id => id !== item.id) : [...prev, item.id])} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${selected ? DS.colors.accent : DS.colors.border}`, background: selected ? DS.colors.accentLight : DS.colors.bg, textAlign: "left" }}>
+                      {item.image_url ? (
+                        <img src={item.image_url} style={{ width: 44, height: 44, borderRadius: DS.radius.sm, objectFit: "cover", flexShrink: 0 }} />
+                      ) : (
+                        <div style={{ width: 32, height: 32, borderRadius: DS.radius.sm, background: item.hex, flexShrink: 0 }} />
+                      )}
+                      <div style={{ flex: 1 }}>
+                        <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>{item.name}</p>
+                        <p style={{ margin: 0, fontSize: 11, color: DS.colors.textFaint }}>{item.category} · {item.colour_name}</p>
+                      </div>
+                      {selected && <Icon name="check" size={16} color={DS.colors.accent} strokeWidth={2.5} />}
+                    </button>
+                  );
+                })}
+              </div>
+              <button onClick={handleEditOutfit} disabled={!editOutfitName.trim() || editOutfitItemIds.length < 2 || loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: !editOutfitName.trim() || editOutfitItemIds.length < 2 ? DS.colors.border : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>
+                {loading ? "Saving..." : "Save changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Add Outfit Sheet */}
       {showAddOutfit && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={() => setShowAddOutfit(false)}>
