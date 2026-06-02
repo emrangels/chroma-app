@@ -1884,6 +1884,13 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
     if (data.error) throw new Error(data.error);
     const updatedUser = { ...user!, plan: "free" as Plan };
     localStorage.setItem("solla_user", JSON.stringify(updatedUser));
+    // Save cancelled_at
+    const cancelToken = localStorage.getItem("solla_token");
+    fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user?.id}`, {
+      method: "PATCH",
+      headers: { ...supabaseHeaders, Authorization: `Bearer ${cancelToken || SUPABASE_JWT_KEY}`, Prefer: "return=minimal" },
+      body: JSON.stringify({ cancelled_at: new Date().toISOString() }),
+    }).catch(() => {});
     setShowCancelConfirm(false);
     alert("Your subscription has been cancelled. You'll keep access until the end of your billing period.");
   } catch (e) {
@@ -2460,8 +2467,8 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           {filteredItems.length === 0 ? (
             <div style={{ textAlign: "center", padding: "40px 0" }}>
               <Icon name="hanger" size={40} color={DS.colors.border} />
-              <p style={{ fontSize: 15, color: DS.colors.textMuted, marginTop: 12 }}>Your wardrobe is empty</p>
-              <p style={{ fontSize: 13, color: DS.colors.textFaint, marginTop: 4 }}>Add your first item and start building your daily outfit engine</p>
+              <p style={{ fontSize: 15, fontWeight: 600, color: DS.colors.textMuted, marginTop: 12 }}>Your wardrobe is empty</p>
+              <p style={{ fontSize: 13, color: DS.colors.textFaint, marginTop: 4, lineHeight: 1.6, maxWidth: 260, margin: "8px auto 0" }}>Add your clothes and your daily outfit suggestions get smarter — Solla learns what you own, what suits your season, and what you love wearing.</p>
             </div>
           ) : gridView ? (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 80 }}>
@@ -2593,7 +2600,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
 <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: items.length > 0 ? DS.colors.accentLight : DS.colors.surface, borderRadius: DS.radius.full, marginBottom: 8 }}>
   <span style={{ fontSize: 11, color: items.length > 0 ? DS.colors.accentDark : DS.colors.textFaint, fontWeight: 500 }}>{items.length > 0 ? `${items.length} wardrobe item${items.length !== 1 ? "s" : ""} loaded` : "No wardrobe items yet"}</span>
 </div>
-                <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, maxWidth: 240, margin: "0 auto" }}>Your personal stylist is ready. Ask what to wear today, what to wear for an occasion, or get your whole wardrobe analysed in one go.</p>
+                <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, maxWidth: 240, margin: "0 auto" }}>Your personal stylist is ready. The more you chat and the more clothes you add, the better Solla knows your style, preferences and lifestyle — so every suggestion gets more personal over time.</p>
                 <button onClick={() => { setChatInput("Analyse my wardrobe and tell me what's missing, what doesn't suit my season, and what key pieces I should add."); }} style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.lg, background: DS.colors.accentLight, fontSize: 13, color: DS.colors.accentDark, fontWeight: 600, textAlign: "left", border: `1px solid ${DS.colors.accent}30`, marginTop: 20, marginBottom: 8 }}>
   ✦ Analyse my wardrobe
 </button>
@@ -3051,6 +3058,66 @@ if (parsedUser.email && parsedSeason?.season) {
         }).catch(() => {});
       }).catch(() => {});
     }
+
+    // Trial ending reminder — 24 hours before trial ends
+    if (profile.trial_end_date && !profile.trial_ending_email_sent) {
+      const trialEnd = new Date(profile.trial_end_date);
+      const hoursUntilEnd = (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60);
+      if (hoursUntilEnd <= 24 && hoursUntilEnd > 0) {
+        fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+          body: JSON.stringify({ type: "trial_ending", email: parsedUser.email, name: parsedUser.name, season: parsedSeason?.season }),
+        }).then(() => {
+          fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${parsedUser.id}`, {
+            method: "PATCH",
+            headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
+            body: JSON.stringify({ trial_ending_email_sent: true }),
+          }).catch(() => {});
+        }).catch(() => {});
+      }
+    }
+
+    // Winback — 3 days after cancellation
+    if (profile.cancelled_at && !profile.winback_email_sent) {
+      const cancelledAt = new Date(profile.cancelled_at);
+      const daysSinceCancelled = Math.floor((Date.now() - cancelledAt.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysSinceCancelled >= 3) {
+        fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+          body: JSON.stringify({ type: "winback", email: parsedUser.email, name: parsedUser.name, season: parsedSeason?.season }),
+        }).then(() => {
+          fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${parsedUser.id}`, {
+            method: "PATCH",
+            headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
+            body: JSON.stringify({ winback_email_sent: true }),
+          }).catch(() => {});
+        }).catch(() => {});
+      }
+    }
+
+    // Wardrobe nudge — Day 5, Luxe users with no wardrobe items
+    if (parsedUser.plan === "luxe" && !profile.wardrobe_nudge_sent && daysSince >= 5) {
+      fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?user_id=eq.${parsedUser.id}&select=id&limit=1`, {
+        headers: { ...supabaseHeaders, Authorization: `Bearer ${token}` },
+      }).then(r => r.json()).then(items => {
+        if (Array.isArray(items) && items.length === 0) {
+          fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+            body: JSON.stringify({ type: "wardrobe_nudge", email: parsedUser.email, name: parsedUser.name, season: parsedSeason?.season }),
+          }).then(() => {
+            fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${parsedUser.id}`, {
+              method: "PATCH",
+              headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
+              body: JSON.stringify({ wardrobe_nudge_sent: true }),
+            }).catch(() => {});
+          }).catch(() => {});
+        }
+      }).catch(() => {});
+    }
+
   }).catch(() => {});
 }
       } else {
@@ -3079,6 +3146,14 @@ if (parsedUser.email && parsedSeason?.season) {
         }).catch(() => {});
         const updatedUser = { ...parsedUser, plan };
         localStorage.setItem("solla_user", JSON.stringify(updatedUser));
+        // Save trial_end_date — 7 days from now
+        const trialEnd = new Date();
+        trialEnd.setDate(trialEnd.getDate() + 7);
+        fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${parsedUser.id}`, {
+          method: "PATCH",
+          headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
+          body: JSON.stringify({ trial_end_date: trialEnd.toISOString() }),
+        }).catch(() => {});
         update({ screen: "main", user: updatedUser, seasonData: cachedSeason ? JSON.parse(cachedSeason) : null });
         window.history.replaceState({}, "", "/");
       }
