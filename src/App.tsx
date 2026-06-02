@@ -1340,10 +1340,15 @@ const loadExtendedPalette = async () => {
         </div>
       )}
       {plan === "free" && (
-        <button onClick={onUpgrade} style={{ margin: "0 16px 4px", padding: "12px 16px", background: DS.colors.accent, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <button onClick={onUpgrade} style={{ margin: "0 16px 4px", padding: "16px", background: `linear-gradient(135deg, ${DS.colors.accent} 0%, #C26B3A 100%)`, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
-            <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: DS.colors.white }}>Your makeup, hair and jewellery guide is ready</p>
-            <p style={{ margin: "2px 0 0", fontSize: 12, color: "rgba(255,255,255,0.8)" }}>Unlock your outfit engine and full colour guide — free for 7 days</p>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+              <div style={{ background: "rgba(255,255,255,0.2)", borderRadius: DS.radius.full, padding: "2px 8px" }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: DS.colors.white }}>FREE FOR 7 DAYS</span>
+              </div>
+            </div>
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: DS.colors.white }}>Your makeup, hair and outfit engine are ready</p>
+            <p style={{ margin: "3px 0 0", fontSize: 12, color: "rgba(255,255,255,0.85)" }}>No charge until day 8 · Cancel anytime</p>
           </div>
           <Icon name="chevronRight" size={16} color={DS.colors.white} />
         </button>
