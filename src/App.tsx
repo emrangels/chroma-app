@@ -1339,6 +1339,7 @@ const loadExtendedPalette = async () => {
           )}
         </div>
         <p style={{ margin: 0, fontSize: 14, color: textColor, lineHeight: 1.6, opacity: 0.85, maxWidth: 300 }}>{seasonData.headline}</p><button onClick={() => setShowShare(true)} style={{ marginTop: 16, display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(255,255,255,0.3)", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 600, color: textColor, border: `1px solid rgba(255,255,255,0.4)` }}>
+  <button data-share-trigger onClick={() => setShowShare(true)} style={{ marginTop: 16, display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(255,255,255,0.3)", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 600, color: textColor, border: `1px solid rgba(255,255,255,0.4)` }}>
   <Icon name="share" size={14} color={textColor} strokeWidth={2} />
   Share my season
 </button>
@@ -3491,7 +3492,16 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
         <button onClick={() => update({ activeSheet: "paywall" as Sheet })} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginTop: 8 }}>
           Build my outfit engine — free for 7 days
         </button>
-        <button onClick={() => update({ activeSheet: "welcome" as Sheet })} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500, marginTop: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "12px 0 0" }}>
+          <div style={{ flex: 1, height: 1, background: DS.colors.border }} />
+          <span style={{ fontSize: 11, color: DS.colors.textFaint, fontWeight: 500 }}>or</span>
+          <div style={{ flex: 1, height: 1, background: DS.colors.border }} />
+        </div>
+        <button onClick={() => { update({ activeSheet: null }); setTimeout(() => { const shareBtn = document.querySelector('[data-share-trigger]') as HTMLElement; if (shareBtn) shareBtn.click(); }, 100); }} style={{ width: "100%", padding: "12px", borderRadius: DS.radius.lg, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, fontWeight: 500, marginTop: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <Icon name="share" size={16} color={DS.colors.text} />
+          Share my {state.seasonData?.season} season
+        </button>
+        <button onClick={() => update({ activeSheet: "welcome" as Sheet })} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500, marginTop: 4 }}>
           Maybe later
         </button>
       </div>
