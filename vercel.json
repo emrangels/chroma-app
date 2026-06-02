@@ -6,6 +6,7 @@
     { "src": "/true-summer-colour-analysis", "dest": "/true-summer-colour-analysis.html" },
     { "src": "/olive-skin-colour-analysis", "dest": "/olive-skin-colour-analysis.html" },
     { "src": "/what-colours-suit-me", "dest": "/what-colours-suit-me.html" },
+    { "src": "/sitemap.xml", "dest": "/sitemap.xml" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
