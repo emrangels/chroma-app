@@ -1571,6 +1571,27 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
     const token = localStorage.getItem("solla_token") || SUPABASE_JWT_KEY;
     setSaving(true);
     try {
+      let image_url: string | null = null;
+      if (saveSheet.previewSrc) {
+        try {
+          const imgRes = await fetch(saveSheet.previewSrc);
+          const blob = await imgRes.blob();
+          const ext = blob.type === "image/png" ? "png" : "jpg";
+          const path = `${user.id}/${Date.now()}.${ext}`;
+          const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/wardrobe-items/${path}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": blob.type,
+              apikey: SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${token}`,
+            },
+            body: blob,
+          });
+          if (uploadRes.ok) {
+            image_url = `${SUPABASE_URL}/storage/v1/object/public/wardrobe-items/${path}`;
+          }
+        } catch {}
+      }
       const res = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items`, {
         method: "POST",
         headers: {
@@ -1590,6 +1611,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
           verdict_v2: saveSheet.item.verdict_v2 || (saveSheet.item.verdict ? "yes" : "no"),
           tip: saveSheet.item.tip,
           starred: false,
+          image_url,
         }),
       });
     if (!res.ok) {
