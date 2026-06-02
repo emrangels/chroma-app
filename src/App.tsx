@@ -2145,7 +2145,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const [editName, setEditName] = useState("");
   const [editCategory, setEditCategory] = useState("");
   const [gridView, setGridView] = useState(false);
-  const [filterVerdict, setFilterVerdict] = useState<boolean | null>(null);
+  const [filterVerdict, setFilterVerdict] = useState<"yes" | "neutral" | "no" | null>(null);
 
   // Add item form
   const [itemPrice, setItemPrice] = useState("");
@@ -2431,7 +2431,10 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
   const filteredItems = items.filter(i => {
   if (filterStarred && !i.starred) return false;
   if (filterCategory !== "All" && i.category !== filterCategory) return false;
-  if (filterVerdict !== null && i.verdict !== filterVerdict) return false;
+  if (filterVerdict !== null) {
+    const v = i.verdict_v2 || (i.verdict ? "yes" : "no");
+    if (v !== filterVerdict) return false;
+  }
   return true;
 });
 
@@ -2480,8 +2483,8 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
     <button onClick={() => setFilterStarred(!filterStarred)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterStarred ? "#FFD700" : DS.colors.surface, color: filterStarred ? "#7A5800" : DS.colors.textMuted, flexShrink: 0 }}>
   ★ Starred
 </button>
-<button onClick={() => setFilterVerdict(v => v === null ? true : v === true ? false : null)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterVerdict === true ? "#F0FDF4" : filterVerdict === false ? "#FEF2F2" : DS.colors.surface, color: filterVerdict === true ? DS.colors.success : filterVerdict === false ? DS.colors.danger : DS.colors.textMuted, flexShrink: 0 }}>
-  {filterVerdict === true ? "✓ Suits season" : filterVerdict === false ? "✗ Avoid" : "All verdicts"}
+<button onClick={() => setFilterVerdict(v => v === null ? "yes" : v === "yes" ? "neutral" : v === "neutral" ? "no" : null)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterVerdict === "yes" ? "#F0FDF4" : filterVerdict === "neutral" ? "#FFFBEB" : filterVerdict === "no" ? "#FEF2F2" : DS.colors.surface, color: filterVerdict === "yes" ? DS.colors.success : filterVerdict === "neutral" ? "#D97706" : filterVerdict === "no" ? DS.colors.danger : DS.colors.textMuted, flexShrink: 0 }}>
+  {filterVerdict === "yes" ? "✓ Suits season" : filterVerdict === "neutral" ? "~ Neutral" : filterVerdict === "no" ? "✗ Avoid" : "All verdicts"}
 </button>
             {categories.map(cat => {
       const count = cat === "All" ? items.length : items.filter(i => i.category === cat).length;
