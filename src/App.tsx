@@ -1340,7 +1340,7 @@ const loadExtendedPalette = async () => {
         </div>
       )}
       {plan === "free" && (
-        <button onClick={onUpgrade} style={{ margin: "0 16px 4px", padding: "16px", background: `linear-gradient(135deg, ${DS.colors.accent} 0%, #C26B3A 100%)`, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <button onClick={onUpgrade} style={{ margin: "0 16px 4px", padding: "16px", background: seasonData.season === "Spring" ? "linear-gradient(135deg, #E8845A 0%, #D4A843 100%)" : seasonData.season === "Autumn" ? "linear-gradient(135deg, #C26B3A 0%, #8B4513 100%)" : seasonData.season === "Winter" ? "linear-gradient(135deg, #2E4057 0%, #6B3FA0 100%)" : `linear-gradient(135deg, ${DS.colors.accent} 0%, #9B6FD4 100%)`, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
               <div style={{ background: "rgba(255,255,255,0.2)", borderRadius: DS.radius.full, padding: "2px 8px" }}>
