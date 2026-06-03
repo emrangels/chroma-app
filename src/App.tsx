@@ -3422,7 +3422,7 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
       <div style={{ position: "relative", width: "100vw", height: "100vh", maxWidth: 430, margin: "0 auto" }}>
         {screen === "splash" && <SplashScreen onComplete={() => update({ screen: "onboarding" })} />}
         {screen === "onboarding" && <OnboardingScreen onComplete={() => update({ screen: "auth" })} />}
-{screen === "lifestyle-onboarding" && <LifestyleOnboardingScreen userId={user?.id || ""} token={localStorage.getItem("solla_token") || ""} onComplete={() => update({ screen: "main", activeSheet: "preview" as Sheet, tourStep: null })} />}
+{screen === "lifestyle-onboarding" && <LifestyleOnboardingScreen userId={user?.id || ""} token={localStorage.getItem("solla_token") || ""} onComplete={() => update({ screen: "main", activeSheet: "preview" as Sheet, tourStep: null, activeTab: "home" })} />}
         {screen === "auth" && <AuthScreen onOpenTerms={sheet => update({ activeSheet: sheet })} onSignIn={u => {
   const cachedSeason = localStorage.getItem(`solla_season_${u.id}`);
   if (cachedSeason) {
