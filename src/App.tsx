@@ -150,10 +150,10 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
 };
 
 const slides = [
-  { icon: "camera", title: "Take a selfie", body: "One clear photo in natural light. No filters, no sunglasses. This is how Solla learns your colours.", bg: "#EDE9FF", accent: DS.colors.accent },
-  { icon: "palette", title: "Discover your season", body: "Our AI analyses your skin tone, undertone, eye and hair colour to find your perfect palette.", bg: "#E8F4FD", accent: "#4A90C4" },
-  { icon: "sparkles", title: "Get your full guide", body: "Colours, makeup, hair, jewellery, style and wardrobe — everything personalised to your season, so getting dressed becomes the easy part.", bg: "#FFF1E6", accent: "#E8845A" },
-  { icon: "shirt", title: "Check any item", body: "Check a single item, a full outfit, or try colour swatches - Solla reads every colour and tells you what works.", bg: "#E8F5EE", accent: "#1A9E6E" },
+  { icon: "camera", title: "Stop asking what to wear", body: "One selfie is all it takes. Solla analyses your colouring and builds your personal colour profile — ready in under a minute.", bg: "#EDE9FF", accent: DS.colors.accent },
+  { icon: "palette", title: "Finally know your colours", body: "Your exact season, your best shades, your makeup guide, your hair colours — all personalised to your specific undertone and colouring.", bg: "#E8F4FD", accent: "#4A90C4" },
+  { icon: "sparkles", title: "Wake up knowing what to wear", body: "Add your wardrobe and Solla suggests a season-approved outfit every morning based on your clothes and the weather. No more standing in front of the mirror.", bg: "#FFF1E6", accent: "#E8845A" },
+  { icon: "shirt", title: "Check anything, instantly", body: "Shopping online? Unsure about an item? Photograph it and Solla tells you instantly whether it suits your season — before you buy.", bg: "#E8F5EE", accent: "#1A9E6E" },
 { icon: "sparkles", title: "Solla learns you", body: "The more you use Solla and chat with your AI stylist, the better it knows your preferences, lifestyle and style — so every suggestion gets more personal over time.", bg: "#EDE9FF", accent: DS.colors.accent },
 ];
 
