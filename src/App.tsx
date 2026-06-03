@@ -46,7 +46,7 @@ interface WardrobeItem {
 }
 interface Outfit {
   id: string; user_id: string; name: string; item_ids: string[];
-  overall_verdict: boolean; starred: boolean; created_at: string;
+  overall_verdict: boolean; starred: boolean; created_at: string; category?: string;
 }
 interface ChatMessage {
   role: "user" | "assistant"; content: string; message_id?: string; feedback?: "up" | "down";
@@ -2237,6 +2237,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const [showAddOutfit, setShowAddOutfit] = useState(false);
   const [editingOutfit, setEditingOutfit] = useState<Outfit | null>(null);
   const [editOutfitName, setEditOutfitName] = useState("");
+  const [editOutfitCategory, setEditOutfitCategory] = useState("Casual");
   const [editOutfitItemIds, setEditOutfitItemIds] = useState<string[]>([]);
   const [filterCategory, setFilterCategory] = useState("All");
   const [filterStarred, setFilterStarred] = useState(false);
@@ -2245,6 +2246,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const [editCategory, setEditCategory] = useState("");
   const [gridView, setGridView] = useState(false);
   const [filterVerdict, setFilterVerdict] = useState<"yes" | "neutral" | "no" | null>(null);
+  const [filterOutfitCategory, setFilterOutfitCategory] = useState("All");
 
   // Add item form
   const [itemPrice, setItemPrice] = useState("");
@@ -2259,6 +2261,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
 
   // Add outfit form
   const [outfitName, setOutfitName] = useState("");
+  const [outfitCategory, setOutfitCategory] = useState("Casual");
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
 
   // AI Chat
@@ -2470,7 +2473,7 @@ const handleDeleteOutfit = async (id: string) => {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/outfits`, {
         method: "POST",
         headers: { ...getAuthHeaders(), Prefer: "return=representation" },
-        body: JSON.stringify({ user_id: user.id, name: outfitName.trim(), item_ids: selectedItemIds, overall_verdict, starred: false }),
+        body: JSON.stringify({ user_id: user.id, name: outfitName.trim(), item_ids: selectedItemIds, overall_verdict, starred: false, category: outfitCategory }),
       });
       const data = await res.json();
       if (Array.isArray(data)) setOutfits(prev => [data[0], ...prev]);
@@ -2487,7 +2490,7 @@ const handleEditOutfit = async () => {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/outfits?id=eq.${editingOutfit.id}`, {
         method: "PATCH",
         headers: { ...getAuthHeaders(), Prefer: "return=representation" },
-        body: JSON.stringify({ name: editOutfitName.trim(), item_ids: editOutfitItemIds, overall_verdict }),
+        body: JSON.stringify({ name: editOutfitName.trim(), item_ids: editOutfitItemIds, overall_verdict, category: editOutfitCategory }),
       });
       const data = await res.json();
       if (Array.isArray(data)) setOutfits(prev => prev.map(o => o.id === editingOutfit.id ? data[0] : o));
@@ -2700,6 +2703,19 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
       {/* Outfits view */}
       {view === "outfits" && (
         <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
+          {outfits.length > 0 && (
+          <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4, marginBottom: 16 }}>
+            {["All", "Casual", "Work", "Going out", "Active", "Special occasion"].map(cat => {
+              const count = cat === "All" ? outfits.length : outfits.filter(o => o.category === cat).length;
+              if (cat !== "All" && count === 0) return null;
+              return (
+                <button key={cat} onClick={() => setFilterOutfitCategory(cat)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterOutfitCategory === cat ? DS.colors.accent : DS.colors.surface, color: filterOutfitCategory === cat ? DS.colors.white : DS.colors.textMuted, flexShrink: 0, transition: "all 0.2s" }}>
+                  {cat}{count > 0 ? ` (${count})` : ""}
+                </button>
+              );
+            })}
+          </div>
+        )}
           {outfits.length === 0 ? (
             <div style={{ textAlign: "center", padding: "40px 0" }}>
               <Icon name="star" size={40} color={DS.colors.border} />
@@ -2708,20 +2724,23 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 80 }}>
-              {outfits.map(outfit => {
+              {outfits.filter(o => filterOutfitCategory === "All" || o.category === filterOutfitCategory).map(outfit => {
                 const outfitItems = items.filter(i => outfit.item_ids.includes(i.id));
                 return (
                   <div key={outfit.id} onClick={() => { setView("chat"); setChatInput(`Tell me about this outfit: ${outfit.name} — ${items.filter(i => outfit.item_ids.includes(i.id)).map(i => i.name).join(", ")}. How can I style it and what occasions does it work for?`); }} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "14px 16px", cursor: "pointer" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: DS.colors.text }}>{outfit.name}</p>
-                        <p style={{ margin: "2px 0 0", fontSize: 11, color: DS.colors.textFaint }}>Tap to style with AI →</p>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+                          {outfit.category && <span style={{ fontSize: 11, color: DS.colors.accent, fontWeight: 500, background: DS.colors.accentLight, padding: "1px 8px", borderRadius: DS.radius.full }}>{outfit.category}</span>}
+                          <span style={{ fontSize: 11, color: DS.colors.textFaint }}>Tap to style with AI →</span>
+                        </div>
                         <div style={{ padding: "2px 8px", borderRadius: DS.radius.full, background: outfit.overall_verdict ? "#F0FDF4" : "#FEF2F2" }}>
                           <span style={{ fontSize: 11, fontWeight: 600, color: outfit.overall_verdict ? DS.colors.success : DS.colors.danger }}>{outfit.overall_verdict ? "Works" : "Needs work"}</span>
                         </div>
                       </div>
                       <button onClick={e => { e.stopPropagation(); handleToggleOutfitStar(outfit); }} style={{ fontSize: 16, color: outfit.starred ? "#FFD700" : DS.colors.border }}>★</button>
-                      <button onClick={e => { e.stopPropagation(); setEditingOutfit(outfit); setEditOutfitName(outfit.name); setEditOutfitItemIds(outfit.item_ids); }}><Icon name="refresh" size={14} color={DS.colors.textFaint} /></button>
+                      <button onClick={e => { e.stopPropagation(); setEditingOutfit(outfit); setEditOutfitName(outfit.name); setEditOutfitCategory(outfit.category || "Casual"); setEditOutfitItemIds(outfit.item_ids); }}><Icon name="refresh" size={14} color={DS.colors.textFaint} /></button>
                       <button onClick={e => { e.stopPropagation(); handleDeleteOutfit(outfit.id); }}><Icon name="trash" size={14} color={DS.colors.textFaint} /></button>
                     </div>
                     <div style={{ display: "flex", gap: 6 }}>
@@ -2895,7 +2914,15 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             </div>
             <div style={{ padding: "16px 24px" }}>
               <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20 }}>Edit outfit</h2>
-              <input value={editOutfitName} onChange={e => setEditOutfitName(e.target.value)} placeholder="Outfit name" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 16, fontFamily: DS.font }} />
+              <input value={editOutfitName} onChange={e => setEditOutfitName(e.target.value)} placeholder="Outfit name" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 12, fontFamily: DS.font }} />
+              <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 600, color: DS.colors.textMuted }}>Category</p>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
+                {["Casual", "Work", "Going out", "Active", "Special occasion"].map(cat => (
+                  <button key={cat} onClick={() => setEditOutfitCategory(cat)} style={{ padding: "6px 14px", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 500, background: editOutfitCategory === cat ? DS.colors.accent : DS.colors.surface, color: editOutfitCategory === cat ? DS.colors.white : DS.colors.textMuted, transition: "all 0.2s" }}>
+                    {cat}
+                  </button>
+                ))}
+              </div>
               <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 12 }}>Select items (minimum 2):</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
                 {items.map(item => {
@@ -2932,7 +2959,15 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             </div>
             <div style={{ padding: "16px 24px" }}>
               <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20 }}>Create outfit</h2>
-              <input value={outfitName} onChange={e => setOutfitName(e.target.value)} placeholder="Outfit name (e.g. Work Monday)" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 16, fontFamily: DS.font }} />
+              <input value={outfitName} onChange={e => setOutfitName(e.target.value)} placeholder="Outfit name (e.g. Work Monday)" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 12, fontFamily: DS.font }} />
+              <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 600, color: DS.colors.textMuted }}>Category</p>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
+                {["Casual", "Work", "Going out", "Active", "Special occasion"].map(cat => (
+                  <button key={cat} onClick={() => setOutfitCategory(cat)} style={{ padding: "6px 14px", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 500, background: outfitCategory === cat ? DS.colors.accent : DS.colors.surface, color: outfitCategory === cat ? DS.colors.white : DS.colors.textMuted, transition: "all 0.2s" }}>
+                    {cat}
+                  </button>
+                ))}
+              </div>
               <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 12 }}>Select items (minimum 2):</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
                 {items.map(item => {
