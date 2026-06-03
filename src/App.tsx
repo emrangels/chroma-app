@@ -2711,17 +2711,18 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
               {outfits.map(outfit => {
                 const outfitItems = items.filter(i => outfit.item_ids.includes(i.id));
                 return (
-                  <div key={outfit.id} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "14px 16px" }}>
+                  <div key={outfit.id} onClick={() => { setView("chat"); setChatInput(`Tell me about this outfit: ${outfit.name} — ${items.filter(i => outfit.item_ids.includes(i.id)).map(i => i.name).join(", ")}. How can I style it and what occasions does it work for?`); }} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "14px 16px", cursor: "pointer" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: DS.colors.text }}>{outfit.name}</p>
+                        <p style={{ margin: "2px 0 0", fontSize: 11, color: DS.colors.textFaint }}>Tap to style with AI →</p>
                         <div style={{ padding: "2px 8px", borderRadius: DS.radius.full, background: outfit.overall_verdict ? "#F0FDF4" : "#FEF2F2" }}>
                           <span style={{ fontSize: 11, fontWeight: 600, color: outfit.overall_verdict ? DS.colors.success : DS.colors.danger }}>{outfit.overall_verdict ? "Works" : "Needs work"}</span>
                         </div>
                       </div>
-                      <button onClick={() => handleToggleOutfitStar(outfit)} style={{ fontSize: 16, color: outfit.starred ? "#FFD700" : DS.colors.border }}>★</button>
-                      <button onClick={() => { setEditingOutfit(outfit); setEditOutfitName(outfit.name); setEditOutfitItemIds(outfit.item_ids); }}><Icon name="refresh" size={14} color={DS.colors.textFaint} /></button>
-                      <button onClick={() => handleDeleteOutfit(outfit.id)}><Icon name="trash" size={14} color={DS.colors.textFaint} /></button>
+                      <button onClick={e => { e.stopPropagation(); handleToggleOutfitStar(outfit); }} style={{ fontSize: 16, color: outfit.starred ? "#FFD700" : DS.colors.border }}>★</button>
+                      <button onClick={e => { e.stopPropagation(); setEditingOutfit(outfit); setEditOutfitName(outfit.name); setEditOutfitItemIds(outfit.item_ids); }}><Icon name="refresh" size={14} color={DS.colors.textFaint} /></button>
+                      <button onClick={e => { e.stopPropagation(); handleDeleteOutfit(outfit.id); }}><Icon name="trash" size={14} color={DS.colors.textFaint} /></button>
                     </div>
                     <div style={{ display: "flex", gap: 6 }}>
                       {outfitItems.map(item => (
