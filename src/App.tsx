@@ -2229,7 +2229,10 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const plan = user?.plan || "free";
   const canAccess = plan === "luxe";
 
-  const [view, setView] = useState<"items" | "outfits" | "chat">("items");
+  const [view, setView] = useState<"items" | "outfits" | "chat" | "plan">("items");
+const [weeklyPlan, setWeeklyPlan] = useState<{ day: string; coat: string | null; base: string; shoes: string; accessories: string; }[]>([]);
+const [loadingPlan, setLoadingPlan] = useState(false);
+const [planGenerated, setPlanGenerated] = useState(false);
   const [items, setItems] = useState<WardrobeItem[]>([]);
   const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [loading, setLoading] = useState(false);
@@ -2508,6 +2511,32 @@ const handleEditOutfit = async () => {
     }).catch(() => {});
   };
 
+  const generateWeeklyPlan = async () => {
+    if (!seasonData) return;
+    setLoadingPlan(true);
+    try {
+      const wardrobeContext = items.filter(i => (i.verdict_v2 || (i.verdict ? "yes" : "no")) !== "no")
+        .map(i => `${i.name} (${i.category}${i.formality ? `, ${i.formality}` : ""})`).join(", ");
+      const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+        body: JSON.stringify({
+          type: "weekly_plan",
+          season: seasonData.season,
+          palette: (seasonData.palette?.best || []).map((c: PaletteColour) => c.name).slice(0, 4).join(", "),
+          wardrobe: wardrobeContext,
+          days,
+        }),
+      });
+      const data = await res.json();
+      if (data.plan && Array.isArray(data.plan)) {
+        setWeeklyPlan(data.plan);
+        setPlanGenerated(true);
+      }
+    } catch {}
+    finally { setLoadingPlan(false); }
+  };
   const handleChat = async () => {
     if (!chatInput.trim() || !seasonData) return;
     const userMsg: ChatMessage = { role: "user", content: chatInput.trim() };
@@ -2566,9 +2595,9 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
       {/* Tab switcher */}
       <div style={{ padding: "16px 16px 0", flexShrink: 0 }}>
         <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, gap: 4 }}>
-          {(["items", "outfits", "chat"] as const).map(v => (
+          {(["items", "outfits", "plan", "chat"] as const).map(v => (
             <button key={v} onClick={() => setView(v)} style={{ flex: 1, padding: "8px 4px", borderRadius: DS.radius.md, fontSize: 13, fontWeight: view === v ? 600 : 400, color: view === v ? DS.colors.white : DS.colors.textMuted, background: view === v ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
-              {v === "items" ? "Wardrobe" : v === "outfits" ? "Outfits" : "Stylist"}
+              {v === "items" ? "Wardrobe" : v === "outfits" ? "Outfits" : v === "plan" ? "Plan" : "Stylist"}
             </button>
           ))}
         </div>
@@ -2766,8 +2795,67 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
         </div>
       )}
 
-      {/* AI Stylist chat */}
-      {view === "chat" && (
+      {/* Weekly plan */}
+      {view === "plan" && (
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+            <div>
+              <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: DS.colors.text }}>Your week ahead</p>
+              <p style={{ margin: "2px 0 0", fontSize: 13, color: DS.colors.textMuted }}>Season-approved outfits for every day</p>
+            </div>
+            <button onClick={generateWeeklyPlan} disabled={loadingPlan} style={{ padding: "8px 16px", borderRadius: DS.radius.full, background: DS.colors.accent, color: DS.colors.white, fontSize: 13, fontWeight: 600, opacity: loadingPlan ? 0.7 : 1 }}>
+              {loadingPlan ? "Planning..." : planGenerated ? "Regenerate" : "Generate plan"}
+            </button>
+          </div>
+          {!planGenerated && !loadingPlan && (
+            <div style={{ textAlign: "center", padding: "40px 0" }}>
+              <Icon name="sparkles" size={40} color={DS.colors.border} />
+              <p style={{ fontSize: 15, fontWeight: 600, color: DS.colors.textMuted, marginTop: 12 }}>No plan yet</p>
+              <p style={{ fontSize: 13, color: DS.colors.textFaint, marginTop: 4, maxWidth: 240, margin: "8px auto 0", lineHeight: 1.6 }}>Tap Generate plan and Solla will build a full week of season-approved outfits from your wardrobe.</p>
+            </div>
+          )}
+          {loadingPlan && (
+            <div style={{ textAlign: "center", padding: "40px 0" }}>
+              <div style={{ display: "flex", gap: 6, justifyContent: "center", marginBottom: 16 }}>
+                {[0,1,2].map(i => <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: DS.colors.accent, animation: `pulse 1.2s ease ${i * 0.2}s infinite` }} />)}
+              </div>
+              <p style={{ fontSize: 14, color: DS.colors.textMuted }}>Building your week...</p>
+            </div>
+          )}
+          {planGenerated && !loadingPlan && weeklyPlan.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 80 }}>
+              {weeklyPlan.map((day, i) => (
+                <div key={i} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "14px 16px" }}>
+                  <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: DS.colors.accent }}>{day.day}</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {day.coat && day.coat !== "null" && (
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.textFaint, minWidth: 80 }}>Coat</span>
+                        <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{day.coat}</span>
+                      </div>
+                    )}
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.textFaint, minWidth: 80 }}>Base</span>
+                      <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{day.base}</span>
+                    </div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.textFaint, minWidth: 80 }}>Shoes</span>
+                      <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{day.shoes}</span>
+                    </div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.textFaint, minWidth: 80 }}>Accessories</span>
+                      <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{day.accessories}</span>
+                    </div>
+                  </div>
+                  <button onClick={() => { setView("chat"); setChatInput(`Can you help me style ${day.day}'s outfit? ${day.base}${day.coat ? `, ${day.coat}` : ""}, ${day.shoes}, ${day.accessories}`); }} style={{ marginTop: 10, fontSize: 12, color: DS.colors.accent, fontWeight: 500 }}>
+                    Style with AI →
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
           <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: 12 }}>
             {chatMessages.length === 0 && (
@@ -2833,7 +2921,6 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             </button>
           </div>
         </div>
-      )}
 
       {/* Add Item Sheet */}
       {showAddItem && (
