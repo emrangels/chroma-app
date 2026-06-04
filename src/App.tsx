@@ -38,6 +38,11 @@ interface SeasonData {
   style: { silhouettes: string; patterns: string; fabrics: string; tip: string; };
   body_shape: string; daily_tip: string;
 }
+interface MakeupItem {
+  id: string; user_id: string; name: string; brand?: string; category: string;
+  shade_name?: string; hex: string; verdict_v2: "yes" | "neutral" | "no"; verdict: boolean;
+  tip?: string; image_url?: string; starred: boolean; created_at: string;
+}
 interface WardrobeItem {
   id: string; user_id: string; name: string; category: string;
   colour_name: string; hex: string; verdict: boolean; verdict_v2?: "yes" | "neutral" | "no"; tip: string;
@@ -1591,7 +1596,14 @@ interface CheckResult {
 }
 
 const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | null; user: User | null; onUpgrade: () => void; }) => {
-  const [mode, setMode] = useState<"single" | "outfit" | "swatch">("single");
+  const [mode, setMode] = useState<"single" | "outfit" | "swatch" | "makeup">("single");
+  const [makeupItems, setMakeupItems] = useState<MakeupItem[]>([]);
+  const [loadingMakeup, setLoadingMakeup] = useState(false);
+  const [saveMakeupSheet, setSaveMakeupSheet] = useState<{ item: CheckResult["items"][0]; previewSrc?: string } | null>(null);
+  const [saveMakeupName, setSaveMakeupName] = useState("");
+  const [saveMakeupBrand, setSaveMakeupBrand] = useState("");
+  const [saveMakeupCategory, setSaveMakeupCategory] = useState("Lip");
+  const [saveMakeupShade, setSaveMakeupShade] = useState("");
   const [previews, setPreviews] = useState<string[]>([]);
   const [swatchLabel, setSwatchLabel] = useState("");
   const [loading, setLoading] = useState(false);
@@ -1765,8 +1777,8 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
       <div style={{ padding: "20px 16px 0" }}>
         {/* Mode switcher */}
         <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, marginBottom: 20, gap: 4 }}>
-          {(["single", "outfit", "swatch"] as const).map(m => (
-            <button key={m} onClick={() => { setMode(m); reset(); }} style={{ flex: 1, padding: "8px 4px", borderRadius: DS.radius.md, fontSize: 13, fontWeight: mode === m ? 600 : 400, color: mode === m ? DS.colors.white : DS.colors.textMuted, background: mode === m ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
+          {(["single", "outfit", "swatch", "makeup"] as const).map(m => (
+            <button key={m} onClick={() => { setMode(m as any); reset(); }} style={{ flex: 1, padding: "8px 4px", borderRadius: DS.radius.md, fontSize: 13, fontWeight: mode === m ? 600 : 400, color: mode === m ? DS.colors.white : DS.colors.textMuted, background: mode === m ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
               {m.charAt(0).toUpperCase() + m.slice(1)}
             </button>
           ))}
@@ -1777,6 +1789,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
           {mode === "single" && "Upload one or more items at once. For best results, photograph in natural light against a neutral background — results may vary with filters or poor lighting."}
           {mode === "outfit" && "Upload a full outfit photo for an overall verdict and per-piece breakdown. Natural light gives the most accurate colour reading."}
           {mode === "swatch" && "Upload a photo of your swatches in natural light (e.g. lipsticks swatched on your arm). The clearer the photo, the more precise each verdict will be."}
+          {mode === "makeup" && "Upload a photo of any makeup product — lipstick, blush, eyeshadow, foundation. Solla will check if the shade suits your season and save it to your makeup kit."}
         </p>
 
         {/* Swatch label */}
@@ -1868,6 +1881,76 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
             </div>
           </div>
         )}
+        {/* Save Makeup Sheet */}
+      {saveMakeupSheet && (
+        <div onClick={() => setSaveMakeupSheet(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 3000, display: "flex", alignItems: "flex-end" }}>
+          <div onClick={e => e.stopPropagation()} style={{ width: "100%", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, padding: "0 0 48px" }}>
+            <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+              <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
+            </div>
+            <div style={{ padding: "16px 24px" }}>
+              <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Save to makeup kit</h2>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, padding: "10px 14px", borderRadius: DS.radius.md, background: saveMakeupSheet.item.verdict_v2 === "yes" ? "#F0FDF4" : saveMakeupSheet.item.verdict_v2 === "neutral" ? "#FFFBEB" : "#FEF2F2" }}>
+                <div style={{ width: 36, height: 36, borderRadius: DS.radius.full, background: saveMakeupSheet.item.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
+                <div>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>{saveMakeupSheet.item.colour_name}</p>
+                  <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted }}>{saveMakeupSheet.item.verdict_v2 === "yes" ? "✓ Suits your season" : saveMakeupSheet.item.verdict_v2 === "neutral" ? "~ Neutral" : "✗ Doesn't suit your season"}</p>
+                </div>
+              </div>
+              <input value={saveMakeupName} onChange={e => setSaveMakeupName(e.target.value)} placeholder="Product name" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 10, fontFamily: DS.font }} />
+              <input value={saveMakeupBrand} onChange={e => setSaveMakeupBrand(e.target.value)} placeholder="Brand (optional)" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 10, fontFamily: DS.font }} />
+              <input value={saveMakeupShade} onChange={e => setSaveMakeupShade(e.target.value)} placeholder="Shade name (optional)" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 12, fontFamily: DS.font }} />
+              <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 600, color: DS.colors.textMuted }}>Category</p>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
+                {["Lip", "Blush", "Foundation", "Eye", "Bronzer", "Highlighter", "Other"].map(cat => (
+                  <button key={cat} onClick={() => setSaveMakeupCategory(cat)} style={{ padding: "6px 14px", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 500, background: saveMakeupCategory === cat ? "#C2185B" : DS.colors.surface, color: saveMakeupCategory === cat ? DS.colors.white : DS.colors.textMuted, transition: "all 0.2s" }}>
+                    {cat}
+                  </button>
+                ))}
+              </div>
+              <button onClick={async () => {
+                if (!user?.id || !saveMakeupName.trim()) return;
+                const token = localStorage.getItem("solla_token");
+                let image_url: string | null = null;
+                if (saveMakeupSheet.previewSrc) {
+                  try {
+                    const imgRes = await fetch(saveMakeupSheet.previewSrc);
+                    const blob = await imgRes.blob();
+                    const ext = blob.type === "image/png" ? "png" : "jpg";
+                    const path = `${user.id}/makeup/${Date.now()}.${ext}`;
+                    const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/wardrobe-items/${path}`, {
+                      method: "POST",
+                      headers: { "Content-Type": blob.type, apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token || SUPABASE_JWT_KEY}` },
+                      body: blob,
+                    });
+                    if (uploadRes.ok) image_url = `${SUPABASE_URL}/storage/v1/object/public/wardrobe-items/${path}`;
+                  } catch {}
+                }
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/makeup_items`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token || SUPABASE_JWT_KEY}`, Prefer: "return=minimal" },
+                  body: JSON.stringify({
+                    user_id: user.id,
+                    name: saveMakeupName.trim(),
+                    brand: saveMakeupBrand.trim() || null,
+                    category: saveMakeupCategory,
+                    shade_name: saveMakeupShade.trim() || null,
+                    hex: saveMakeupSheet.item.hex,
+                    verdict_v2: saveMakeupSheet.item.verdict_v2 || "yes",
+                    verdict: saveMakeupSheet.item.verdict,
+                    tip: saveMakeupSheet.item.tip,
+                    image_url,
+                    starred: false,
+                  }),
+                });
+                if (res.ok) setSaveMakeupSheet(null);
+              }} disabled={!saveMakeupName.trim()} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: !saveMakeupName.trim() ? DS.colors.border : "#C2185B", color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>
+                Save to makeup kit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
         {/* Lightbox */}
         {lightboxSrc && (
           <div onClick={() => setLightboxSrc(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.9)", zIndex: 3000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
@@ -1929,8 +2012,38 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                   <p style={{ margin: "0 0 4px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{item.reason}</p>
                   <p style={{ margin: 0, fontSize: 13, color: DS.colors.accent, lineHeight: 1.5, fontWeight: 500 }}>{item.tip}</p>
 {user?.plan === "luxe" && (
-  <button onClick={() => openSaveSheet(item, previews[idx])} style={{ marginTop: 8, padding: "6px 14px", borderRadius: DS.radius.full, background: DS.colors.accentLight, fontSize: 12, color: DS.colors.accentDark, fontWeight: 500 }}>
-    + Save to wardrobe
+  <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+    <button onClick={() => openSaveSheet(item, previews[idx])} style={{ padding: "6px 14px", borderRadius: DS.radius.full, background: DS.colors.accentLight, fontSize: 12, color: DS.colors.accentDark, fontWeight: 500 }}>
+      + Save to wardrobe
+    </button>
+    {mode === "makeup" && (
+      <button onClick={() => {
+        setSaveMakeupSheet({ item, previewSrc: previews[idx] });
+        setSaveMakeupName(item.colour_name);
+        setSaveMakeupShade(item.colour_name);
+        setSaveMakeupCategory("Lip");
+        setSaveMakeupBrand("");
+      }} style={{ padding: "6px 14px", borderRadius: DS.radius.full, background: "#FFF0F5", fontSize: 12, color: "#C2185B", fontWeight: 500 }}>
+        + Save to makeup kit
+      </button>
+    )}
+  </div>
+)}
+{user?.plan === "glow" && mode !== "makeup" && (
+  <button onClick={onUpgrade} style={{ marginTop: 8, padding: "8px 14px", borderRadius: DS.radius.full, background: "#FFF7ED", border: `1px solid #C26B3A`, display: "flex", alignItems: "center", gap: 6 }}>
+    <Icon name="lock" size={12} color="#C26B3A" strokeWidth={2} />
+    <span style={{ fontSize: 12, color: "#C26B3A", fontWeight: 600 }}>Save to wardrobe — unlock with Luxe</span>
+  </button>
+)}
+{user?.plan === "glow" && mode === "makeup" && (
+  <button onClick={() => {
+    setSaveMakeupSheet({ item, previewSrc: previews[idx] });
+    setSaveMakeupName(item.colour_name);
+    setSaveMakeupShade(item.colour_name);
+    setSaveMakeupCategory("Lip");
+    setSaveMakeupBrand("");
+  }} style={{ marginTop: 8, padding: "6px 14px", borderRadius: DS.radius.full, background: "#FFF0F5", fontSize: 12, color: "#C2185B", fontWeight: 500 }}>
+    + Save to makeup kit
   </button>
 )}
 {user?.plan === "glow" && (
@@ -1945,6 +2058,142 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
           </div>
         ))}
       </div>
+    </div>
+  );
+};
+const MakeupKitSection = ({ user, seasonData, onUpgrade }: { user: User | null; seasonData: SeasonData | null; onUpgrade: () => void }) => {
+  const [makeupItems, setMakeupItems] = useState<MakeupItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [filterCategory, setFilterCategory] = useState("All");
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    if (!user?.id || user.plan === "free") return;
+    setLoading(true);
+    const token = localStorage.getItem("solla_token");
+    fetch(`${SUPABASE_URL}/rest/v1/makeup_items?user_id=eq.${user.id}&order=created_at.desc`, {
+      headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token || SUPABASE_JWT_KEY}` },
+    }).then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setMakeupItems(data);
+    }).catch(() => {}).finally(() => setLoading(false));
+  }, [user?.id]);
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Remove this item from your makeup kit?")) return;
+    setMakeupItems(prev => prev.filter(i => i.id !== id));
+    const token = localStorage.getItem("solla_token");
+    await fetch(`${SUPABASE_URL}/rest/v1/makeup_items?id=eq.${id}`, {
+      method: "DELETE",
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token || SUPABASE_JWT_KEY}` },
+    }).catch(() => {});
+  };
+
+  const handleToggleStar = async (item: MakeupItem) => {
+    const updated = { ...item, starred: !item.starred };
+    setMakeupItems(prev => prev.map(i => i.id === item.id ? updated : i));
+    const token = localStorage.getItem("solla_token");
+    await fetch(`${SUPABASE_URL}/rest/v1/makeup_items?id=eq.${item.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token || SUPABASE_JWT_KEY}`, Prefer: "return=minimal" },
+      body: JSON.stringify({ starred: updated.starred }),
+    }).catch(() => {});
+  };
+
+  const categories = ["All", "Lip", "Blush", "Foundation", "Eye", "Bronzer", "Highlighter", "Other"];
+  const filtered = makeupItems.filter(i => filterCategory === "All" || i.category === filterCategory);
+
+  if (user?.plan === "free") return (
+    <div style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "16px", marginBottom: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+        <Icon name="droplet" size={16} color={DS.colors.accent} />
+        <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: DS.colors.text }}>Makeup kit</p>
+        <span style={{ fontSize: 11, background: DS.colors.accentLight, color: DS.colors.accentDark, padding: "2px 8px", borderRadius: DS.radius.full, fontWeight: 500 }}>Glow</span>
+      </div>
+      <p style={{ margin: "0 0 12px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>Save your makeup products and check if they suit your season. Never buy the wrong shade again.</p>
+      <button onClick={onUpgrade} style={{ padding: "8px 16px", borderRadius: DS.radius.full, background: DS.colors.accent, color: DS.colors.white, fontSize: 13, fontWeight: 600 }}>Unlock makeup kit</button>
+    </div>
+  );
+
+  return (
+    <div style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "16px" }}>
+      <button onClick={() => setExpanded(!expanded)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: "pointer" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Icon name="droplet" size={16} color={DS.colors.accent} />
+          <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: DS.colors.text }}>Makeup kit</p>
+          {makeupItems.length > 0 && <span style={{ fontSize: 11, background: DS.colors.accentLight, color: DS.colors.accentDark, padding: "2px 8px", borderRadius: DS.radius.full, fontWeight: 500 }}>{makeupItems.length} items</span>}
+        </div>
+        <Icon name={expanded ? "chevronDown" : "chevronRight"} size={16} color={DS.colors.textFaint} />
+      </button>
+
+      {expanded && (
+        <div style={{ marginTop: 14 }}>
+          {loading && <p style={{ fontSize: 13, color: DS.colors.textMuted }}>Loading...</p>}
+          {!loading && makeupItems.length === 0 && (
+            <div style={{ textAlign: "center", padding: "20px 0" }}>
+              <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 4 }}>Your makeup kit is empty</p>
+              <p style={{ fontSize: 13, color: DS.colors.textFaint, lineHeight: 1.5 }}>Go to Checker → Makeup to check and save products.</p>
+            </div>
+          )}
+          {!loading && makeupItems.length > 0 && (
+            <>
+              <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 8, marginBottom: 12 }}>
+                {categories.map(cat => {
+                  const count = cat === "All" ? makeupItems.length : makeupItems.filter(i => i.category === cat).length;
+                  if (cat !== "All" && count === 0) return null;
+                  return (
+                    <button key={cat} onClick={() => setFilterCategory(cat)} style={{ padding: "4px 10px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: filterCategory === cat ? "#C2185B" : DS.colors.surface, color: filterCategory === cat ? DS.colors.white : DS.colors.textMuted, flexShrink: 0 }}>
+                      {cat}{count > 0 ? ` (${count})` : ""}
+                    </button>
+                  );
+                })}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {filtered.map(item => (
+                  <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: DS.radius.md, border: `1px solid ${DS.colors.border}`, background: DS.colors.bg }}>
+                    {item.image_url ? (
+                      <img src={item.image_url} style={{ width: 44, height: 44, borderRadius: DS.radius.md, objectFit: "cover", flexShrink: 0 }} />
+                    ) : (
+                      <div style={{ width: 44, height: 44, borderRadius: DS.radius.full, background: item.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
+                    )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</p>
+                      <div style={{ display: "flex", gap: 4, alignItems: "center", marginTop: 2 }}>
+                        {item.brand && <span style={{ fontSize: 11, color: DS.colors.textFaint }}>{item.brand}</span>}
+                        {item.brand && item.shade_name && <span style={{ fontSize: 11, color: DS.colors.textFaint }}>·</span>}
+                        {item.shade_name && <span style={{ fontSize: 11, color: DS.colors.textFaint }}>{item.shade_name}</span>}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
+                        <span style={{ fontSize: 10, color: DS.colors.textFaint, background: DS.colors.surface, padding: "1px 6px", borderRadius: DS.radius.full }}>{item.category}</span>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: item.verdict_v2 === "yes" ? DS.colors.success : item.verdict_v2 === "neutral" ? "#D97706" : DS.colors.danger }}>
+                          {item.verdict_v2 === "yes" ? "✓" : item.verdict_v2 === "neutral" ? "~" : "✗"}
+                        </span>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <button onClick={() => handleToggleStar(item)} style={{ fontSize: 16, color: item.starred ? "#FFD700" : DS.colors.border }}>★</button>
+                      <button onClick={() => handleDelete(item.id)}><Icon name="trash" size={14} color={DS.colors.textFaint} /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {seasonData && (
+                <div style={{ marginTop: 16, padding: "12px 14px", background: DS.colors.accentLight, borderRadius: DS.radius.md }}>
+                  <p style={{ margin: "0 0 4px", fontSize: 12, fontWeight: 600, color: DS.colors.accentDark }}>Your {seasonData.season} makeup kit</p>
+                  {(() => {
+                    const cats = ["Lip", "Blush", "Foundation", "Eye"];
+                    const missing = cats.filter(c => !makeupItems.some(i => i.category === c && i.verdict_v2 === "yes"));
+                    return missing.length > 0 ? (
+                      <p style={{ margin: 0, fontSize: 12, color: DS.colors.accentDark }}>Still needed: {missing.join(", ")}</p>
+                    ) : (
+                      <p style={{ margin: 0, fontSize: 12, color: DS.colors.success }}>✓ Full kit — you have all the essentials covered</p>
+                    );
+                  })()}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -2144,6 +2393,8 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
           )}
         </div>
 
+        {/* Makeup Kit */}
+        <MakeupKitSection user={user} seasonData={seasonData} onUpgrade={onUpgrade} />
         {/* Actions */}
         <div style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, overflow: "hidden" }}>
   <button onClick={() => onOpenFaq("faq")} style={{ width: "100%", padding: "16px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${DS.colors.border}` }}>
