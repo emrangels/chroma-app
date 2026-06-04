@@ -4232,7 +4232,14 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
         {screen === "onboarding" && <OnboardingScreen onComplete={() => update({ screen: "auth" })} />}
 {screen === "lifestyle-onboarding" && <LifestyleOnboardingScreen userId={user?.id || ""} token={localStorage.getItem("solla_token") || ""} onComplete={() => update({ screen: "main", activeSheet: "preview" as Sheet, tourStep: null, activeTab: "home" })} />}
         {screen === "auth" && <AuthScreen onOpenTerms={sheet => update({ activeSheet: sheet })} onSignIn={u => {
-  const cachedSeason = localStorage.getItem(`solla_season_${u.id}`);
+  // Check user's own cached season first, then fall back to guest season
+  const cachedSeason = localStorage.getItem(`solla_season_${u.id}`) || localStorage.getItem(`solla_season_guest`);
+  const cachedGuestSeason = localStorage.getItem(`solla_season_guest`);
+  if (cachedGuestSeason) {
+    // Copy guest season to user's ID
+    localStorage.setItem(`solla_season_${u.id}`, cachedGuestSeason);
+    localStorage.removeItem(`solla_season_guest`);
+  }
   if (cachedSeason) {
     try {
       const parsedSeason = JSON.parse(cachedSeason);
@@ -4253,7 +4260,7 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
             seasonData={seasonData}
             user={user}
             isGuest={isGuest}
-            onSignUp={() => update({ screen: "auth" })}
+            onSignUp={() => update({ screen: "auth", isGuest: false })}
             onOpenSheet={sheet => update({ activeSheet: sheet })}
             onUpgrade={() => update({ activeSheet: "paywall" })}
             onSignOut={handleSignOut}
@@ -4359,7 +4366,7 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
     onUpgrade={handleUpgrade}
     onClose={() => update({ activeSheet: null })}
     isGuest={state.isGuest}
-    onSignUp={() => { update({ activeSheet: null, screen: "auth" }); }}
+    onSignUp={() => { update({ activeSheet: null, screen: "auth", isGuest: false }); }}
   />
 )}
       </div>
