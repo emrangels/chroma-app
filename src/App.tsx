@@ -2230,7 +2230,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const canAccess = plan === "luxe";
 
   const [view, setView] = useState<"items" | "outfits" | "chat" | "plan">("items");
-const [weeklyPlan, setWeeklyPlan] = useState<{ day: string; coat: string | null; base: string; shoes: string; accessories: string; }[]>(() => {
+const [weeklyPlan, setWeeklyPlan] = useState<{ day: string; coat: string | null; base: string; shoes: string; accessories: string; locked: boolean; }[]>(() => {
   try {
     const saved = localStorage.getItem(`solla_weekly_plan_${user?.id}`);
     return saved ? JSON.parse(saved) : [];
@@ -2520,6 +2520,37 @@ const handleEditOutfit = async () => {
     }).catch(() => {});
   };
 
+  const regenerateDay = async (dayName: string) => {
+    if (!seasonData) return;
+    const wardrobeContext = items.filter(i => (i.verdict_v2 || (i.verdict ? "yes" : "no")) !== "no")
+      .map(i => `${i.name} (${i.category}${i.formality ? `, ${i.formality}` : ""})`).join(", ");
+    setWeeklyPlan(prev => prev.map(d => d.day === dayName ? { ...d, base: "Regenerating..." } : d));
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+        body: JSON.stringify({
+          type: "weather_outfit",
+          season: seasonData.season,
+          palette: (seasonData.palette?.best || []).map((c: PaletteColour) => c.name).slice(0, 4).join(", "),
+          temp: 18,
+          desc: "mild",
+          wardrobe: wardrobeContext,
+        }),
+      });
+      const data = await res.json();
+      if (data.outfit) {
+        try {
+          const parsed = JSON.parse(data.outfit);
+          setWeeklyPlan(prev => {
+            const updated = prev.map(d => d.day === dayName ? { ...d, coat: parsed.coat || null, base: parsed.base || d.base, shoes: parsed.shoes || d.shoes, accessories: parsed.accessories || d.accessories } : d);
+            localStorage.setItem(`solla_weekly_plan_${user?.id}`, JSON.stringify(updated));
+            return updated;
+          });
+        } catch {}
+      }
+    } catch {}
+  };
   const generateWeeklyPlan = async () => {
     if (!seasonData) return;
     setLoadingPlan(true);
@@ -2540,9 +2571,17 @@ const handleEditOutfit = async () => {
       });
       const data = await res.json();
       if (data.plan && Array.isArray(data.plan)) {
-        setWeeklyPlan(data.plan);
+        setWeeklyPlan(prev => {
+          const lockedDays = prev.filter(d => d.locked).map(d => d.day);
+          const merged = data.plan.map((d: { day: string; coat: string | null; base: string; shoes: string; accessories: string }) => {
+            const existing = prev.find(p => p.day === d.day);
+            if (existing?.locked) return existing;
+            return { ...d, locked: false };
+          });
+          localStorage.setItem(`solla_weekly_plan_${user?.id}`, JSON.stringify(merged));
+          return merged;
+        });
         setPlanGenerated(true);
-        localStorage.setItem(`solla_weekly_plan_${user?.id}`, JSON.stringify(data.plan));
       }
     } catch {}
     finally { setLoadingPlan(false); }
@@ -2835,27 +2874,52 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           {planGenerated && !loadingPlan && weeklyPlan.length > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 80 }}>
               {weeklyPlan.map((day, i) => (
-                <div key={i} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "14px 16px" }}>
-                  <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: DS.colors.accent }}>{day.day}</p>
+                <div key={i} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1.5px solid ${day.locked ? DS.colors.accent : DS.colors.border}`, padding: "14px 16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: day.locked ? DS.colors.accent : DS.colors.text }}>{day.day}{day.locked ? " 🔒" : ""}</p>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button onClick={() => {
+                        setWeeklyPlan(prev => {
+                          const updated = prev.map(d => d.day === day.day ? { ...d, locked: !d.locked } : d);
+                          localStorage.setItem(`solla_weekly_plan_${user?.id}`, JSON.stringify(updated));
+                          return updated;
+                        });
+                      }} style={{ fontSize: 11, color: day.locked ? DS.colors.accent : DS.colors.textFaint, fontWeight: 500, padding: "3px 8px", borderRadius: DS.radius.full, background: day.locked ? DS.colors.accentLight : DS.colors.surface }}>
+                        {day.locked ? "Locked" : "Lock"}
+                      </button>
+                      {!day.locked && (
+                        <button onClick={() => regenerateDay(day.day)} style={{ fontSize: 11, color: DS.colors.textMuted, fontWeight: 500, padding: "3px 8px", borderRadius: DS.radius.full, background: DS.colors.surface }}>
+                          Regenerate
+                        </button>
+                      )}
+                    </div>
+                  </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                    {day.coat && day.coat !== "null" && (
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.textFaint, minWidth: 80 }}>Coat</span>
-                        <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{day.coat}</span>
+                    {[
+                      { label: "Coat", value: day.coat, key: "coat" },
+                      { label: "Base", value: day.base, key: "base" },
+                      { label: "Shoes", value: day.shoes, key: "shoes" },
+                      { label: "Accessories", value: day.accessories, key: "accessories" },
+                    ].filter(f => f.value && f.value !== "null").map(field => (
+                      <div key={field.key} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.textFaint, minWidth: 80, paddingTop: 2 }}>{field.label}</span>
+                        {day.locked ? (
+                          <span style={{ fontSize: 13, color: DS.colors.textMuted, flex: 1 }}>{field.value}</span>
+                        ) : (
+                          <input
+                            value={field.value || ""}
+                            onChange={e => {
+                              setWeeklyPlan(prev => {
+                                const updated = prev.map(d => d.day === day.day ? { ...d, [field.key]: e.target.value } : d);
+                                localStorage.setItem(`solla_weekly_plan_${user?.id}`, JSON.stringify(updated));
+                                return updated;
+                              });
+                            }}
+                            style={{ flex: 1, fontSize: 13, color: DS.colors.text, border: "none", borderBottom: `1px solid ${DS.colors.border}`, outline: "none", background: "transparent", padding: "2px 0", fontFamily: DS.font }}
+                          />
+                        )}
                       </div>
-                    )}
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.textFaint, minWidth: 80 }}>Base</span>
-                      <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{day.base}</span>
-                    </div>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.textFaint, minWidth: 80 }}>Shoes</span>
-                      <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{day.shoes}</span>
-                    </div>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.textFaint, minWidth: 80 }}>Accessories</span>
-                      <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{day.accessories}</span>
-                    </div>
+                    ))}
                   </div>
                   <div style={{ display: "flex", gap: 12, marginTop: 10 }}>
                     <button onClick={() => { setView("chat"); setChatInput(`Can you help me style ${day.day}'s outfit? ${day.base}${day.coat ? `, ${day.coat}` : ""}, ${day.shoes}, ${day.accessories}`); }} style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 500 }}>
@@ -2864,6 +2928,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     <button onClick={async () => {
                       if (!user?.id) return;
                       const outfitName = `${day.day}'s outfit`;
+                      const description = `${day.coat ? day.coat + ", " : ""}${day.base}, ${day.shoes}, ${day.accessories}`;
                       const res = await fetch(`${SUPABASE_URL}/rest/v1/outfits`, {
                         method: "POST",
                         headers: { ...getAuthHeaders(), Prefer: "return=minimal" },
@@ -2881,7 +2946,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                         alert(`Saved "${outfitName}" to your outfits ✓`);
                       }
                     }} style={{ fontSize: 12, color: DS.colors.success, fontWeight: 500 }}>
-                      + Save as outfit
+                      + Save to outfits
                     </button>
                   </div>
                 </div>
