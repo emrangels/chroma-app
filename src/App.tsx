@@ -4018,6 +4018,7 @@ export default function App() {
         localStorage.removeItem("solla_token");
         localStorage.removeItem("solla_refresh");
         localStorage.removeItem("solla_user");
+        // Don't clear guest season data — it will be copied when they sign in
         update({ screen: "auth" });
         window.history.replaceState({}, "", "/");
         return;
@@ -4333,7 +4334,7 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
       <p style={{ fontSize: 14, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>{state.isGuest ? "Create a free account to save your colours, add wardrobe items and access your full colour guide. Your analysis is saved and ready." : "Your colour profile is ready. Now let's build your daily outfit engine — add your wardrobe, create outfits and never ask \"what do I wear?\" again."}</p>
       {state.isGuest ? (
         <>
-          <button onClick={() => { update({ activeSheet: null, screen: "auth", isGuest: false }); }} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 10 }}>Create free account</button>
+          <button onClick={() => { update({ activeSheet: null, screen: "auth" }); }} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 10 }}>Create free account</button>
           <button onClick={() => update({ activeSheet: null })} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Maybe later</button>
         </>
       ) : (
