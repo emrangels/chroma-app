@@ -3622,7 +3622,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
               <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20 }}>Add item</h2>
 
               {/* Photo upload */}
-              <div onClick={() => !itemPreviews.length && fileRef.current?.click()} style={{ borderRadius: DS.radius.lg, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, height: 160, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: itemPreviews.length ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 16 }}>
+              <div onClick={() => { if (!user || user.id === "guest") { onSignUp?.(); return; } if (!itemPreviews.length) fileRef.current?.click(); }} style={{ borderRadius: DS.radius.lg, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, height: 160, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: itemPreviews.length ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 16 }}>
                 {itemPreviews.length > 0 ? (
                   <div style={{ display: "flex", width: "100%", height: "100%" }}>
                     {itemPreviews.map((src, i) => (
@@ -3642,7 +3642,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                   </div>
                 )}
               </div>
-              <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={e => { if (e.target.files?.length) handleItemPhotos(e.target.files); }} />
+              <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={e => { if (e.target.files?.length) { if (!user || user.id === "guest") { onSignUp?.(); return; } handleItemPhotos(e.target.files); } }} />
 
               {/* Results — one card per item */}
               {itemResults.map((result, i) => (
