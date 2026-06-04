@@ -2824,11 +2824,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           )}
 
           {/* Add item button */}
-         <button onClick={() => {
-            if (isGuest) {
-              onSignUp?.();
-              return;
-            }
+         {!isGuest && <button onClick={() => {
             if (!seasonData) {
               alert("Complete your colour analysis first — tap the Season tab to get started.");
               return;
@@ -2840,7 +2836,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             setShowAddItem(true);
           }}  style={{ position: "fixed", bottom: 96, right: 20, width: 52, height: 52, borderRadius: DS.radius.full, background: DS.colors.accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: DS.shadow.lg }}>
             <Icon name="plus" size={24} color={DS.colors.white} />
-          </button>
+          </button>}
         </div>
       )}
 
