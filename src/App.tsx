@@ -4260,7 +4260,7 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
             seasonData={seasonData}
             user={user}
             isGuest={isGuest}
-            onSignUp={() => update({ screen: "auth", isGuest: false })}
+            onSignUp={() => update({ activeSheet: "welcome" as Sheet })}
             onOpenSheet={sheet => update({ activeSheet: sheet })}
             onUpgrade={() => update({ activeSheet: "paywall" })}
             onSignOut={handleSignOut}
@@ -4329,9 +4329,16 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
       <div style={{ width: 56, height: 56, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
         <Icon name="sparkles" size={24} color={DS.colors.accent} />
       </div>
-      <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>Your season is ready 🌸</h2>
-      <p style={{ fontSize: 14, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>Your colour profile is ready. Now let's build your daily outfit engine — add your wardrobe, create outfits and never ask "what do I wear?" again.</p>
-      <button onClick={() => update({ activeSheet: null, tourStep: 0 })} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Explore my colours</button>
+      <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>{state.isGuest ? "Save your colour profile 🌸" : "Your season is ready 🌸"}</h2>
+      <p style={{ fontSize: 14, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>{state.isGuest ? "Create a free account to save your colours, add wardrobe items and access your full colour guide. Your analysis is saved and ready." : "Your colour profile is ready. Now let's build your daily outfit engine — add your wardrobe, create outfits and never ask \"what do I wear?\" again."}</p>
+      {state.isGuest ? (
+        <>
+          <button onClick={() => { update({ activeSheet: null, screen: "auth", isGuest: false }); }} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 10 }}>Create free account</button>
+          <button onClick={() => update({ activeSheet: null })} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Maybe later</button>
+        </>
+      ) : (
+        <button onClick={() => update({ activeSheet: null, tourStep: 0 })} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Explore my colours</button>
+      )}
     </div>
   </div>
 )}
@@ -4366,7 +4373,7 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
     onUpgrade={handleUpgrade}
     onClose={() => update({ activeSheet: null })}
     isGuest={state.isGuest}
-    onSignUp={() => { update({ activeSheet: null, screen: "auth", isGuest: false }); }}
+    onSignUp={() => update({ activeSheet: "welcome" as Sheet })}
   />
 )}
       </div>
