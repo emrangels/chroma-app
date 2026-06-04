@@ -2230,9 +2230,18 @@ const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seaso
   const canAccess = plan === "luxe";
 
   const [view, setView] = useState<"items" | "outfits" | "chat" | "plan">("items");
-const [weeklyPlan, setWeeklyPlan] = useState<{ day: string; coat: string | null; base: string; shoes: string; accessories: string; }[]>([]);
+const [weeklyPlan, setWeeklyPlan] = useState<{ day: string; coat: string | null; base: string; shoes: string; accessories: string; }[]>(() => {
+  try {
+    const saved = localStorage.getItem(`solla_weekly_plan_${user?.id}`);
+    return saved ? JSON.parse(saved) : [];
+  } catch { return []; }
+});
 const [loadingPlan, setLoadingPlan] = useState(false);
-const [planGenerated, setPlanGenerated] = useState(false);
+const [planGenerated, setPlanGenerated] = useState(() => {
+  try {
+    return !!localStorage.getItem(`solla_weekly_plan_${user?.id}`);
+  } catch { return false; }
+});
   const [items, setItems] = useState<WardrobeItem[]>([]);
   const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [loading, setLoading] = useState(false);
@@ -2533,6 +2542,7 @@ const handleEditOutfit = async () => {
       if (data.plan && Array.isArray(data.plan)) {
         setWeeklyPlan(data.plan);
         setPlanGenerated(true);
+        localStorage.setItem(`solla_weekly_plan_${user?.id}`, JSON.stringify(data.plan));
       }
     } catch {}
     finally { setLoadingPlan(false); }
@@ -2847,9 +2857,33 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                       <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{day.accessories}</span>
                     </div>
                   </div>
-                  <button onClick={() => { setView("chat"); setChatInput(`Can you help me style ${day.day}'s outfit? ${day.base}${day.coat ? `, ${day.coat}` : ""}, ${day.shoes}, ${day.accessories}`); }} style={{ marginTop: 10, fontSize: 12, color: DS.colors.accent, fontWeight: 500 }}>
-                    Style with AI →
-                  </button>
+                  <div style={{ display: "flex", gap: 12, marginTop: 10 }}>
+                    <button onClick={() => { setView("chat"); setChatInput(`Can you help me style ${day.day}'s outfit? ${day.base}${day.coat ? `, ${day.coat}` : ""}, ${day.shoes}, ${day.accessories}`); }} style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 500 }}>
+                      Style with AI →
+                    </button>
+                    <button onClick={async () => {
+                      if (!user?.id) return;
+                      const outfitName = `${day.day}'s outfit`;
+                      const res = await fetch(`${SUPABASE_URL}/rest/v1/outfits`, {
+                        method: "POST",
+                        headers: { ...getAuthHeaders(), Prefer: "return=minimal" },
+                        body: JSON.stringify({
+                          user_id: user.id,
+                          name: outfitName,
+                          item_ids: [],
+                          overall_verdict: true,
+                          starred: false,
+                          category: "Casual",
+                        }),
+                      });
+                      if (res.ok) {
+                        await loadOutfits();
+                        alert(`Saved "${outfitName}" to your outfits ✓`);
+                      }
+                    }} style={{ fontSize: 12, color: DS.colors.success, fontWeight: 500 }}>
+                      + Save as outfit
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
