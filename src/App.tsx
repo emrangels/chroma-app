@@ -38,6 +38,11 @@ interface SeasonData {
   style: { silhouettes: string; patterns: string; fabrics: string; tip: string; };
   body_shape: string; daily_tip: string;
 }
+interface MakeupItem {
+  id: string; user_id: string; name: string; brand?: string; category: string;
+  shade_name?: string; hex: string; verdict_v2: "yes" | "neutral" | "no"; verdict: boolean;
+  tip?: string; image_url?: string; starred: boolean; created_at: string;
+}
 interface WardrobeItem {
   id: string; user_id: string; name: string; category: string;
   colour_name: string; hex: string; verdict: boolean; verdict_v2?: "yes" | "neutral" | "no"; tip: string;
@@ -54,7 +59,7 @@ interface ChatMessage {
 interface AppState {
   screen: Screen; activeTab: Tab; activeSheet: Sheet;
   user: User | null; isGuest: boolean; seasonData: SeasonData | null;
-  wardrobeItems: WardrobeItem[]; checkerMode: "single" | "swatch"; onboardingIndex: number;
+  wardrobeItems: WardrobeItem[]; checkerMode: "single" | "outfit"; onboardingIndex: number;
   tourStep: number | null;
 showDay3Prompt: boolean;
 }
@@ -1593,7 +1598,6 @@ interface CheckResult {
 const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | null; user: User | null; onUpgrade: () => void; }) => {
   const [mode, setMode] = useState<"single" | "outfit">("single");
   const [previews, setPreviews] = useState<string[]>([]);
-  const [swatchLabel, setSwatchLabel] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<CheckResult[]>([]);
   const [error, setError] = useState("");
@@ -1723,7 +1727,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
         const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
           method: "POST",
           headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
-          body: JSON.stringify({ type: "check_item", image: base64, season: seasonData.season, mode, swatchLabel: swatchLabel || undefined }),
+         body: JSON.stringify({ type: "check_item", image: base64, season: seasonData.season, mode }),
         });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
@@ -1738,7 +1742,6 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
     setPreviews([]);
     setResults([]);
     setError("");
-    setSwatchLabel("");
     if (fileRef.current) fileRef.current.value = "";
   };
 
@@ -1777,16 +1780,6 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
           {mode === "single" && "Upload one or more items at once. For best results, photograph in natural light against a neutral background — results may vary with filters or poor lighting."}
           {mode === "outfit" && "Upload a full outfit photo for an overall verdict and per-piece breakdown. Natural light gives the most accurate colour reading."}
         </p>
-
-        {/* Swatch label */}
-        {mode === "swatch" && (
-          <input
-            value={swatchLabel}
-            onChange={e => setSwatchLabel(e.target.value)}
-            placeholder="What are these swatches? (e.g. lipstick shades)"
-            style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 16, fontFamily: DS.font }}
-          />
-        )}
 
         {/* Upload area */}
         {results.length === 0 && (
@@ -3250,15 +3243,14 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     type: "check_item",
                     image: base64,
                     season: seasonData.season,
-                    mode: "swatch",
-                    swatchLabel: `${makeupProductCategory} product — ${makeupProductCategory === "Foundation" || makeupProductCategory === "Concealer" || makeupProductCategory === "Bronzer" ? "complexion product, consider how it relates to skin tone not just season colour" : "colour product, check against season palette directly"}`,
+                    mode: "single",
                   };
                 } else {
                   body = {
                     type: "makeup_check_product",
                     season: seasonData.season,
                     products: [{ name: makeupProductName.trim(), category: makeupProductCategory }],
-                    foundation: makeupFoundation || null,
+                    foundation: makeupFoundationShades.filter(s => s.trim()).join(", ") || null,
                   };
                 }
                 const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
@@ -3270,7 +3262,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                 if (makeupCheckMode === "upload") {
                   setMakeupCheckResult(data);
                 } else if (data.results) {
-                  setMakeupCheckResult({ mode: "swatch", items: data.results.map((r: any) => ({ colour_name: r.shade || r.name, hex: r.hex || "#C4A882", verdict: r.verdict !== false, verdict_v2: r.verdict_v2 || "yes", reason: r.reason || "", tip: r.tip || "" })) });
+                  setMakeupCheckResult({ mode: "single", items: data.results.map((r: any) => ({ colour_name: r.shade || r.name, hex: r.hex || "#C4A882", verdict: r.verdict !== false, verdict_v2: r.verdict_v2 || "yes", reason: r.reason || "", tip: r.tip || "" })) });
                 }
               } catch {}
               finally { setMakeupChecking(false); }
@@ -3887,7 +3879,7 @@ const PlaceholderTab = ({ tab, isGuest, onSignUp }: { tab: Tab; isGuest: boolean
   const locked = isGuest && tab !== "home";
   if (locked) {
     const tabInfo: Record<string, { icon: string; title: string; body: string }> = {
-      checker: { icon: "image", title: "Check your colours", body: "Check any item, outfit or swatches against your season." },
+      checker: { icon: "image", title: "Check your colours", body: "Check any item or outfit against your season. Check makeup products in the Makeup tab." },
       wardrobe: { icon: "hanger", title: "Your daily outfit engine", body: "Add your clothes, get daily outfit suggestions and never ask 'what do I wear?' again." },
       me: { icon: "user", title: "Your profile", body: "Manage your profile, plan and preferences." },
     };
