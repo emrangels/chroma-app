@@ -2908,13 +2908,13 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {(() => {
                         const planText = `${day.coat || ""} ${day.base} ${day.shoes} ${day.accessories}`.toLowerCase();
-                        const selectedIds = planSelectedItems[day.day] || [];
-                        const autoMatched = items.filter(item => {
-                          const itemText = `${item.name} ${item.colour_name} ${item.category}`.toLowerCase();
-                          return itemText.split(" ").some(word => word.length > 3 && planText.includes(word));
-                        }).map(i => i.id);
-                        const allIds = selectedIds.length > 0 ? [...new Set([...selectedIds, ...autoMatched])] : autoMatched;
-                        const matchedItems = items.filter(item => allIds.includes(item.id));
+                        const selectedIds = planSelectedItems[day.day];
+                        const matchedItems = selectedIds
+                          ? items.filter(item => selectedIds.includes(item.id))
+                          : items.filter(item => {
+                              const itemText = `${item.name} ${item.colour_name} ${item.category}`.toLowerCase();
+                              return itemText.split(" ").some(word => word.length > 3 && planText.includes(word));
+                            });
                         return matchedItems.length > 0 ? (
                           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                             {matchedItems.map(item => (
