@@ -1777,8 +1777,13 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
 
         {/* Mode description */}
         <p style={{ fontSize: 13, color: DS.colors.textFaint, marginBottom: 16, lineHeight: 1.5 }}>
-          {mode === "single" && "Upload one or more items at once. For best results, photograph in natural light against a neutral background — results may vary with filters or poor lighting."}
-          {mode === "outfit" && "Upload a full outfit photo for an overall verdict and per-piece breakdown. Natural light gives the most accurate colour reading."}
+          {mode === "single" && (
+            <div style={{ marginBottom: 8 }}>
+              <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, margin: "0 0 6px" }}>Upload a clear photo in natural light against a plain background. Photograph your actual garment — not a website product image — for the most accurate result.</p>
+              <p style={{ fontSize: 12, color: "#D97706", margin: 0, lineHeight: 1.5 }}>Tip: sales photography is often colour-corrected. Your own photo in daylight gives the best reading.</p>
+            </div>
+          )}
+          {mode === "outfit" && "Upload a full outfit photo for an overall verdict and per-piece breakdown. Photograph in natural light for the most accurate colour reading."}
         </p>
 
         {/* Upload area */}
@@ -3092,61 +3097,44 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     </button>
                   )}
                   <button onClick={async () => {
-                    if (!seasonData || !user?.id) return;
+                    if (!user?.id) return;
                     setMakeupLoading(true);
                     const token = localStorage.getItem("solla_token");
                     const allFoundations = makeupFoundationShades.filter(s => s.trim());
                     const allConcealers = makeupConcealerShades.filter(s => s.trim());
+                    // Save as calibration data — no verdict, these inform future checks
                     const products = [
                       ...allFoundations.map(s => ({ name: s, category: "Foundation" })),
                       ...allConcealers.map(s => ({ name: s, category: "Concealer" })),
                     ];
-                    if (products.length > 0) {
-                      try {
-                        const undertone = (seasonData as any).colour_profile?.undertone || "";
-                        const depth = (seasonData as any).colour_profile?.depth || "";
-                        const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
+                    try {
+                      for (const product of products) {
+                        await fetch(`${SUPABASE_URL}/rest/v1/makeup_items`, {
                           method: "POST",
-                          headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+                          headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token || SUPABASE_JWT_KEY}`, Prefer: "return=minimal" },
                           body: JSON.stringify({
-                            type: "makeup_check_product",
-                            season: seasonData.season,
-                            subseason: seasonData.subseason,
-                            undertone,
-                            depth,
-                            products,
-                            context: `User provided ${allFoundations.length} foundation shade${allFoundations.length !== 1 ? "s" : ""} to help triangulate their skin tone. Assess each individually and note if any are better or worse matches than others.`,
+                            user_id: user.id,
+                            name: product.name,
+                            brand: null,
+                            category: product.category,
+                            shade_name: null,
+                            hex: "#C4A882",
+                            verdict_v2: "neutral",
+                            verdict: true,
+                            tip: "Added as calibration — check this product to get your season verdict.",
+                            starred: false,
                           }),
                         });
-                        const data = await res.json();
-                        if (data.results && Array.isArray(data.results)) {
-                          for (const result of data.results) {
-                            await fetch(`${SUPABASE_URL}/rest/v1/makeup_items`, {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token || SUPABASE_JWT_KEY}`, Prefer: "return=minimal" },
-                              body: JSON.stringify({
-                                user_id: user.id,
-                                name: result.name,
-                                brand: result.brand || null,
-                                category: result.category,
-                                shade_name: result.shade || null,
-                                hex: result.hex || "#C4A882",
-                                verdict_v2: result.verdict_v2 || "yes",
-                                verdict: result.verdict !== false,
-                                tip: result.tip || null,
-                                starred: false,
-                              }),
-                            });
-                          }
-                          await loadMakeupItems();
-                        }
-                      } catch {}
-                      finally { setMakeupLoading(false); }
-                    } else { setMakeupLoading(false); }
+                      }
+                      await loadMakeupItems();
+                    } catch {}
+                    finally { setMakeupLoading(false); }
                     localStorage.setItem(`solla_makeup_onboarded_${user?.id}`, "true");
+                    // Save foundation shades for use in future checks
+                    localStorage.setItem(`solla_foundation_shades_${user?.id}`, allFoundations.join("|"));
                     setMakeupOnboarded(true);
                   }} style={{ width: "100%", padding: "12px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 14, fontWeight: 600, marginTop: 4 }}>
-                    {makeupLoading ? "Checking your shades..." : "Save to my kit"}
+                    {makeupLoading ? "Saving..." : "Save to my kit"}
                   </button>
                   <button onClick={() => setMakeupOnboardingStep(0)} style={{ width: "100%", padding: "10px", fontSize: 13, color: DS.colors.textMuted, marginTop: 6 }}>← Back</button>
                 </div>
@@ -3178,10 +3166,12 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             {makeupCheckMode === "upload" && (
               <>
                 <div style={{ background: DS.colors.surface, borderRadius: DS.radius.md, padding: "10px 12px", marginBottom: 10 }}>
-                  <p style={{ margin: "0 0 4px", fontSize: 12, fontWeight: 600, color: DS.colors.textMuted }}>For best results:</p>
-                  <p style={{ margin: "0 0 2px", fontSize: 12, color: DS.colors.textFaint }}>· Swatch on inner arm in natural light works best for lip, blush and eye</p>
-                  <p style={{ margin: "0 0 2px", fontSize: 12, color: DS.colors.textFaint }}>· For foundation/concealer, enter the shade name instead — it's more accurate</p>
-                  <p style={{ margin: 0, fontSize: 12, color: DS.colors.textFaint }}>· Clean background, no filters, no flash</p>
+                  <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 600, color: DS.colors.textMuted }}>For best results:</p>
+                  <p style={{ margin: "0 0 2px", fontSize: 12, color: DS.colors.textFaint }}>· Swatch on inner arm in natural light — best for lip, blush and eye</p>
+                  <p style={{ margin: "0 0 2px", fontSize: 12, color: DS.colors.textFaint }}>· Photograph your actual garment, not a product image from a website</p>
+                  <p style={{ margin: "0 0 2px", fontSize: 12, color: DS.colors.textFaint }}>· Natural light only — no flash, no filters, no artificial lighting</p>
+                  <p style={{ margin: "0 0 6px", fontSize: 12, color: DS.colors.textFaint }}>· White or neutral background where possible</p>
+                  <p style={{ margin: 0, fontSize: 12, color: "#D97706", fontWeight: 500 }}>Foundation and concealer: use "Enter name" for a more accurate result — photo accuracy for complexion products is limited by lighting variation.</p>
                 </div>
                 <div onClick={() => !makeupPreview && makeupFileRef.current?.click()} style={{ borderRadius: DS.radius.lg, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, height: 120, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: makeupPreview ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 10 }}>
                   {makeupPreview ? (
@@ -3246,11 +3236,15 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     mode: "single",
                   };
                 } else {
-                  body = {
+                  const savedFoundations = localStorage.getItem(`solla_foundation_shades_${user?.id}`) || "";
+                body = {
                     type: "makeup_check_product",
                     season: seasonData.season,
+                    subseason: seasonData.subseason,
+                    undertone: (seasonData as any).colour_profile?.undertone || "",
+                    depth: (seasonData as any).colour_profile?.depth || "",
                     products: [{ name: makeupProductName.trim(), category: makeupProductCategory }],
-                    foundation: makeupFoundationShades.filter(s => s.trim()).join(", ") || null,
+                    foundation: savedFoundations || makeupFoundationShades.filter(s => s.trim()).join(", ") || null,
                   };
                 }
                 const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
@@ -3284,6 +3278,9 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                         <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>{item.colour_name}</p>
                         <span style={{ fontSize: 11, fontWeight: 600, color: item.verdict_v2 === "yes" ? DS.colors.success : item.verdict_v2 === "neutral" ? "#D97706" : DS.colors.danger }}>
                           {item.verdict_v2 === "yes" ? "✓ Suits your season" : item.verdict_v2 === "neutral" ? "~ Works with care" : "✗ Doesn't suit your season"}
+                        </span>
+                        <span style={{ fontSize: 10, color: DS.colors.textFaint, background: DS.colors.surface, padding: "1px 6px", borderRadius: DS.radius.full, display: "block", marginTop: 3 }}>
+                          {makeupCheckMode === "upload" ? "Photo check — result may vary with lighting" : "Name check — high confidence"}
                         </span>
                       </div>
                     </div>
