@@ -1591,7 +1591,7 @@ interface CheckResult {
 }
 
 const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | null; user: User | null; onUpgrade: () => void; }) => {
-  const [mode, setMode] = useState<"single" | "outfit" | "swatch">("single");
+  const [mode, setMode] = useState<"single" | "outfit">("single");
   const [previews, setPreviews] = useState<string[]>([]);
   const [swatchLabel, setSwatchLabel] = useState("");
   const [loading, setLoading] = useState(false);
@@ -1765,7 +1765,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
       <div style={{ padding: "20px 16px 0" }}>
         {/* Mode switcher */}
         <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, marginBottom: 20, gap: 4 }}>
-          {(["single", "outfit", "swatch"] as const).map(m => (
+          {(["single", "outfit"] as const).map(m => (
             <button key={m} onClick={() => { setMode(m); reset(); }} style={{ flex: 1, padding: "8px 4px", borderRadius: DS.radius.md, fontSize: 13, fontWeight: mode === m ? 600 : 400, color: mode === m ? DS.colors.white : DS.colors.textMuted, background: mode === m ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
               {m.charAt(0).toUpperCase() + m.slice(1)}
             </button>
@@ -1776,7 +1776,6 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
         <p style={{ fontSize: 13, color: DS.colors.textFaint, marginBottom: 16, lineHeight: 1.5 }}>
           {mode === "single" && "Upload one or more items at once. For best results, photograph in natural light against a neutral background — results may vary with filters or poor lighting."}
           {mode === "outfit" && "Upload a full outfit photo for an overall verdict and per-piece breakdown. Natural light gives the most accurate colour reading."}
-          {mode === "swatch" && "Upload a photo of your swatches in natural light (e.g. lipsticks swatched on your arm). The clearer the photo, the more precise each verdict will be."}
         </p>
 
         {/* Swatch label */}
@@ -2266,8 +2265,8 @@ const [planGenerated, setPlanGenerated] = useState(() => {
   const [makeupLoading, setMakeupLoading] = useState(false);
   const [makeupOnboarded, setMakeupOnboarded] = useState(() => !!localStorage.getItem(`solla_makeup_onboarded_${user?.id}`));
   const [makeupOnboardingStep, setMakeupOnboardingStep] = useState(0);
-  const [makeupFoundation, setMakeupFoundation] = useState("");
-  const [makeupConcealer, setMakeupConcealer] = useState("");
+  const [makeupFoundationShades, setMakeupFoundationShades] = useState<string[]>([""]);
+  const [makeupConcealerShades, setMakeupConcealerShades] = useState<string[]>([""]);
   const [makeupFilterCategory, setMakeupFilterCategory] = useState("All");
   const [makeupCheckMode, setMakeupCheckMode] = useState<"upload" | "name">("upload");
   const [makeupProductName, setMakeupProductName] = useState("");
@@ -3042,69 +3041,121 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           {!makeupOnboarded && (
             <div style={{ background: DS.colors.accentLight, borderRadius: DS.radius.lg, padding: "20px", marginBottom: 16 }}>
               <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 700, color: DS.colors.text }}>Set up your makeup profile</p>
-              <p style={{ margin: "0 0 16px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>Tell us what you currently wear and Solla will check if it suits your season — and help you find better alternatives.</p>
+              <p style={{ margin: "0 0 16px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>Tell us what foundation and concealer shades you currently use — even if you're not sure they suit you. The more shades you give us, the better we can triangulate your skin tone and season match.</p>
+
               {makeupOnboardingStep === 0 && (
                 <div>
-                  <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 600, color: DS.colors.text }}>What foundation do you currently wear?</p>
-                  <p style={{ margin: "0 0 8px", fontSize: 12, color: DS.colors.textFaint }}>e.g. "MAC Studio Fix NC15" or "Fenty Beauty 130W"</p>
-                  <input value={makeupFoundation} onChange={e => setMakeupFoundation(e.target.value)} placeholder="Brand + shade name" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 10, fontFamily: DS.font }} />
-                  <div style={{ display: "flex", gap: 8 }}>
+                  <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 600, color: DS.colors.text }}>Foundation shades you wear</p>
+                  <p style={{ margin: "0 0 10px", fontSize: 12, color: DS.colors.textFaint }}>Include brand and shade name — e.g. "MAC Studio Fix NC15", "Fenty 130N". Add multiple if you use more than one or have tried a few.</p>
+                  {makeupFoundationShades.map((shade, i) => (
+                    <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                      <input
+                        value={shade}
+                        onChange={e => setMakeupFoundationShades(prev => prev.map((s, idx) => idx === i ? e.target.value : s))}
+                        placeholder={i === 0 ? "e.g. MAC Studio Fix NC15" : "Add another shade..."}
+                        style={{ flex: 1, padding: "10px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", fontFamily: DS.font }}
+                      />
+                      {i > 0 && (
+                        <button onClick={() => setMakeupFoundationShades(prev => prev.filter((_, idx) => idx !== i))} style={{ padding: "10px", color: DS.colors.textFaint }}>
+                          <Icon name="x" size={14} color={DS.colors.textFaint} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  {makeupFoundationShades.length < 4 && (
+                    <button onClick={() => setMakeupFoundationShades(prev => [...prev, ""])} style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 500, marginBottom: 14 }}>
+                      + Add another foundation shade
+                    </button>
+                  )}
+                  <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
                     <button onClick={() => setMakeupOnboardingStep(1)} style={{ flex: 1, padding: "12px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 14, fontWeight: 600 }}>Next</button>
                     <button onClick={() => { localStorage.setItem(`solla_makeup_onboarded_${user?.id}`, "true"); setMakeupOnboarded(true); }} style={{ padding: "12px 16px", borderRadius: DS.radius.lg, background: DS.colors.surface, color: DS.colors.textMuted, fontSize: 14 }}>Skip</button>
                   </div>
                 </div>
               )}
+
               {makeupOnboardingStep === 1 && (
                 <div>
-                  <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 600, color: DS.colors.text }}>What concealer do you use?</p>
-                  <p style={{ margin: "0 0 8px", fontSize: 12, color: DS.colors.textFaint }}>e.g. "NARS Radiant Creamy Concealer Vanilla"</p>
-                  <input value={makeupConcealer} onChange={e => setMakeupConcealer(e.target.value)} placeholder="Brand + shade name (optional)" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 10, fontFamily: DS.font }} />
+                  <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 600, color: DS.colors.text }}>Concealer shades you wear</p>
+                  <p style={{ margin: "0 0 10px", fontSize: 12, color: DS.colors.textFaint }}>e.g. "NARS Radiant Creamy Vanilla", "Maybelline Fit Me 110". Optional but helps us get your undertone right.</p>
+                  {makeupConcealerShades.map((shade, i) => (
+                    <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                      <input
+                        value={shade}
+                        onChange={e => setMakeupConcealerShades(prev => prev.map((s, idx) => idx === i ? e.target.value : s))}
+                        placeholder={i === 0 ? "e.g. NARS Radiant Creamy Vanilla" : "Add another shade..."}
+                        style={{ flex: 1, padding: "10px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", fontFamily: DS.font }}
+                      />
+                      {i > 0 && (
+                        <button onClick={() => setMakeupConcealerShades(prev => prev.filter((_, idx) => idx !== i))} style={{ padding: "10px", color: DS.colors.textFaint }}>
+                          <Icon name="x" size={14} color={DS.colors.textFaint} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  {makeupConcealerShades.length < 4 && (
+                    <button onClick={() => setMakeupConcealerShades(prev => [...prev, ""])} style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 500, marginBottom: 14 }}>
+                      + Add another concealer shade
+                    </button>
+                  )}
                   <button onClick={async () => {
                     if (!seasonData || !user?.id) return;
                     setMakeupLoading(true);
                     const token = localStorage.getItem("solla_token");
-                    try {
-                      const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
-                        body: JSON.stringify({
-                          type: "makeup_check_product",
-                          season: seasonData.season,
-                          products: [
-                            makeupFoundation ? { name: makeupFoundation, category: "Foundation" } : null,
-                            makeupConcealer ? { name: makeupConcealer, category: "Concealer" } : null,
-                          ].filter(Boolean),
-                        }),
-                      });
-                      const data = await res.json();
-                      if (data.results && Array.isArray(data.results)) {
-                        for (const result of data.results) {
-                          await fetch(`${SUPABASE_URL}/rest/v1/makeup_items`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token || SUPABASE_JWT_KEY}`, Prefer: "return=minimal" },
-                            body: JSON.stringify({
-                              user_id: user.id,
-                              name: result.name,
-                              brand: result.brand || null,
-                              category: result.category,
-                              shade_name: result.shade || null,
-                              hex: result.hex || "#C4A882",
-                              verdict_v2: result.verdict_v2 || "yes",
-                              verdict: result.verdict !== false,
-                              tip: result.tip || null,
-                              starred: false,
-                            }),
-                          });
+                    const allFoundations = makeupFoundationShades.filter(s => s.trim());
+                    const allConcealers = makeupConcealerShades.filter(s => s.trim());
+                    const products = [
+                      ...allFoundations.map(s => ({ name: s, category: "Foundation" })),
+                      ...allConcealers.map(s => ({ name: s, category: "Concealer" })),
+                    ];
+                    if (products.length > 0) {
+                      try {
+                        const undertone = (seasonData as any).colour_profile?.undertone || "";
+                        const depth = (seasonData as any).colour_profile?.depth || "";
+                        const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+                          body: JSON.stringify({
+                            type: "makeup_check_product",
+                            season: seasonData.season,
+                            subseason: seasonData.subseason,
+                            undertone,
+                            depth,
+                            products,
+                            context: `User provided ${allFoundations.length} foundation shade${allFoundations.length !== 1 ? "s" : ""} to help triangulate their skin tone. Assess each individually and note if any are better or worse matches than others.`,
+                          }),
+                        });
+                        const data = await res.json();
+                        if (data.results && Array.isArray(data.results)) {
+                          for (const result of data.results) {
+                            await fetch(`${SUPABASE_URL}/rest/v1/makeup_items`, {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token || SUPABASE_JWT_KEY}`, Prefer: "return=minimal" },
+                              body: JSON.stringify({
+                                user_id: user.id,
+                                name: result.name,
+                                brand: result.brand || null,
+                                category: result.category,
+                                shade_name: result.shade || null,
+                                hex: result.hex || "#C4A882",
+                                verdict_v2: result.verdict_v2 || "yes",
+                                verdict: result.verdict !== false,
+                                tip: result.tip || null,
+                                starred: false,
+                              }),
+                            });
+                          }
+                          await loadMakeupItems();
                         }
-                        await loadMakeupItems();
-                      }
-                    } catch {}
-                    finally { setMakeupLoading(false); }
+                      } catch {}
+                      finally { setMakeupLoading(false); }
+                    } else { setMakeupLoading(false); }
                     localStorage.setItem(`solla_makeup_onboarded_${user?.id}`, "true");
                     setMakeupOnboarded(true);
-                  }} style={{ width: "100%", padding: "12px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 14, fontWeight: 600 }}>
-                    {makeupLoading ? "Checking your products..." : "Save to my kit"}
+                  }} style={{ width: "100%", padding: "12px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 14, fontWeight: 600, marginTop: 4 }}>
+                    {makeupLoading ? "Checking your shades..." : "Save to my kit"}
                   </button>
+                  <button onClick={() => setMakeupOnboardingStep(0)} style={{ width: "100%", padding: "10px", fontSize: 13, color: DS.colors.textMuted, marginTop: 6 }}>← Back</button>
                 </div>
               )}
             </div>
@@ -3116,7 +3167,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.md, padding: 3, gap: 3, marginBottom: 12 }}>
               {(["upload", "name"] as const).map(m => (
                 <button key={m} onClick={() => { setMakeupCheckMode(m); setMakeupCheckResult(null); setMakeupPreview(null); }} style={{ flex: 1, padding: "7px", borderRadius: DS.radius.sm, fontSize: 12, fontWeight: makeupCheckMode === m ? 600 : 400, color: makeupCheckMode === m ? DS.colors.white : DS.colors.textMuted, background: makeupCheckMode === m ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
-                  {m === "upload" ? "📷 Upload photo" : "✏️ Enter name"}
+                  {m === "upload" ? "Upload photo" : "Enter name"}
                 </button>
               ))}
             </div>
@@ -3133,6 +3184,12 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
 
             {makeupCheckMode === "upload" && (
               <>
+                <div style={{ background: DS.colors.surface, borderRadius: DS.radius.md, padding: "10px 12px", marginBottom: 10 }}>
+                  <p style={{ margin: "0 0 4px", fontSize: 12, fontWeight: 600, color: DS.colors.textMuted }}>For best results:</p>
+                  <p style={{ margin: "0 0 2px", fontSize: 12, color: DS.colors.textFaint }}>· Swatch on inner arm in natural light works best for lip, blush and eye</p>
+                  <p style={{ margin: "0 0 2px", fontSize: 12, color: DS.colors.textFaint }}>· For foundation/concealer, enter the shade name instead — it's more accurate</p>
+                  <p style={{ margin: 0, fontSize: 12, color: DS.colors.textFaint }}>· Clean background, no filters, no flash</p>
+                </div>
                 <div onClick={() => !makeupPreview && makeupFileRef.current?.click()} style={{ borderRadius: DS.radius.lg, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, height: 120, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: makeupPreview ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 10 }}>
                   {makeupPreview ? (
                     <>
@@ -3144,8 +3201,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                   ) : (
                     <>
                       <Icon name="camera" size={20} color={DS.colors.accent} />
-                      <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 6 }}>Upload product photo or swatch</p>
-                      <p style={{ fontSize: 11, color: DS.colors.textFaint, marginTop: 2 }}>Photo of product, swatch on skin, or both</p>
+                      <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 6 }}>Tap to upload</p>
                     </>
                   )}
                 </div>
@@ -3225,6 +3281,9 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             {/* Check results */}
             {makeupCheckResult && (
               <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+                <button onClick={() => { setMakeupCheckResult(null); setMakeupPreview(null); setMakeupProductName(""); if (makeupFileRef.current) makeupFileRef.current.value = ""; }} style={{ padding: "8px 16px", borderRadius: DS.radius.full, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, fontSize: 12, color: DS.colors.textMuted, fontWeight: 500, alignSelf: "flex-start" }}>
+                  ← Check another
+                </button>
                 {makeupCheckResult.items.map((item, i) => (
                   <div key={i} style={{ padding: "12px 14px", borderRadius: DS.radius.md, border: `1px solid ${DS.colors.border}`, background: DS.colors.bg }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
