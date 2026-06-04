@@ -2909,12 +2909,12 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                       {(() => {
                         const planText = `${day.coat || ""} ${day.base} ${day.shoes} ${day.accessories}`.toLowerCase();
                         const selectedIds = planSelectedItems[day.day] || [];
-                        const matchedItems = selectedIds.length > 0
-                          ? items.filter(item => selectedIds.includes(item.id))
-                          : items.filter(item => {
-                              const itemText = `${item.name} ${item.colour_name} ${item.category}`.toLowerCase();
-                              return itemText.split(" ").some(word => word.length > 3 && planText.includes(word));
-                            });
+                        const autoMatched = items.filter(item => {
+                          const itemText = `${item.name} ${item.colour_name} ${item.category}`.toLowerCase();
+                          return itemText.split(" ").some(word => word.length > 3 && planText.includes(word));
+                        }).map(i => i.id);
+                        const allIds = selectedIds.length > 0 ? [...new Set([...selectedIds, ...autoMatched])] : autoMatched;
+                        const matchedItems = items.filter(item => allIds.includes(item.id));
                         return matchedItems.length > 0 ? (
                           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                             {matchedItems.map(item => (
@@ -2972,7 +2972,19 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                   )}
                   <div style={{ display: "flex", gap: 12, marginTop: 10, flexWrap: "wrap" }}>
                     {!day.locked && (
-                      <button onClick={() => setPlanItemSelector(day.day)} style={{ fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>
+                      <button onClick={() => {
+                        if (!planSelectedItems[day.day]) {
+                          const planText = `${day.coat || ""} ${day.base} ${day.shoes} ${day.accessories}`.toLowerCase();
+                          const autoMatched = items.filter(item => {
+                            const itemText = `${item.name} ${item.colour_name} ${item.category}`.toLowerCase();
+                            return itemText.split(" ").some(word => word.length > 3 && planText.includes(word));
+                          }).map(i => i.id);
+                          if (autoMatched.length > 0) {
+                            setPlanSelectedItems(prev => ({ ...prev, [day.day]: autoMatched }));
+                          }
+                        }
+                        setPlanItemSelector(day.day);
+                      }} style={{ fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>
                         + Select items
                       </button>
                     )}
