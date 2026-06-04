@@ -2494,7 +2494,7 @@ const handleDeleteOutfit = async (id: string) => {
     finally { setLoading(false); }
   };
 const handleEditOutfit = async () => {
-    if (!editingOutfit || !editOutfitName.trim() || editOutfitItemIds.length < 2) return;
+    if (!editingOutfit || !editOutfitName.trim()) return;
     setLoading(true);
     try {
       const outfitItems = items.filter(i => editOutfitItemIds.includes(i.id));
@@ -3067,7 +3067,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                   );
                 })}
               </div>
-              <button onClick={handleEditOutfit} disabled={!editOutfitName.trim() || editOutfitItemIds.length < 2 || loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: !editOutfitName.trim() || editOutfitItemIds.length < 2 ? DS.colors.border : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>
+              <button onClick={handleEditOutfit} disabled={!editOutfitName.trim() || loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: !editOutfitName.trim() ? DS.colors.border : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>
                 {loading ? "Saving..." : "Save changes"}
               </button>
             </div>
