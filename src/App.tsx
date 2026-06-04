@@ -2222,7 +2222,7 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
     </div>
   );
 };
-const WardrobeTab = ({ user, seasonData, onUpgrade, onSignUp }: { user: User | null; seasonData: SeasonData | null; onUpgrade: () => void; onSignUp?: () => void; }) => {
+const WardrobeTab = ({ user, seasonData, onUpgrade, onSignUp, isGuest }: { user: User | null; seasonData: SeasonData | null; onUpgrade: () => void; onSignUp?: () => void; isGuest?: boolean; }) => {
   const plan = user?.plan || "free";
   const canAccess = true;
   const freeItemLimit = 3;
@@ -2671,6 +2671,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
         <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, gap: 4 }}>
           {(["items", "outfits", "plan", "makeup", "chat"] as const).map(v => (
             <button key={v} onClick={() => {
+              if (isGuest && v !== "items") { onSignUp?.(); return; }
               if (isFreePlan && (v === "outfits" || v === "plan" || v === "chat")) { onUpgrade(); return; }
               setView(v);
             }} style={{ flex: 1, padding: "6px 2px", borderRadius: DS.radius.md, fontSize: 12, fontWeight: view === v ? 600 : 400, color: view === v ? DS.colors.white : DS.colors.textMuted, background: view === v ? DS.colors.accent : "transparent", transition: "all 0.2s", position: "relative" }}>
@@ -2688,7 +2689,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
   <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
 
     {/* Guest prompt */}
-        {(!user || user.id === "guest") && (
+        {isGuest && (
           <div style={{ margin: "0 16px 12px", padding: "16px", background: DS.colors.accentLight, borderRadius: DS.radius.lg, textAlign: "center" }}>
             <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 600, color: DS.colors.text }}>Save your wardrobe</p>
             <p style={{ margin: "0 0 12px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>Create a free account to save up to 3 items and check if they suit your {seasonData?.season} season.</p>
@@ -2824,7 +2825,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
 
           {/* Add item button */}
          <button onClick={() => {
-            if (!user || user.id === "guest") {
+            if (isGuest) {
               onSignUp?.();
               return;
             }
@@ -3622,7 +3623,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
               <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20 }}>Add item</h2>
 
               {/* Photo upload */}
-              <div onClick={() => { if (!user || user.id === "guest") { onSignUp?.(); return; } if (!itemPreviews.length) fileRef.current?.click(); }} style={{ borderRadius: DS.radius.lg, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, height: 160, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: itemPreviews.length ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 16 }}>
+              <div onClick={() => { if (isGuest) { onSignUp?.(); return; } if (!itemPreviews.length) fileRef.current?.click(); }} style={{ borderRadius: DS.radius.lg, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, height: 160, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: itemPreviews.length ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 16 }}>
                 {itemPreviews.length > 0 ? (
                   <div style={{ display: "flex", width: "100%", height: "100%" }}>
                     {itemPreviews.map((src, i) => (
@@ -3642,7 +3643,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                   </div>
                 )}
               </div>
-              <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={e => { if (e.target.files?.length) { if (!user || user.id === "guest") { onSignUp?.(); return; } handleItemPhotos(e.target.files); } }} />
+              <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={e => { if (e.target.files?.length) { if (isGuest) { onSignUp?.(); return; } handleItemPhotos(e.target.files); } }}/>
 
               {/* Results — one card per item */}
               {itemResults.map((result, i) => (
@@ -3958,7 +3959,7 @@ const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, 
       ) : activeTab === "me" ? (
         <MeTab user={user} seasonData={seasonData} onSignOut={onSignOut} onReanalyse={onReanalyse} onUpgrade={onUpgrade} onOpenFaq={(sheet) => onOpenSheet(sheet || "faq")} />
       ) : activeTab === "wardrobe" ? (
-        <WardrobeTab user={user} seasonData={seasonData} onUpgrade={onUpgrade} onSignUp={onSignUp} />
+        <WardrobeTab user={user} seasonData={seasonData} onUpgrade={onUpgrade} onSignUp={onSignUp} isGuest={isGuest} />
       ) : (
         <PlaceholderTab tab={activeTab} isGuest={isGuest} onSignUp={onSignUp} />
       )}
