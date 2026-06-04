@@ -2260,6 +2260,14 @@ const [planGenerated, setPlanGenerated] = useState(() => {
   const [filterVerdict, setFilterVerdict] = useState<"yes" | "neutral" | "no" | null>(null);
   const [filterOutfitCategory, setFilterOutfitCategory] = useState("All");
   const [planItemSelector, setPlanItemSelector] = useState<string | null>(null);
+  const [planItemSearch, setPlanItemSearch] = useState("");
+  const [planItemCategoryFilter, setPlanItemCategoryFilter] = useState("All");
+  const [planSelectedItems, setPlanSelectedItems] = useState<Record<string, string[]>>(() => {
+    try {
+      const saved = localStorage.getItem(`solla_plan_items_${user?.id}`);
+      return saved ? JSON.parse(saved) : {};
+    } catch { return {}; }
+  });
 
   // Add item form
   const [itemPrice, setItemPrice] = useState("");
@@ -2583,6 +2591,7 @@ const handleEditOutfit = async () => {
           return merged;
         });
         setPlanGenerated(true);
+        setPlanSelectedItems({});
       }
     } catch {}
     finally { setLoadingPlan(false); }
@@ -2899,10 +2908,13 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {(() => {
                         const planText = `${day.coat || ""} ${day.base} ${day.shoes} ${day.accessories}`.toLowerCase();
-                        const matchedItems = items.filter(item => {
-                          const itemText = `${item.name} ${item.colour_name} ${item.category}`.toLowerCase();
-                          return itemText.split(" ").some(word => word.length > 3 && planText.includes(word));
-                        });
+                        const selectedIds = planSelectedItems[day.day] || [];
+                        const matchedItems = selectedIds.length > 0
+                          ? items.filter(item => selectedIds.includes(item.id))
+                          : items.filter(item => {
+                              const itemText = `${item.name} ${item.colour_name} ${item.category}`.toLowerCase();
+                              return itemText.split(" ").some(word => word.length > 3 && planText.includes(word));
+                            });
                         return matchedItems.length > 0 ? (
                           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                             {matchedItems.map(item => (
@@ -3080,26 +3092,36 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             </div>
             <div style={{ padding: "16px 24px" }}>
               <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Select items for {planItemSelector}</h2>
-              <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 16 }}>Items you select will show when this day is locked.</p>
+              <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 12 }}>Items you select will show when this day is locked.</p>
+              <input
+                placeholder="Search items..."
+                value={planItemSearch}
+                onChange={e => setPlanItemSearch(e.target.value)}
+                style={{ width: "100%", padding: "10px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 10, fontFamily: DS.font }}
+              />
+              <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 8, marginBottom: 8 }}>
+                {["All", "Top", "Knitwear", "Jackets & Coats", "Bottoms", "Dresses & Jumpsuits", "Shoes", "Bags", "Accessories"].map(cat => (
+                  <button key={cat} onClick={() => setPlanItemCategoryFilter(cat)} style={{ padding: "5px 12px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: planItemCategoryFilter === cat ? DS.colors.accent : DS.colors.surface, color: planItemCategoryFilter === cat ? DS.colors.white : DS.colors.textMuted, flexShrink: 0 }}>
+                    {cat}
+                  </button>
+                ))}
+              </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {items.map(item => {
-                  const dayPlan = weeklyPlan.find(d => d.day === planItemSelector);
-                  const planText = `${dayPlan?.coat || ""} ${dayPlan?.base || ""} ${dayPlan?.shoes || ""} ${dayPlan?.accessories || ""}`.toLowerCase();
-                  const isSelected = item.name.toLowerCase().split(" ").some(word => word.length > 3 && planText.includes(word));
+                {items.filter(item => {
+                  if (planItemCategoryFilter !== "All" && item.category !== planItemCategoryFilter) return false;
+                  if (planItemSearch.trim() && !`${item.name} ${item.colour_name}`.toLowerCase().includes(planItemSearch.toLowerCase())) return false;
+                  return true;
+                }).map(item => {
+                  const selectedForDay = planSelectedItems[planItemSelector] || [];
+                  const isSelected = selectedForDay.includes(item.id);
                   return (
                     <button key={item.id} onClick={() => {
-                      setWeeklyPlan(prev => {
-                        const updated = prev.map(d => {
-                          if (d.day !== planItemSelector) return d;
-                          const currentBase = d.base || "";
-                          const itemDesc = `${item.colour_name} ${item.name}`;
-                          const newBase = isSelected
-                            ? currentBase.replace(itemDesc, "").trim()
-                            : currentBase ? `${currentBase}, ${itemDesc}` : itemDesc;
-                          return { ...d, base: newBase };
-                        });
-                        localStorage.setItem(`solla_weekly_plan_${user?.id}`, JSON.stringify(updated));
-                        return updated;
+                      setPlanSelectedItems(prev => {
+                        const current = prev[planItemSelector] || [];
+                        const updated = isSelected
+                          ? current.filter(id => id !== item.id)
+                          : [...current, item.id];
+                        return { ...prev, [planItemSelector]: updated };
                       });
                     }} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${isSelected ? DS.colors.accent : DS.colors.border}`, background: isSelected ? DS.colors.accentLight : DS.colors.bg, textAlign: "left" }}>
                       {item.image_url ? (
@@ -3116,7 +3138,12 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                   );
                 })}
               </div>
-              <button onClick={() => setPlanItemSelector(null)} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 15, fontWeight: 600, marginTop: 20 }}>
+              <button onClick={() => {
+                localStorage.setItem(`solla_plan_items_${user?.id}`, JSON.stringify(planSelectedItems));
+                setPlanItemSelector(null);
+                setPlanItemSearch("");
+                setPlanItemCategoryFilter("All");
+              }} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 15, fontWeight: 600, marginTop: 20 }}>
                 Done
               </button>
             </div>
