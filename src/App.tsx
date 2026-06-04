@@ -2856,6 +2856,9 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           )}
         </div>
       )}
+
+      {/* AI Stylist chat */}
+      {view === "chat" && (
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
           <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: 12 }}>
             {chatMessages.length === 0 && (
