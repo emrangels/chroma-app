@@ -2224,7 +2224,9 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
 };
 const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seasonData: SeasonData | null; onUpgrade: () => void; }) => {
   const plan = user?.plan || "free";
-  const canAccess = plan === "luxe";
+  const canAccess = true;
+  const freeItemLimit = 3;
+  const isFreePlan = plan === "free";
 
   const [view, setView] = useState<"items" | "outfits" | "plan" | "makeup" | "chat">("items");
 const [weeklyPlan, setWeeklyPlan] = useState<{ day: string; coat: string | null; base: string; shoes: string; accessories: string; locked: boolean; }[]>(() => {
@@ -2648,16 +2650,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
     finally { setChatLoading(false); }
   };
 
-  if (!canAccess) return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 28px" }}>
-      <div style={{ width: 64, height: 64, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
-        <Icon name="hanger" size={28} color={DS.colors.accent} />
-      </div>
-      <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Your Wardrobe</h2>
-      <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 24 }}>Stop guessing what to wear. Build your colour-approved wardrobe, get daily outfit suggestions and never open your wardrobe feeling lost again — all in Luxe.</p>
-      <button onClick={onUpgrade} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: "#C26B3A", color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Unlock Wardrobe</button>
-    </div>
-  );
+  // Free users can access wardrobe with 3 item limit
 
   const filteredItems = items.filter(i => {
   if (filterStarred && !i.starred) return false;
@@ -2675,8 +2668,14 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
       <div style={{ padding: "16px 16px 0", flexShrink: 0 }}>
         <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, gap: 4 }}>
           {(["items", "outfits", "plan", "makeup", "chat"] as const).map(v => (
-            <button key={v} onClick={() => setView(v)} style={{ flex: 1, padding: "6px 2px", borderRadius: DS.radius.md, fontSize: 12, fontWeight: view === v ? 600 : 400, color: view === v ? DS.colors.white : DS.colors.textMuted, background: view === v ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
+            <button key={v} onClick={() => {
+              if (isFreePlan && (v === "outfits" || v === "plan" || v === "chat")) { onUpgrade(); return; }
+              setView(v);
+            }} style={{ flex: 1, padding: "6px 2px", borderRadius: DS.radius.md, fontSize: 12, fontWeight: view === v ? 600 : 400, color: view === v ? DS.colors.white : DS.colors.textMuted, background: view === v ? DS.colors.accent : "transparent", transition: "all 0.2s", position: "relative" }}>
               {v === "items" ? "Wardrobe" : v === "outfits" ? "Outfits" : v === "plan" ? "Plan" : v === "makeup" ? "Makeup" : "Stylist"}
+              {isFreePlan && (v === "outfits" || v === "plan" || v === "chat") && (
+                <span style={{ position: "absolute", top: 1, right: 2, fontSize: 8, color: DS.colors.textFaint }}>🔒</span>
+              )}
             </button>
           ))}
         </div>
@@ -2686,6 +2685,18 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
       {view === "items" && (
   <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
 
+    {/* Free tier banner */}
+        {isFreePlan && (
+          <div style={{ margin: "0 16px 12px", padding: "12px 14px", background: DS.colors.accentLight, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.accentDark }}>{items.length}/{freeItemLimit} free items used</p>
+              <p style={{ margin: "2px 0 0", fontSize: 12, color: DS.colors.accentDark, opacity: 0.8 }}>Upgrade to Luxe for unlimited wardrobe + daily outfits</p>
+            </div>
+            <button onClick={onUpgrade} style={{ padding: "6px 12px", borderRadius: DS.radius.full, background: DS.colors.accent, color: DS.colors.white, fontSize: 12, fontWeight: 600, flexShrink: 0 }}>
+              Upgrade
+            </button>
+          </div>
+        )}
     {/* Stats card */}
     {items.length > 0 && (() => {
       const suits = items.filter(i => i.verdict).length;
@@ -2802,7 +2813,13 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           )}
 
           {/* Add item button */}
-          <button onClick={() => setShowAddItem(true)} style={{ position: "fixed", bottom: 96, right: 20, width: 52, height: 52, borderRadius: DS.radius.full, background: DS.colors.accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: DS.shadow.lg }}>
+          <button onClick={() => {
+            if (isFreePlan && items.length >= freeItemLimit) {
+              onUpgrade();
+              return;
+            }
+            setShowAddItem(true);
+          }} style={{ position: "fixed", bottom: 96, right: 20, width: 52, height: 52, borderRadius: DS.radius.full, background: DS.colors.accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: DS.shadow.lg }}>
             <Icon name="plus" size={24} color={DS.colors.white} />
           </button>
         </div>
