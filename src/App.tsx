@@ -2928,22 +2928,27 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     <button onClick={async () => {
                       if (!user?.id) return;
                       const outfitName = `${day.day}'s outfit`;
-                      const description = `${day.coat ? day.coat + ", " : ""}${day.base}, ${day.shoes}, ${day.accessories}`;
+                      const planText = `${day.coat || ""} ${day.base} ${day.shoes} ${day.accessories}`.toLowerCase();
+                      const matchedIds = items.filter(item => {
+                        const itemText = `${item.name} ${item.colour_name} ${item.category}`.toLowerCase();
+                        return itemText.split(" ").some(word => word.length > 3 && planText.includes(word));
+                      }).map(i => i.id);
                       const res = await fetch(`${SUPABASE_URL}/rest/v1/outfits`, {
                         method: "POST",
-                        headers: { ...getAuthHeaders(), Prefer: "return=minimal" },
+                        headers: { ...getAuthHeaders(), Prefer: "return=representation" },
                         body: JSON.stringify({
                           user_id: user.id,
                           name: outfitName,
-                          item_ids: [],
+                          item_ids: matchedIds,
                           overall_verdict: true,
                           starred: false,
                           category: "Casual",
                         }),
                       });
-                      if (res.ok) {
-                        await loadOutfits();
-                        alert(`Saved "${outfitName}" to your outfits ✓`);
+                      const data = await res.json();
+                      if (Array.isArray(data)) {
+                        setOutfits(prev => [data[0], ...prev]);
+                        alert(`Saved "${outfitName}" to your outfits${matchedIds.length > 0 ? ` with ${matchedIds.length} matching item${matchedIds.length !== 1 ? "s" : ""}` : " — add items in the Outfits tab"} ✓`);
                       }
                     }} style={{ fontSize: 12, color: DS.colors.success, fontWeight: 500 }}>
                       + Save to outfits
