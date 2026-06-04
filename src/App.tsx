@@ -2894,6 +2894,45 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                       )}
                     </div>
                   </div>
+                  {day.locked ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {(() => {
+                        const planText = `${day.coat || ""} ${day.base} ${day.shoes} ${day.accessories}`.toLowerCase();
+                        const matchedItems = items.filter(item => {
+                          const itemText = `${item.name} ${item.colour_name} ${item.category}`.toLowerCase();
+                          return itemText.split(" ").some(word => word.length > 3 && planText.includes(word));
+                        });
+                        return matchedItems.length > 0 ? (
+                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                            {matchedItems.map(item => (
+                              <div key={item.id} style={{ textAlign: "center" }}>
+                                {item.image_url ? (
+                                  <img src={item.image_url} style={{ width: 56, height: 56, borderRadius: DS.radius.md, objectFit: "cover", border: `1px solid ${DS.colors.border}` }} />
+                                ) : (
+                                  <div style={{ width: 56, height: 56, borderRadius: DS.radius.md, background: item.hex, border: `1px solid ${DS.colors.border}` }} />
+                                )}
+                                <p style={{ margin: "3px 0 0", fontSize: 9, color: DS.colors.textFaint, maxWidth: 56, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                            {[
+                              { label: "Coat", value: day.coat },
+                              { label: "Base", value: day.base },
+                              { label: "Shoes", value: day.shoes },
+                              { label: "Accessories", value: day.accessories },
+                            ].filter(f => f.value && f.value !== "null").map(field => (
+                              <div key={field.label} style={{ display: "flex", gap: 8 }}>
+                                <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.textFaint, minWidth: 80 }}>{field.label}</span>
+                                <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{field.value}</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     {[
                       { label: "Coat", value: day.coat, key: "coat" },
@@ -2903,24 +2942,21 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     ].filter(f => f.value && f.value !== "null").map(field => (
                       <div key={field.key} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                         <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.textFaint, minWidth: 80, paddingTop: 2 }}>{field.label}</span>
-                        {day.locked ? (
-                          <span style={{ fontSize: 13, color: DS.colors.textMuted, flex: 1 }}>{field.value}</span>
-                        ) : (
-                          <input
-                            value={field.value || ""}
-                            onChange={e => {
-                              setWeeklyPlan(prev => {
-                                const updated = prev.map(d => d.day === day.day ? { ...d, [field.key]: e.target.value } : d);
-                                localStorage.setItem(`solla_weekly_plan_${user?.id}`, JSON.stringify(updated));
-                                return updated;
-                              });
-                            }}
-                            style={{ flex: 1, fontSize: 13, color: DS.colors.text, border: "none", borderBottom: `1px solid ${DS.colors.border}`, outline: "none", background: "transparent", padding: "2px 0", fontFamily: DS.font }}
-                          />
-                        )}
+                        <input
+                          value={field.value || ""}
+                          onChange={e => {
+                            setWeeklyPlan(prev => {
+                              const updated = prev.map(d => d.day === day.day ? { ...d, [field.key]: e.target.value } : d);
+                              localStorage.setItem(`solla_weekly_plan_${user?.id}`, JSON.stringify(updated));
+                              return updated;
+                            });
+                          }}
+                          style={{ flex: 1, fontSize: 13, color: DS.colors.text, border: "none", borderBottom: `1px solid ${DS.colors.border}`, outline: "none", background: "transparent", padding: "2px 0", fontFamily: DS.font }}
+                        />
                       </div>
                     ))}
                   </div>
+                  )}
                   <div style={{ display: "flex", gap: 12, marginTop: 10 }}>
                     <button onClick={() => { setView("chat"); setChatInput(`Can you help me style ${day.day}'s outfit? ${day.base}${day.coat ? `, ${day.coat}` : ""}, ${day.shoes}, ${day.accessories}`); }} style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 500 }}>
                       Style with AI →
