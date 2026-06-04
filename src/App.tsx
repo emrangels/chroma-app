@@ -2259,6 +2259,7 @@ const [planGenerated, setPlanGenerated] = useState(() => {
   const [gridView, setGridView] = useState(false);
   const [filterVerdict, setFilterVerdict] = useState<"yes" | "neutral" | "no" | null>(null);
   const [filterOutfitCategory, setFilterOutfitCategory] = useState("All");
+  const [planItemSelector, setPlanItemSelector] = useState<string | null>(null);
 
   // Add item form
   const [itemPrice, setItemPrice] = useState("");
@@ -2957,7 +2958,12 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     ))}
                   </div>
                   )}
-                  <div style={{ display: "flex", gap: 12, marginTop: 10 }}>
+                  <div style={{ display: "flex", gap: 12, marginTop: 10, flexWrap: "wrap" }}>
+                    {!day.locked && (
+                      <button onClick={() => setPlanItemSelector(day.day)} style={{ fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>
+                        + Select items
+                      </button>
+                    )}
                     <button onClick={() => { setView("chat"); setChatInput(`Can you help me style ${day.day}'s outfit? ${day.base}${day.coat ? `, ${day.coat}` : ""}, ${day.shoes}, ${day.accessories}`); }} style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 500 }}>
                       Style with AI →
                     </button>
@@ -3062,6 +3068,58 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             <button onClick={handleChat} disabled={!chatInput.trim() || chatLoading} style={{ width: 44, height: 44, borderRadius: DS.radius.lg, background: chatInput.trim() ? DS.colors.accent : DS.colors.border, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <Icon name="chevronRight" size={18} color={DS.colors.white} />
             </button>
+          </div>
+        </div>
+      )}
+      {/* Plan Item Selector Sheet */}
+      {planItemSelector && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={() => setPlanItemSelector(null)}>
+          <div style={{ width: "100%", maxHeight: "90vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+              <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
+            </div>
+            <div style={{ padding: "16px 24px" }}>
+              <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Select items for {planItemSelector}</h2>
+              <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 16 }}>Items you select will show when this day is locked.</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {items.map(item => {
+                  const dayPlan = weeklyPlan.find(d => d.day === planItemSelector);
+                  const planText = `${dayPlan?.coat || ""} ${dayPlan?.base || ""} ${dayPlan?.shoes || ""} ${dayPlan?.accessories || ""}`.toLowerCase();
+                  const isSelected = item.name.toLowerCase().split(" ").some(word => word.length > 3 && planText.includes(word));
+                  return (
+                    <button key={item.id} onClick={() => {
+                      setWeeklyPlan(prev => {
+                        const updated = prev.map(d => {
+                          if (d.day !== planItemSelector) return d;
+                          const currentBase = d.base || "";
+                          const itemDesc = `${item.colour_name} ${item.name}`;
+                          const newBase = isSelected
+                            ? currentBase.replace(itemDesc, "").trim()
+                            : currentBase ? `${currentBase}, ${itemDesc}` : itemDesc;
+                          return { ...d, base: newBase };
+                        });
+                        localStorage.setItem(`solla_weekly_plan_${user?.id}`, JSON.stringify(updated));
+                        return updated;
+                      });
+                    }} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${isSelected ? DS.colors.accent : DS.colors.border}`, background: isSelected ? DS.colors.accentLight : DS.colors.bg, textAlign: "left" }}>
+                      {item.image_url ? (
+                        <img src={item.image_url} style={{ width: 44, height: 44, borderRadius: DS.radius.sm, objectFit: "cover", flexShrink: 0 }} />
+                      ) : (
+                        <div style={{ width: 44, height: 44, borderRadius: DS.radius.sm, background: item.hex, flexShrink: 0 }} />
+                      )}
+                      <div style={{ flex: 1 }}>
+                        <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>{item.name}</p>
+                        <p style={{ margin: 0, fontSize: 11, color: DS.colors.textFaint }}>{item.category} · {item.colour_name}</p>
+                      </div>
+                      {isSelected && <Icon name="check" size={16} color={DS.colors.accent} strokeWidth={2.5} />}
+                    </button>
+                  );
+                })}
+              </div>
+              <button onClick={() => setPlanItemSelector(null)} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 15, fontWeight: 600, marginTop: 20 }}>
+                Done
+              </button>
+            </div>
           </div>
         </div>
       )}
