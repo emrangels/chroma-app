@@ -2222,7 +2222,7 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
     </div>
   );
 };
-const WardrobeTab = ({ user, seasonData, onUpgrade }: { user: User | null; seasonData: SeasonData | null; onUpgrade: () => void; }) => {
+const WardrobeTab = ({ user, seasonData, onUpgrade, onSignUp }: { user: User | null; seasonData: SeasonData | null; onUpgrade: () => void; onSignUp?: () => void; }) => {
   const plan = user?.plan || "free";
   const canAccess = true;
   const freeItemLimit = 3;
@@ -2312,11 +2312,13 @@ const [planGenerated, setPlanGenerated] = useState(() => {
   };
 };
   useEffect(() => {
-    if (!canAccess || !user?.id) return;
+    if (!user?.id) return;
     loadItems();
-    loadOutfits();
+    if (plan !== "free") {
+      loadOutfits();
+    }
     loadMakeupItems();
-  }, [canAccess, user?.id]);
+  }, [user?.id, plan]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -2685,6 +2687,14 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
       {view === "items" && (
   <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
 
+    {/* Guest prompt */}
+        {(!user || user.id === "guest") && (
+          <div style={{ margin: "0 16px 12px", padding: "16px", background: DS.colors.accentLight, borderRadius: DS.radius.lg, textAlign: "center" }}>
+            <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 600, color: DS.colors.text }}>Save your wardrobe</p>
+            <p style={{ margin: "0 0 12px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>Create a free account to save up to 3 items and check if they suit your {seasonData?.season} season.</p>
+            <button onClick={() => onSignUp?.()} style={{ padding: "10px 20px", borderRadius: DS.radius.full, background: DS.colors.accent, color: DS.colors.white, fontSize: 13, fontWeight: 600 }}>Create free account</button>
+          </div>
+        )}
     {/* Free tier banner */}
         {isFreePlan && (
           <div style={{ margin: "0 16px 12px", padding: "12px 14px", background: DS.colors.accentLight, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -2813,13 +2823,21 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           )}
 
           {/* Add item button */}
-          <button onClick={() => {
+         <button onClick={() => {
+            if (!user || user.id === "guest") {
+              onSignUp?.();
+              return;
+            }
+            if (!seasonData) {
+              alert("Complete your colour analysis first — tap the Season tab to get started.");
+              return;
+            }
             if (isFreePlan && items.length >= freeItemLimit) {
               onUpgrade();
               return;
             }
             setShowAddItem(true);
-          }} style={{ position: "fixed", bottom: 96, right: 20, width: 52, height: 52, borderRadius: DS.radius.full, background: DS.colors.accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: DS.shadow.lg }}>
+          }}  style={{ position: "fixed", bottom: 96, right: 20, width: 52, height: 52, borderRadius: DS.radius.full, background: DS.colors.accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: DS.shadow.lg }}>
             <Icon name="plus" size={24} color={DS.colors.white} />
           </button>
         </div>
@@ -3940,7 +3958,7 @@ const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, 
       ) : activeTab === "me" ? (
         <MeTab user={user} seasonData={seasonData} onSignOut={onSignOut} onReanalyse={onReanalyse} onUpgrade={onUpgrade} onOpenFaq={(sheet) => onOpenSheet(sheet || "faq")} />
       ) : activeTab === "wardrobe" ? (
-        <WardrobeTab user={user} seasonData={seasonData} onUpgrade={onUpgrade} />
+        <WardrobeTab user={user} seasonData={seasonData} onUpgrade={onUpgrade} onSignUp={onSignUp} />
       ) : (
         <PlaceholderTab tab={activeTab} isGuest={isGuest} onSignUp={onSignUp} />
       )}
