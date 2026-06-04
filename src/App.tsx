@@ -1779,8 +1779,8 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
         <p style={{ fontSize: 13, color: DS.colors.textFaint, marginBottom: 16, lineHeight: 1.5 }}>
           {mode === "single" && (
             <div style={{ marginBottom: 8 }}>
-              <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, margin: "0 0 6px" }}>Upload a clear photo in natural light against a plain background. Photograph your actual garment — not a website product image — for the most accurate result.</p>
-              <p style={{ fontSize: 12, color: "#D97706", margin: 0, lineHeight: 1.5 }}>Tip: sales photography is often colour-corrected. Your own photo in daylight gives the best reading.</p>
+              <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, margin: "0 0 6px" }}>Upload one item or multiple items at once — Solla checks each colour separately. Photograph your actual garment in natural light against a plain background for the most accurate result. You can also upload multiple items in one go.</p>
+              <p style={{ fontSize: 12, color: "#D97706", margin: 0, lineHeight: 1.5 }}>Avoid website or sales photos — they're often colour-corrected and will give a less accurate reading than your own photo.</p>
             </div>
           )}
           {mode === "outfit" && "Upload a full outfit photo for an overall verdict and per-piece breakdown. Photograph in natural light for the most accurate colour reading."}
@@ -3171,7 +3171,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                   <p style={{ margin: "0 0 2px", fontSize: 12, color: DS.colors.textFaint }}>· Photograph your actual garment, not a product image from a website</p>
                   <p style={{ margin: "0 0 2px", fontSize: 12, color: DS.colors.textFaint }}>· Natural light only — no flash, no filters, no artificial lighting</p>
                   <p style={{ margin: "0 0 6px", fontSize: 12, color: DS.colors.textFaint }}>· White or neutral background where possible</p>
-                  <p style={{ margin: 0, fontSize: 12, color: "#D97706", fontWeight: 500 }}>Foundation and concealer: use "Enter name" for a more accurate result — photo accuracy for complexion products is limited by lighting variation.</p>
+                  <p style={{ margin: 0, fontSize: 12, color: "#D97706", fontWeight: 500 }}>For any product with a known shade name — always use "Enter name". Photo checking is best for unknown shades swatched directly on your inner arm in natural daylight. Product photos and packaging shots will give unreliable colour readings.</p>
                 </div>
                 <div onClick={() => !makeupPreview && makeupFileRef.current?.click()} style={{ borderRadius: DS.radius.lg, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, height: 120, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: makeupPreview ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 10 }}>
                   {makeupPreview ? (
