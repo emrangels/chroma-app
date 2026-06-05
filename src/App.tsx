@@ -1207,7 +1207,66 @@ const getDailyTip = (season: string, fallback: string): string => {
   return tips[dayOfYear % tips.length];
 };
 
-const SEASON_IDENTITY: Record<string, string[]> = {
+const SEASONAL_MOOD: Record<string, string[]> = {
+  Spring: [
+    "A day to lead with warmth. Someone needs your energy today more than you know.",
+    "Your instinct to brighten things is right today. Follow it.",
+    "A good day to wear something that makes you feel alive — the world responds to your light.",
+    "Today favours bold moves. Your colouring was built for visibility.",
+    "You may feel pulled toward comfort today. Let your palette meet you there.",
+    "A day for connection. Your warmth opens doors that logic cannot.",
+    "Something small and joyful is available today if you look for it.",
+    "Today is a good day to be seen. Wear the colour you've been saving.",
+    "Your energy is high today. Match it with something vivid and warm.",
+    "A day for new beginnings. Your colouring carries optimism naturally — use it.",
+  ],
+  Summer: [
+    "A quieter day. Your instinct for stillness is an asset today, not a limitation.",
+    "Someone will notice how considered you are today. Let them.",
+    "A day for depth over noise. Your palette was built for exactly this kind of day.",
+    "Today favours listening. You'll gather something important if you stay soft.",
+    "You may feel the pull of beauty today — in objects, in light, in people. Trust it.",
+    "A day to wear something that feels like you at your most yourself.",
+    "Your calm is contagious today. More people need it than you realise.",
+    "A thoughtful day. The right words will come if you don't rush them.",
+    "Today is for considered choices. Your instincts are reliable right now.",
+    "Something has been waiting for your attention. Today is the right day to give it.",
+  ],
+  Autumn: [
+    "A grounded day. Your steadiness will be exactly what someone needs.",
+    "Today favours depth and patience. You have both naturally.",
+    "A good day to create something — your hands know what your mind is still working out.",
+    "You may feel more yourself today than you have in a while. Lean into it.",
+    "Someone will trust you with something today. You already know what to do with it.",
+    "A day for warmth and honesty. Your colouring carries both.",
+    "Today is unhurried. That's not stagnation — that's groundedness.",
+    "Your eye for beauty is sharp today. Something you see will stay with you.",
+    "A day to wear something rich and earthy. Let your palette carry the weight of the day.",
+    "You are more striking today than you feel. Wear the colour that proves it.",
+  ],
+  Winter: [
+    "A high-contrast day. Your precision will cut through where others are vague.",
+    "Today favours clarity. You see things as they are — that's rare and valuable.",
+    "Something that has been unclear is becoming sharper. Trust the sharpening.",
+    "A day for decisiveness. Your instincts are correct — act on them.",
+    "You may feel more intense than usual today. That intensity is information.",
+    "Today favours presence over warmth. You have exactly the right kind.",
+    "Someone will mistake your cool for distance today. Let your presence correct them.",
+    "A day to be exactly as certain as you actually are. No softening needed.",
+    "Your clarity is a gift today, even when it's uncomfortable for others.",
+    "Wear something that matches the day — sharp, considered, completely yours.",
+  ],
+};
+
+const getSeasonalMood = (season: string): string => {
+  const moods = SEASONAL_MOOD[season];
+  if (!moods) return "";
+  // Offset by 3 from dayOfYear so mood and tip never feel like the same thought
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+  return moods[(dayOfYear + 3) % moods.length];
+};
+
+
   Spring: [
     "You carry warmth into every room before you say a word. That's not charm — it's colouring.",
     "Springs are the people others describe as 'glowing'. You always have been.",
@@ -1343,7 +1402,7 @@ useEffect(() => {
   setNudge(selectedNudge);
 }, [user?.id, plan, seasonData?.season]);
 
-const generateOutfit = async (temp: number, desc: string) => {
+const generateOutfit = async (temp: number, desc: string, cacheKey?: string) => {
   try {
     const season = seasonData!.season;
     const palette = (seasonData!.palette?.best || []).map((c: PaletteColour) => c.name).slice(0, 3).join(", ");
@@ -1363,18 +1422,14 @@ const generateOutfit = async (temp: number, desc: string) => {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
       method: "POST",
       headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
-      body: JSON.stringify({
-        type: "weather_outfit",
-        season,
-        palette,
-        temp,
-        desc,
-        wardrobe: wardrobeContext,
-      }),
+      body: JSON.stringify({ type: "weather_outfit", season, palette, temp, desc, wardrobe: wardrobeContext }),
     });
     const data = await res.json();
     if (data.outfit) {
       setWeatherOutfit(data.outfit);
+      if (cacheKey) {
+        try { localStorage.setItem(cacheKey, JSON.stringify({ outfit: data.outfit, temp, desc })); } catch {}
+      }
     } else {
       setWeatherOutfit("Debug: " + JSON.stringify(data).slice(0, 150));
     }
@@ -1385,6 +1440,17 @@ const generateOutfit = async (temp: number, desc: string) => {
 
 useEffect(() => {
   if (!seasonData || plan === "free") return;
+  const today = new Date().toDateString();
+  const cacheKey = `solla_outfit_${user?.id || "guest"}_${today}`;
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    try {
+      const { outfit, temp, desc } = JSON.parse(cached);
+      setWeatherOutfit(outfit);
+      setWeather({ temp, desc, icon: "sun" });
+      return;
+    } catch {}
+  }
   if (!navigator.geolocation) { return; }
   setLoadingWeather(true);
   navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -1396,7 +1462,7 @@ useEffect(() => {
       const code = data.current.weathercode;
       const desc = code <= 1 ? "sunny" : code <= 3 ? "partly cloudy" : code <= 67 ? "rainy" : code <= 77 ? "snowy" : "overcast";
       setWeather({ temp, desc, icon: "sun" });
-      await generateOutfit(temp, desc);
+      await generateOutfit(temp, desc, cacheKey);
     } catch {}
     finally { setLoadingWeather(false); }
   }, (err) => { console.log("Location error:", err.code, err.message); setLoadingWeather(false); setWeather({ temp: -1, desc: "denied", icon: "map-pin" }); }, { timeout: 10000 });
@@ -1485,12 +1551,15 @@ const loadExtendedPalette = async () => {
         </div>
 {showShare && <ShareCard seasonData={seasonData} onClose={() => setShowShare(false)} />}
       </div>
-      <div style={{ margin: "0 16px", background: DS.colors.bg, borderRadius: `0 0 ${DS.radius.lg} ${DS.radius.lg}`, padding: "12px 16px", borderLeft: `3px solid ${accentColor}`, display: "flex", alignItems: "flex-start", gap: 10 }}>
-        <Icon name="sparkles" size={14} color={accentColor} strokeWidth={2} />
-        <div style={{ flex: 1 }}>
-          <p style={{ margin: "0 0 3px", fontSize: 10, fontWeight: 600, color: accentColor, letterSpacing: "0.06em", textTransform: "uppercase" }}>Today's colour note</p>
-          <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{getDailyTip(seasonData.season, seasonData.daily_tip)}</p>
+      <div style={{ margin: "0 16px", background: DS.colors.bg, borderRadius: `0 0 ${DS.radius.lg} ${DS.radius.lg}`, padding: "14px 16px", borderLeft: `3px solid ${accentColor}` }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+          <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: accentColor, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+            {new Date().toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long" })}
+          </p>
+          <span style={{ fontSize: 10, color: DS.colors.textFaint, fontWeight: 500 }}>{seasonData.season}</span>
         </div>
+        <p style={{ margin: "0 0 8px", fontSize: 14, color: DS.colors.text, lineHeight: 1.6, fontWeight: 500 }}>{getSeasonalMood(seasonData.season)}</p>
+        <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5, paddingTop: 8, borderTop: `1px solid ${DS.colors.border}` }}>{getDailyTip(seasonData.season, seasonData.daily_tip)}</p>
       </div>
       {streak > 0 && [3, 7, 14, 30].includes(streak) && (
         <div style={{ margin: "0 16px 4px", padding: "12px 14px", background: `${accentColor}15`, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", gap: 10 }}>
@@ -1570,7 +1639,11 @@ const loadExtendedPalette = async () => {
   <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted }}>Getting your location for today's outfit suggestion…</p>
 )}
 {!loadingWeather && !weatherOutfit && weather?.desc === "denied" && (
-  <PostcodeWeather seasonData={seasonData} onResult={(temp, desc) => { setWeather({ temp, desc, icon: "map-pin" }); generateOutfit(temp, desc); }} />
+  <PostcodeWeather seasonData={seasonData} onResult={(temp, desc) => {
+    const cacheKey = `solla_outfit_${user?.id || "guest"}_${new Date().toDateString()}`;
+    setWeather({ temp, desc, icon: "map-pin" });
+    generateOutfit(temp, desc, cacheKey);
+  }} />
 )}
         </div>
       )}
