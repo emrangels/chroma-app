@@ -1069,6 +1069,144 @@ const PostcodeWeather = ({ seasonData, onResult }: { seasonData: SeasonData | nu
     </div>
   );
 };
+const DAILY_TIPS: Record<string, string[]> = {
+  Spring: [
+    "Warm peach tones near your face will make your skin glow — try a peachy blush instead of pink.",
+    "Your best neutrals are warm camel and ivory, not stark white or grey.",
+    "Coral and warm terracotta are your power colours — own them.",
+    "Light golden jewellery complements your warm undertone far better than silver.",
+    "Try layering warm cream with a pop of turquoise — it's a classic Spring combination.",
+    "Your season thrives in natural fabrics like linen and cotton in warm, light tones.",
+    "Avoid black near your face — it creates harsh contrast against your soft, warm colouring.",
+    "A warm apricot lip is more flattering than a cool berry on your Spring colouring.",
+    "Bright, clear colours suit you best — dusty or muted tones can wash you out.",
+    "Golden hour light was made for Springs — your colouring comes alive in warm sunlight.",
+    "Try a warm peach or coral nail colour — it harmonises beautifully with your skin tone.",
+    "Your best whites are cream and warm off-white, never stark or blue-based white.",
+    "Warm golden highlights in your hair will enhance your natural radiance.",
+    "Light teal and aqua are unexpected but stunning accent colours for Springs.",
+    "Avoid cool-toned makeup — always reach for warm-based foundations and blushes.",
+    "A bright cobalt or warm turquoise scarf near your face will make your eyes pop.",
+    "Ivory, warm beige and camel are your wardrobe foundations — build from these.",
+    "Your season pairs beautifully with natural wood and warm metallic accessories.",
+    "When in doubt, choose the warmer version of any colour — it will always serve you better.",
+    "Soft golden or peachy eyeshadow enhances your natural warmth more than cool greys.",
+    "Light warm greens like sage or chartreuse are surprisingly powerful on Springs.",
+    "Your skin responds beautifully to warmth — embrace warm lighting wherever possible.",
+    "Avoid dark, heavy colours in winter — layer warm light tones instead for the same cosy effect.",
+    "Warm red-oranges and corals are your reds — cool blue-reds clash with your undertone.",
+    "Your best denim is a lighter, warm-washed blue — dark or grey-toned denim dulls your look.",
+    "Peach, apricot and warm yellow florals are made for your colouring.",
+    "Try warm chartreuse or yellow-green as a statement colour — it's unexpectedly brilliant on Springs.",
+    "Your colouring has natural clarity — bright, vivid tones reflect that energy back.",
+    "Light, bright and warm: your three words for getting dressed every morning.",
+    "Warm gold-toned eyeshadow at the inner corner of your eyes makes them appear brighter instantly.",
+  ],
+  Summer: [
+    "Dusty rose and soft lavender are your superpower colours — they make your skin look luminous.",
+    "Your best neutrals are cool greige, soft taupe and blue-grey — never warm beige.",
+    "Avoid stark black near your face — try deep plum, charcoal or navy instead.",
+    "Silver and white gold jewellery harmonises perfectly with your cool undertone.",
+    "Soft, muted tones suit you best — highly saturated colours can overwhelm your gentle colouring.",
+    "Cool-toned pinks and mauves make your lips look naturally beautiful.",
+    "Powder blue and soft sage are your neutral workhorses — more versatile than beige for you.",
+    "A dusty rose or soft berry blush will give you that effortless, healthy flush.",
+    "Your colouring is softer than it looks — muted and blended outfits feel most harmonious.",
+    "Avoid warm golden tones in hair and makeup — ashy cool tones will suit you far better.",
+    "Denim in a cooler, greyer wash is your best friend — it works with almost everything in your palette.",
+    "Lavender, lilac and soft violet are unexpected but stunning on Summer colouring.",
+    "Avoid orange-based bronzers — a cool-toned highlighter gives you a more natural glow.",
+    "Your best whites are soft white and cool white — pure bright white can clash with your soft colouring.",
+    "Charcoal and deep navy are your versions of black — more harmonious and just as versatile.",
+    "Muted teal and dusty aqua are beautiful accent colours that work with your cool palette.",
+    "Cool rose-brown hair tones complement your natural colouring more than warm caramel.",
+    "Layering similar tones together — like soft blue with greige — is a very Summer way to dress.",
+    "Your colouring has a natural softness — lean into it rather than fighting it with harsh contrasts.",
+    "Cool raspberry and deep rose are your power reds — avoid warm coral or tomato red.",
+    "Soft sage and cool mint are surprisingly wearable everyday colours for your season.",
+    "A cool-toned soft plum or mulberry lip is more flattering than a warm nude on you.",
+    "Your eyes often have cool or grey undertones — enhance them with soft lavender or taupe shadow.",
+    "Avoid highly saturated colours — the softer, dustier version of any colour will suit you better.",
+    "Pearl and moonstone jewellery suit your soft, cool colouring beautifully.",
+    "Soft, cool florals in lavender, dusty pink and blue are made for your palette.",
+    "Your season is associated with elegance and refinement — your palette reflects that naturally.",
+    "Cool-toned mauve or dusty pink nails are more harmonious than warm coral or orange.",
+    "Misty morning light captures your colouring at its best — soft, cool and luminous.",
+    "When in doubt, choose the cooler, softer version of any colour and you'll always be right.",
+  ],
+  Autumn: [
+    "Rich terracotta and burnt orange are your signature colours — wear them near your face.",
+    "Your best neutrals are warm camel, chocolate brown and olive — endlessly versatile for you.",
+    "Gold jewellery was made for Autumns — it enhances your warmth and depth beautifully.",
+    "Avoid black — try deep chocolate, espresso or dark olive for the same impact with more harmony.",
+    "Earthy, muted tones are your foundation — they ground your look without overwhelming it.",
+    "Warm brick red is your red — cool blue-red or cherry red will clash with your undertone.",
+    "Olive green is one of your most powerful and wearable colours — don't underestimate it.",
+    "Your colouring is rich and warm — embrace depth and saturation in your palette.",
+    "Amber, cognac and warm toffee tones in accessories will pull any outfit together.",
+    "Avoid icy or cool pastels — they fight against your warm, earthy colouring.",
+    "Deep mustard yellow is one of the most flattering colours you can wear — try it today.",
+    "Warm auburn and copper hair tones align beautifully with your natural colouring.",
+    "Bronze and antique gold accessories give you a richness that silver cannot match.",
+    "Warm brown-toned eyeshadow enhances your eyes far more than cool grey or taupe.",
+    "Layering warm tones — terracotta with camel, burgundy with olive — is quintessentially Autumn.",
+    "Your skin has a warmth and depth that glows in autumn light — lean into it.",
+    "Rust, burnt sienna and ochre are your accent colours — powerful and deeply personal.",
+    "Warm, earthy florals in burnt orange, deep red and golden yellow are made for you.",
+    "Your best lipstick shades are warm brick, terracotta, deep coral and warm berry.",
+    "Avoid bright, clear colours — muted, earthy versions of the same hues will always suit you better.",
+    "Warm tortoiseshell, leather and wood accessories harmonise naturally with your palette.",
+    "Deep teal and forest green are your cool-leaning colours — still warm enough to work beautifully.",
+    "Your colouring carries weight and richness — avoid anything too light or pastel near your face.",
+    "A warm bronze highlighter will give you a natural glow that cool highlighters can't replicate.",
+    "Camel and warm tan coats are your neutrals done right — they work with your entire wardrobe.",
+    "Autumn colouring was designed for textures — linen, suede, leather and wool all look outstanding on you.",
+    "Your season is the most grounded and earthy — your palette reflects strength and warmth.",
+    "Deep burgundy and wine are your evening colours — rich, warm and completely your own.",
+    "Avoid white — try warm ivory, cream or soft sand for a fresher, more harmonious look.",
+    "When in doubt, reach for something earthy and warm — you cannot go wrong.",
+  ],
+  Winter: [
+    "High contrast is your superpower — don't be afraid of bold colour pairings.",
+    "True black is one of your best colours — it enhances your natural contrast and depth.",
+    "Bright white and pure black are your neutrals — avoid warm beige or cream near your face.",
+    "Cool jewel tones — sapphire, emerald, ruby — are made for your colouring.",
+    "Silver and platinum jewellery harmonises perfectly with your cool undertone.",
+    "Avoid warm, muted or earthy tones — they dull your natural intensity.",
+    "A bold red lip in a cool, blue-toned red is one of the most flattering looks you can wear.",
+    "Your colouring thrives in sharp contrasts — don't blend everything into the same tonal range.",
+    "Icy pastels — ice blue, pale lavender, mint — are surprisingly powerful on Winter colouring.",
+    "Avoid warm browns and camel tones — they clash with your cool, high-contrast nature.",
+    "Deep navy is your alternative to black — equally strong and slightly softer.",
+    "Cool plum and deep berry are your most flattering lip colours after red.",
+    "Your eyes likely have cool undertones — enhance them with charcoal, navy or cool taupe shadow.",
+    "Avoid muted or dusty colours — you need clarity and saturation for your palette to sing.",
+    "Bright fuchsia and cool magenta are bold but deeply flattering on Winter colouring.",
+    "White gold and silver accessories always over gold — warmth doesn't serve your undertone.",
+    "Cool-toned highlighters give you a luminous, icy glow that suits your season perfectly.",
+    "Deep emerald green is one of your strongest colours — wear it confidently.",
+    "Avoid orange-based tones at all costs — they are among the least flattering for your colouring.",
+    "Crisp, clean lines and minimal styling reflect your season's natural aesthetic.",
+    "Cool charcoal grey is a powerful neutral for you — more harmonious than warm grey or taupe.",
+    "Bright cobalt blue worn near your face will make your features more striking instantly.",
+    "Your colouring has a natural drama — lean into it rather than softening it unnecessarily.",
+    "Deep burgundy and wine are your reds for eveningwear — rich and perfectly cool-toned.",
+    "Avoid anything yellow-based in your makeup — cool pink and mauve tones will always serve you better.",
+    "Monochrome dressing in black and white is a Winter signature — own it.",
+    "Your season is the most dramatic of the four — your palette should reflect that confidence.",
+    "Cool mint and icy aqua are unexpected but beautiful accent colours for your wardrobe.",
+    "Avoid warm lighting when possible — cool, natural light is where your colouring looks its best.",
+    "When in doubt, go cooler, deeper and more saturated — that is always the Winter direction.",
+  ],
+};
+
+const getDailyTip = (season: string, fallback: string): string => {
+  const tips = DAILY_TIPS[season];
+  if (!tips) return fallback;
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+  return tips[dayOfYear % tips.length];
+};
+
 const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade, onReanalyse, onTabChange }: { seasonData: SeasonData | null; user: User | null; onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void; onReanalyse: () => void; onTabChange: (tab: Tab) => void; }) => {
   const plan = user?.plan || "free"; const [showShare, setShowShare] = useState(false);const [selectedColour, setSelectedColour] = useState<PaletteColour | null>(null);
 const [extendedPalette, setExtendedPalette] = useState<PaletteColour[]>([]);
@@ -1245,7 +1383,7 @@ const loadExtendedPalette = async () => {
       </div>
       <div style={{ margin: "0 16px", background: DS.colors.bg, borderRadius: `0 0 ${DS.radius.lg} ${DS.radius.lg}`, padding: "12px 16px", borderLeft: `3px solid ${accentColor}`, display: "flex", alignItems: "flex-start", gap: 10 }}>
         <Icon name="sparkles" size={14} color={accentColor} strokeWidth={2} />
-        <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{seasonData.daily_tip}</p>
+        <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{getDailyTip(seasonData.season, seasonData.daily_tip)}</p>
       </div>
       {nudge && !nudgeDismissed && (
         <div style={{ margin: "0 16px 4px", padding: "12px 14px", background: DS.colors.accentLight, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", gap: 10 }}>
@@ -1490,7 +1628,7 @@ interface CheckResult {
 }
 
 const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | null; user: User | null; onUpgrade: () => void; }) => {
-  const [mode, setMode] = useState<"single" | "outfit">("single");
+  const [mode, setMode] = useState<"single" | "outfit" | "makeup">("single");
   const [previews, setPreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<CheckResult[]>([]);
@@ -1502,6 +1640,19 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
   const [saveCategory, setSaveCategory] = useState("Top");
   const [saveFormality, setSaveFormality] = useState("Casual");
   const [saving, setSaving] = useState(false);
+  // Makeup mode state
+  const [makeupCheckMode, setMakeupCheckMode] = useState<"upload" | "name">("name");
+  const [makeupProductName, setMakeupProductName] = useState("");
+  const [makeupProductCategory, setMakeupProductCategory] = useState("Lip");
+  const [makeupPreview, setMakeupPreview] = useState<string | null>(null);
+  const [makeupChecking, setMakeupChecking] = useState(false);
+  const [makeupResult, setMakeupResult] = useState<CheckResult | null>(null);
+  const [saveMakeupSheet, setSaveMakeupSheet] = useState<{ item: CheckResult["items"][0]; previewSrc?: string } | null>(null);
+  const [saveMakeupName, setSaveMakeupName] = useState("");
+  const [saveMakeupBrand, setSaveMakeupBrand] = useState("");
+  const [saveMakeupCategory, setSaveMakeupCategory] = useState("Lip");
+  const [saveMakeupShade, setSaveMakeupShade] = useState("");
+  const makeupFileRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const plan = user?.plan || "free";
@@ -1669,8 +1820,227 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
           ))}
         </div>
 
-        {/* Mode description */}
-        <p style={{ fontSize: 13, color: DS.colors.textFaint, marginBottom: 16, lineHeight: 1.5 }}>
+        {/* Mode switcher */}
+        <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, marginBottom: 20, gap: 4 }}>
+          {(["single", "outfit", "makeup"] as const).map(m => (
+            <button key={m} onClick={() => { setMode(m); reset(); setMakeupResult(null); setMakeupPreview(null); setMakeupProductName(""); }} style={{ flex: 1, padding: "8px 4px", borderRadius: DS.radius.md, fontSize: 13, fontWeight: mode === m ? 600 : 400, color: mode === m ? DS.colors.white : DS.colors.textMuted, background: mode === m ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
+              {m === "single" ? "Single" : m === "outfit" ? "Outfit" : "Makeup"}
+            </button>
+          ))}
+        </div>
+
+        {/* Makeup mode */}
+        {mode === "makeup" && (
+          <div>
+            <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 16 }}>Check any makeup product against your colour season — at Sephora, online or at home. Enter the name for the most accurate result.</p>
+
+            {/* Check mode toggle */}
+            <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.md, padding: 3, gap: 3, marginBottom: 14 }}>
+              {(["name", "upload"] as const).map(m => (
+                <button key={m} onClick={() => { setMakeupCheckMode(m); setMakeupResult(null); setMakeupPreview(null); }} style={{ flex: 1, padding: "7px", borderRadius: DS.radius.sm, fontSize: 12, fontWeight: makeupCheckMode === m ? 600 : 400, color: makeupCheckMode === m ? DS.colors.white : DS.colors.textMuted, background: makeupCheckMode === m ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
+                  {m === "name" ? "Enter name" : "Upload photo"}
+                </button>
+              ))}
+            </div>
+
+            {/* Product category */}
+            <p style={{ margin: "0 0 8px", fontSize: 12, fontWeight: 600, color: DS.colors.textMuted }}>Product type</p>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+              {["Lip", "Blush", "Foundation", "Concealer", "Bronzer", "Eye", "Highlighter", "Other"].map(cat => (
+                <button key={cat} onClick={() => setMakeupProductCategory(cat)} style={{ padding: "4px 10px", borderRadius: DS.radius.full, fontSize: 12, fontWeight: 500, background: makeupProductCategory === cat ? "#C2185B" : DS.colors.surface, color: makeupProductCategory === cat ? DS.colors.white : DS.colors.textMuted, transition: "all 0.2s" }}>
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {makeupCheckMode === "name" ? (
+              <input value={makeupProductName} onChange={e => setMakeupProductName(e.target.value)} placeholder={`e.g. "Charlotte Tilbury Pillow Talk" or "MAC Ruby Woo"`} style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 12, fontFamily: DS.font }} />
+            ) : (
+              <>
+                <div style={{ background: DS.colors.surface, borderRadius: DS.radius.md, padding: "10px 12px", marginBottom: 10 }}>
+                  <p style={{ margin: 0, fontSize: 12, color: "#D97706", fontWeight: 500 }}>For any product with a known shade name — use "Enter name" instead. Photo checking is best for unknown shades swatched on your inner arm in natural daylight.</p>
+                </div>
+                <div onClick={() => !makeupPreview && makeupFileRef.current?.click()} style={{ borderRadius: DS.radius.lg, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, height: 120, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: makeupPreview ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 12 }}>
+                  {makeupPreview ? (
+                    <>
+                      <img src={makeupPreview} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <button onClick={e => { e.stopPropagation(); setMakeupPreview(null); setMakeupResult(null); if (makeupFileRef.current) makeupFileRef.current.value = ""; }} style={{ position: "absolute", top: 8, right: 8, width: 28, height: 28, borderRadius: DS.radius.full, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Icon name="x" size={14} color={DS.colors.white} />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="camera" size={20} color={DS.colors.accent} />
+                      <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 6 }}>Tap to upload swatch</p>
+                    </>
+                  )}
+                </div>
+                <input ref={makeupFileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) setMakeupPreview(URL.createObjectURL(f)); }} />
+              </>
+            )}
+
+            <button onClick={async () => {
+              if (!seasonData) return;
+              if (makeupCheckMode === "name" && !makeupProductName.trim()) return;
+              if (makeupCheckMode === "upload" && !makeupPreview) return;
+              setMakeupChecking(true); setMakeupResult(null);
+              try {
+                let body: any;
+                if (makeupCheckMode === "upload") {
+                  const file = makeupFileRef.current?.files?.[0];
+                  if (!file) return;
+                  const img = new Image();
+                  const url = URL.createObjectURL(file);
+                  const base64 = await new Promise<string>((resolve, reject) => {
+                    img.onload = () => {
+                      URL.revokeObjectURL(url);
+                      let { width, height } = img;
+                      const max = 1024;
+                      if (width > height) { if (width > max) { height = Math.round(height * max / width); width = max; } }
+                      else { if (height > max) { width = Math.round(width * max / height); height = max; } }
+                      const canvas = document.createElement("canvas");
+                      canvas.width = width; canvas.height = height;
+                      const ctx = canvas.getContext("2d");
+                      if (!ctx) { reject(new Error("Canvas error")); return; }
+                      ctx.drawImage(img, 0, 0, width, height);
+                      resolve(canvas.toDataURL("image/jpeg", 0.85).split(",")[1]);
+                    };
+                    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Load error")); };
+                    img.src = url;
+                  });
+                  body = { type: "check_item", image: base64, season: seasonData.season, mode: "single" };
+                } else {
+                  const savedFoundations = localStorage.getItem(`solla_foundation_shades_${user?.id}`) || "";
+                  body = {
+                    type: "makeup_check_product",
+                    season: seasonData.season,
+                    subseason: seasonData.subseason,
+                    undertone: seasonData.colour_profile?.undertone || "",
+                    depth: seasonData.colour_profile?.depth || "",
+                    products: [{ name: makeupProductName.trim(), category: makeupProductCategory }],
+                    foundation: savedFoundations || null,
+                  };
+                }
+                const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
+                  body: JSON.stringify(body),
+                });
+                const data = await res.json();
+                if (makeupCheckMode === "upload") {
+                  setMakeupResult(data);
+                } else if (data.results) {
+                  setMakeupResult({ mode: "single", items: data.results.map((r: any) => ({ colour_name: r.shade || r.name, hex: r.hex || "#C4A882", verdict: r.verdict !== false, verdict_v2: r.verdict_v2 || "yes", reason: r.reason || "", tip: r.tip || "" })) });
+                }
+              } catch {}
+              finally { setMakeupChecking(false); }
+            }} disabled={makeupChecking || (makeupCheckMode === "name" ? !makeupProductName.trim() : !makeupPreview)} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: makeupChecking || (makeupCheckMode === "name" ? !makeupProductName.trim() : !makeupPreview) ? DS.colors.border : "#C2185B", color: DS.colors.white, fontSize: 15, fontWeight: 600, marginBottom: 16 }}>
+              {makeupChecking ? "Checking..." : "Check this product"}
+            </button>
+
+            {/* Makeup results */}
+            {makeupResult && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+                <button onClick={() => { setMakeupResult(null); setMakeupPreview(null); setMakeupProductName(""); if (makeupFileRef.current) makeupFileRef.current.value = ""; }} style={{ padding: "8px 16px", borderRadius: DS.radius.full, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, fontSize: 12, color: DS.colors.textMuted, fontWeight: 500, alignSelf: "flex-start" }}>
+                  ← Check another
+                </button>
+                {makeupResult.items.map((item, i) => (
+                  <div key={i} style={{ padding: "14px", borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, background: DS.colors.bg }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: DS.radius.full, background: item.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
+                      <div style={{ flex: 1 }}>
+                        <p style={{ margin: "0 0 2px", fontSize: 14, fontWeight: 600, color: DS.colors.text }}>{item.colour_name}</p>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: item.verdict_v2 === "yes" ? DS.colors.success : item.verdict_v2 === "neutral" ? "#D97706" : DS.colors.danger }}>
+                          {item.verdict_v2 === "yes" ? "✓ Suits your season" : item.verdict_v2 === "neutral" ? "~ Works with care" : "✗ Doesn't suit your season"}
+                        </span>
+                        <span style={{ fontSize: 10, color: DS.colors.textFaint, background: DS.colors.surface, padding: "1px 6px", borderRadius: DS.radius.full, display: "block", marginTop: 3 }}>
+                          {makeupCheckMode === "upload" ? "Photo check — result may vary with lighting" : "Name check — high confidence"}
+                        </span>
+                      </div>
+                    </div>
+                    <p style={{ margin: "0 0 4px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{item.reason}</p>
+                    <p style={{ margin: "0 0 12px", fontSize: 13, color: DS.colors.accent, fontWeight: 500, lineHeight: 1.5 }}>{item.tip}</p>
+                    {user && user.plan !== "free" && (
+                      <button onClick={() => {
+                        setSaveMakeupSheet({ item, previewSrc: makeupPreview || undefined });
+                        setSaveMakeupName(makeupCheckMode === "name" ? makeupProductName : item.colour_name);
+                        setSaveMakeupShade(item.colour_name);
+                        setSaveMakeupCategory(makeupProductCategory);
+                        setSaveMakeupBrand("");
+                      }} style={{ padding: "6px 14px", borderRadius: DS.radius.full, background: "#FFF0F5", fontSize: 12, color: "#C2185B", fontWeight: 500 }}>
+                        + Save to my kit
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Save to kit sheet */}
+            {saveMakeupSheet && (
+              <div onClick={() => setSaveMakeupSheet(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 3000, display: "flex", alignItems: "flex-end" }}>
+                <div onClick={e => e.stopPropagation()} style={{ width: "100%", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, padding: "0 0 48px" }}>
+                  <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+                    <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
+                  </div>
+                  <div style={{ padding: "16px 24px" }}>
+                    <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Save to my kit</h2>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14, padding: "10px 14px", borderRadius: DS.radius.md, background: DS.colors.surface }}>
+                      <div style={{ width: 32, height: 32, borderRadius: DS.radius.full, background: saveMakeupSheet.item.hex, flexShrink: 0 }} />
+                      <p style={{ margin: 0, fontSize: 13, color: DS.colors.text }}>{saveMakeupSheet.item.colour_name}</p>
+                    </div>
+                    <input value={saveMakeupName} onChange={e => setSaveMakeupName(e.target.value)} placeholder="Product name" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 10, fontFamily: DS.font }} />
+                    <input value={saveMakeupBrand} onChange={e => setSaveMakeupBrand(e.target.value)} placeholder="Brand (optional)" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 10, fontFamily: DS.font }} />
+                    <input value={saveMakeupShade} onChange={e => setSaveMakeupShade(e.target.value)} placeholder="Shade name (optional)" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 12, fontFamily: DS.font }} />
+                    <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 600, color: DS.colors.textMuted }}>Category</p>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
+                      {["Lip", "Blush", "Foundation", "Concealer", "Bronzer", "Eye", "Highlighter", "Other"].map(cat => (
+                        <button key={cat} onClick={() => setSaveMakeupCategory(cat)} style={{ padding: "6px 14px", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 500, background: saveMakeupCategory === cat ? "#C2185B" : DS.colors.surface, color: saveMakeupCategory === cat ? DS.colors.white : DS.colors.textMuted }}>
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                    <button onClick={async () => {
+                      if (!user?.id || !saveMakeupName.trim()) return;
+                      const token = localStorage.getItem("solla_token");
+                      let image_url: string | null = null;
+                      if (saveMakeupSheet.previewSrc) {
+                        try {
+                          const imgRes = await fetch(saveMakeupSheet.previewSrc);
+                          const blob = await imgRes.blob();
+                          const ext = blob.type === "image/png" ? "png" : "jpg";
+                          const path = `${user.id}/makeup/${Date.now()}.${ext}`;
+                          const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/wardrobe-items/${path}`, {
+                            method: "POST",
+                            headers: { "Content-Type": blob.type, apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token || SUPABASE_JWT_KEY}` },
+                            body: blob,
+                          });
+                          if (uploadRes.ok) image_url = `${SUPABASE_URL}/storage/v1/object/public/wardrobe-items/${path}`;
+                        } catch {}
+                      }
+                      const res = await fetch(`${SUPABASE_URL}/rest/v1/makeup_items`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token || SUPABASE_JWT_KEY}`, Prefer: "return=minimal" },
+                        body: JSON.stringify({
+                          user_id: user.id, name: saveMakeupName.trim(), brand: saveMakeupBrand.trim() || null,
+                          category: saveMakeupCategory, shade_name: saveMakeupShade.trim() || null,
+                          hex: saveMakeupSheet.item.hex, verdict_v2: saveMakeupSheet.item.verdict_v2 || "yes",
+                          verdict: saveMakeupSheet.item.verdict, tip: saveMakeupSheet.item.tip, image_url, starred: false,
+                        }),
+                      });
+                      if (res.ok) setSaveMakeupSheet(null);
+                    }} disabled={!saveMakeupName.trim()} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: !saveMakeupName.trim() ? DS.colors.border : "#C2185B", color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>
+                      Save to my kit
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Mode description — single/outfit only */}
+        {mode !== "makeup" && <p style={{ fontSize: 13, color: DS.colors.textFaint, marginBottom: 16, lineHeight: 1.5 }}>
           {mode === "single" && (
             <div style={{ marginBottom: 8 }}>
               <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, margin: "0 0 6px" }}>Upload one item or multiple items at once — Solla checks each colour separately. Photograph your actual garment in natural light against a plain background for the most accurate result. You can also upload multiple items in one go.</p>
@@ -1678,10 +2048,10 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
             </div>
           )}
           {mode === "outfit" && "Upload a full outfit photo for an overall verdict and per-piece breakdown. Photograph in natural light for the most accurate colour reading."}
-        </p>
+        </p>}
 
-        {/* Upload area */}
-        {results.length === 0 && (
+        {/* Upload area — single/outfit only */}
+        {mode !== "makeup" && results.length === 0 && (
           <div
             onClick={() => previews.length === 0 && fileRef.current?.click()}
             style={{ borderRadius: DS.radius.xl, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: previews.length > 0 ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 16, height: 220 }}
@@ -1709,10 +2079,10 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
           </div>
         )}
 
-        <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={e => { if (e.target.files?.length) handleFiles(e.target.files); }} />
+        {mode !== "makeup" && <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={e => { if (e.target.files?.length) handleFiles(e.target.files); }} />}
 
-        {/* CTA */}
-        {previews.length > 0 && results.length === 0 && (
+        {/* CTA — single/outfit only */}
+        {mode !== "makeup" && previews.length > 0 && results.length === 0 && (
           <button onClick={handleCheck} disabled={loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: loading ? DS.colors.textFaint : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
             {loading ? (checkingIndex !== null && previews.length > 1 ? `Checking ${checkingIndex + 1} of ${previews.length}...` : "Checking...") : "Check this"}
           </button>
@@ -1770,7 +2140,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
         )}
 
         {/* Results */}
-        {results.length > 0 && results.map((result, idx) => (
+        {mode !== "makeup" && results.length > 0 && results.map((result, idx) => (
           <div key={idx} style={{ marginBottom: 32 }}>
             {previews[idx] && <img src={previews[idx]} alt={`item ${idx + 1}`} onClick={() => setLightboxSrc(previews[idx])} style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: DS.radius.lg, marginBottom: 12, cursor: "pointer" }} />}
             {/* Outfit overall verdict */}
