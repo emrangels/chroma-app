@@ -1265,7 +1265,7 @@ const generateOutfit = async (temp: number, desc: string) => {
         });
         const wData = await wRes.json();
         if (Array.isArray(wData) && wData.length > 0) {
-          wardrobeContext = wData.filter((i: WardrobeItem) => i.verdict).map((i: WardrobeItem) => `${i.name} (${i.category}${i.formality ? `, ${i.formality}` : ""})`).join(", ");
+          wardrobeContext = wData.filter((i: WardrobeItem) => (i.verdict_v2 || (i.verdict ? "yes" : "no")) !== "no").map((i: WardrobeItem) => `${i.name} (${i.category}${i.formality ? `, ${i.formality}` : ""})`).join(", ");
         }
       } catch {}
     }
@@ -1408,6 +1408,7 @@ const loadExtendedPalette = async () => {
           {!loadingWeather && weatherOutfit && (() => {
   try {
     const outfit = JSON.parse(weatherOutfit);
+    const outfitSummary = [outfit.coat && outfit.coat !== "null" ? outfit.coat : null, outfit.base, outfit.shoes, outfit.accessories].filter(Boolean).join(", ");
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {outfit.coat && outfit.coat !== "null" && (
@@ -1434,6 +1435,9 @@ const loadExtendedPalette = async () => {
             <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{outfit.accessories}</span>
           </div>
         )}
+        <button onClick={() => { localStorage.setItem("solla_stylist_prefill", `Style today's outfit for me: ${outfitSummary}. Any tweaks or alternatives?`); onTabChange("wardrobe"); }} style={{ marginTop: 4, alignSelf: "flex-start", fontSize: 12, color: DS.colors.accent, fontWeight: 600 }}>
+          Style with AI →
+        </button>
       </div>
     );
   } catch {
@@ -2484,7 +2488,7 @@ const WardrobeTab = ({ user, seasonData, onUpgrade, onSignUp, isGuest }: { user:
   const isFreePlan = plan === "free";
 
   const [view, setView] = useState<"items" | "outfits" | "plan" | "makeup" | "chat">("items");
-const [weeklyPlan, setWeeklyPlan] = useState<{ day: string; coat: string | null; base: string; shoes: string; accessories: string; locked: boolean; }[]>(() => {
+const [weeklyPlan, setWeeklyPlan] = useState<{ day: string; coat: string | null; base: string; shoes: string; accessories: string; locked: boolean; item_ids?: string[]; }[]>(() => {
   try {
     const saved = localStorage.getItem(`solla_weekly_plan_${user?.id}`);
     return saved ? JSON.parse(saved) : [];
@@ -2555,6 +2559,16 @@ const [planGenerated, setPlanGenerated] = useState(() => {
   // AI Chat
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
+
+  // Pick up prefill from Season tab "Style with AI" button
+  useEffect(() => {
+    const prefill = localStorage.getItem("solla_stylist_prefill");
+    if (prefill) {
+      setView("chat");
+      setChatInput(prefill);
+      localStorage.removeItem("solla_stylist_prefill");
+    }
+  }, []);
   const [chatLoading, setChatLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const categories = ["All", "Top", "Knitwear", "Jackets & Coats", "Bottoms", "Dresses & Jumpsuits", "Shoes", "Bags", "Accessories"];
@@ -3213,14 +3227,10 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                   {day.locked ? (
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {(() => {
-                        const planText = `${day.coat || ""} ${day.base} ${day.shoes} ${day.accessories}`.toLowerCase();
-                        const matchedItems = items.filter(item => {
-                          const itemText = `${item.name} ${item.colour_name} ${item.category}`.toLowerCase();
-                          return itemText.split(" ").some(word => word.length > 3 && planText.includes(word));
-                        });
-                        return matchedItems.length > 0 ? (
+                        const selectedItems = items.filter(item => (day.item_ids || []).includes(item.id));
+                        return selectedItems.length > 0 ? (
                           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                            {matchedItems.map(item => (
+                            {selectedItems.map(item => (
                               <div key={item.id} style={{ textAlign: "center" }}>
                                 {item.image_url ? (
                                   <img src={item.image_url} style={{ width: 56, height: 56, borderRadius: DS.radius.md, objectFit: "cover", border: `1px solid ${DS.colors.border}` }} />
@@ -3285,11 +3295,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     <button onClick={async () => {
                       if (!user?.id) return;
                       const outfitName = `${day.day}'s outfit`;
-                      const planText = `${day.coat || ""} ${day.base} ${day.shoes} ${day.accessories}`.toLowerCase();
-                      const matchedIds = items.filter(item => {
-                        const itemText = `${item.name} ${item.colour_name} ${item.category}`.toLowerCase();
-                        return itemText.split(" ").some(word => word.length > 3 && planText.includes(word));
-                      }).map(i => i.id);
+                      const matchedIds = day.item_ids || [];
                       const res = await fetch(`${SUPABASE_URL}/rest/v1/outfits`, {
                         method: "POST",
                         headers: { ...getAuthHeaders(), Prefer: "return=representation" },
@@ -3819,23 +3825,20 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             </div>
             <div style={{ padding: "16px 24px" }}>
               <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Select items for {planItemSelector}</h2>
-              <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 16 }}>Items you select will show when this day is locked.</p>
+              <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 16 }}>Tap items to add or remove them from this day.</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {items.map(item => {
                   const dayPlan = weeklyPlan.find(d => d.day === planItemSelector);
-                  const planText = `${dayPlan?.coat || ""} ${dayPlan?.base || ""} ${dayPlan?.shoes || ""} ${dayPlan?.accessories || ""}`.toLowerCase();
-                  const isSelected = item.name.toLowerCase().split(" ").some(word => word.length > 3 && planText.includes(word));
+                  const selectedIds = dayPlan?.item_ids || [];
+                  const isSelected = selectedIds.includes(item.id);
                   return (
                     <button key={item.id} onClick={() => {
                       setWeeklyPlan(prev => {
                         const updated = prev.map(d => {
                           if (d.day !== planItemSelector) return d;
-                          const currentBase = d.base || "";
-                          const itemDesc = `${item.colour_name} ${item.name}`;
-                          const newBase = isSelected
-                            ? currentBase.replace(itemDesc, "").trim()
-                            : currentBase ? `${currentBase}, ${itemDesc}` : itemDesc;
-                          return { ...d, base: newBase };
+                          const current = d.item_ids || [];
+                          const newIds = isSelected ? current.filter(id => id !== item.id) : [...current, item.id];
+                          return { ...d, item_ids: newIds };
                         });
                         localStorage.setItem(`solla_weekly_plan_${user?.id}`, JSON.stringify(updated));
                         return updated;
