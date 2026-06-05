@@ -866,6 +866,12 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
     </div>
   );
 };
+const fixTipSeason = (tip: string, correctSeason: string): string => {
+  if (!tip || !correctSeason) return tip;
+  return tip
+    .replace(/\b(Spring|Summer|Autumn|Winter)\b/g, correctSeason);
+};
+
 const guessColourFromName = (name: string): string => {
   const n = name.toLowerCase();
   if (n.includes("black")) return "#2C2C2C";
@@ -3372,7 +3378,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                       <button onClick={() => handleDeleteItem(item.id)}><Icon name="trash" size={14} color={DS.colors.textFaint} /></button>
                     </div>
                   </div>
-                  {item.tip && <p style={{ margin: "8px 0 0", fontSize: 12, color: DS.colors.textMuted, lineHeight: 1.5 }}>{item.tip}</p>}
+                  {item.tip && <p style={{ margin: "8px 0 0", fontSize: 12, color: DS.colors.textMuted, lineHeight: 1.5 }}>{fixTipSeason(item.tip, seasonData?.season || "")}</p>}
                 </div>
               ))}
             </div>
@@ -4057,11 +4063,11 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
   <span style={{ fontSize: 11, color: items.length > 0 ? DS.colors.accentDark : DS.colors.textFaint, fontWeight: 500 }}>{items.length > 0 ? `${items.length} wardrobe item${items.length !== 1 ? "s" : ""} loaded` : "No wardrobe items yet"}</span>
 </div>
                 <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, maxWidth: 240, margin: "0 auto" }}>Your personal stylist is ready. The more you chat and the more clothes you add, the better Solla knows your style, preferences and lifestyle — so every suggestion gets more personal over time.</p>
-                <button onClick={() => { setChatInput("Analyse my wardrobe and tell me what's missing, what doesn't suit my season, and what key pieces I should add."); }} style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.lg, background: DS.colors.accentLight, fontSize: 13, color: DS.colors.accentDark, fontWeight: 600, textAlign: "left", border: `1px solid ${DS.colors.accent}30`, marginTop: 20, marginBottom: 8 }}>
+                <button onClick={() => { setChatInput(`Analyse my wardrobe and tell me what's missing for my ${seasonData?.season || ""} season, what doesn't suit me, and what key pieces I should add.`); }} style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.lg, background: DS.colors.accentLight, fontSize: 13, color: DS.colors.accentDark, fontWeight: 600, textAlign: "left", border: `1px solid ${DS.colors.accent}30`, marginTop: 20, marginBottom: 8 }}>
   ✦ Analyse my wardrobe
 </button>
 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-  {["What should I wear to a job interview?", "Put together a weekend outfit from my wardrobe", "What colours work with my season?"].map(suggestion => (
+  {["What should I wear to a job interview?", "Build me a capsule wardrobe for my season", "What am I wearing too much of?"].map(suggestion => (
                     <button key={suggestion} onClick={() => { setChatInput(suggestion); }} style={{ padding: "10px 14px", borderRadius: DS.radius.md, background: DS.colors.surface, fontSize: 13, color: DS.colors.textMuted, textAlign: "left", border: `1px solid ${DS.colors.border}` }}>
                       {suggestion}
                     </button>
@@ -4440,9 +4446,10 @@ const ShareCard = ({ seasonData, streak = 0, onClose }: { seasonData: SeasonData
           </div>
         </div>
 
-        {/* Headline */}
-        <div style={{ padding: "0 28px 28px" }}>
-          <p style={{ margin: 0, fontSize: 13, color: textColor, lineHeight: 1.6, opacity: 0.8 }}>{seasonData.headline}</p>
+        {/* Headline + Identity */}
+        <div style={{ padding: "0 28px 24px" }}>
+          <p style={{ margin: "0 0 10px", fontSize: 13, color: textColor, lineHeight: 1.6, opacity: 0.8 }}>{seasonData.headline}</p>
+          <p style={{ margin: 0, fontSize: 13, color: textColor, lineHeight: 1.65, fontStyle: "italic", opacity: 0.9 }}>{getIdentityStatement(seasonData.season)}</p>
         </div>
 
         {/* Divider */}
@@ -4904,7 +4911,7 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
         <Icon name="sparkles" size={24} color={DS.colors.accent} />
       </div>
       <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>{state.isGuest ? "Save your colour profile 🌸" : "Your season is ready 🌸"}</h2>
-      <p style={{ fontSize: 14, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>{state.isGuest ? "Create a free account to save your colours, add wardrobe items and access your full colour guide. Your analysis is saved and ready." : "Your colour profile is ready. Now let's build your daily outfit engine — add your wardrobe, create outfits and never ask \"what do I wear?\" again."}</p>
+      <p style={{ fontSize: 14, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>{state.isGuest ? `Create a free account to save your colours, add wardrobe items and access your full colour guide. Your ${state.seasonData?.season || ""} analysis is saved and ready.` : "Your colour profile is ready. Now let's build your daily outfit engine — add your wardrobe, create outfits and never ask \"what do I wear?\" again."}</p>
       {state.isGuest ? (
         <>
           <button onClick={() => { update({ activeSheet: null, screen: "auth" }); }} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 10 }}>Create free account</button>
