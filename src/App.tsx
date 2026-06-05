@@ -4825,7 +4825,7 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
   } else {
     update({ user: u, screen: "upload", isGuest: false });
   }
-}} onGuest={() => update({ isGuest: true, screen: "onboarding" })} />}
+}} onGuest={() => update({ isGuest: true, screen: "upload" })} />}
         {screen === "upload" && <UploadScreen onUpload={handleUpload} />}
         {screen === "analysing" && <AnalysingScreen />}
         {screen === "main" && (
