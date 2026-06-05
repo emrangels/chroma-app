@@ -155,11 +155,46 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
 };
 
 const slides = [
-  { icon: "camera", title: "Stop asking what to wear", body: "One selfie is all it takes. Solla analyses your colouring and builds your personal colour profile — ready in under a minute.", bg: "#EDE9FF", accent: DS.colors.accent },
-  { icon: "palette", title: "Finally know your colours", body: "Your exact season, your best shades, your makeup guide, your hair colours — all personalised to your specific undertone and colouring.", bg: "#E8F4FD", accent: "#4A90C4" },
-  { icon: "sparkles", title: "Wake up knowing what to wear", body: "Add your wardrobe and Solla suggests a season-approved outfit every morning based on your clothes and the weather. No more standing in front of the mirror.", bg: "#FFF1E6", accent: "#E8845A" },
-  { icon: "shirt", title: "Check anything, instantly", body: "Shopping online? Unsure about an item? Photograph it and Solla tells you instantly whether it suits your season — before you buy.", bg: "#E8F5EE", accent: "#1A9E6E" },
-{ icon: "sparkles", title: "Solla learns you", body: "The more you use Solla and chat with your AI stylist, the better it knows your preferences, lifestyle and style — so every suggestion gets more personal over time.", bg: "#EDE9FF", accent: DS.colors.accent },
+  {
+    icon: "camera",
+    title: "You've been guessing your colours your whole life.",
+    body: "One selfie changes that. Solla analyses your exact undertone, depth and colouring — and tells you precisely which colours make you look alive.",
+    bg: "#EDE9FF",
+    accent: DS.colors.accent,
+    label: null,
+  },
+  {
+    icon: "palette",
+    title: "One selfie tells you everything.",
+    body: "Your season, your subseason, your full colour palette, your exact makeup shades, your hair colours, your jewellery metals — all from a single photo. Under a minute.",
+    bg: "#E8F4FD",
+    accent: "#4A90C4",
+    label: "Colour analysis",
+  },
+  {
+    icon: "sparkles",
+    title: "Never ask what to wear again.",
+    body: "Add your wardrobe and Solla builds your daily outfit — weather-aware, season-approved, pulled from clothes you actually own. Every morning, sorted.",
+    bg: "#FFF1E6",
+    accent: "#E8845A",
+    label: "Daily outfit engine",
+  },
+  {
+    icon: "image",
+    title: "Check anything before you buy it.",
+    body: "Shopping online or standing in Sephora? Photograph it. Solla tells you instantly whether it suits your season — clothes, makeup, anything.",
+    bg: "#E8F5EE",
+    accent: "#1A9E6E",
+    label: "Colour checker",
+  },
+  {
+    icon: "sparkles",
+    title: "Solla gets smarter every day you use it.",
+    body: "The more you add, check and chat with your AI stylist, the better Solla knows your style, your life and what you actually reach for. This is the last styling app you'll need.",
+    bg: "#EDE9FF",
+    accent: DS.colors.accent,
+    label: "AI stylist",
+  },
 ];
 
 const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
@@ -175,24 +210,32 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
         .slide-right{animation:slideInRight 0.35s ease both}
         .slide-left{animation:slideInLeft 0.35s ease both}
       `}</style>
-      <div key={idx} className={dir > 0 ? "slide-right" : "slide-left"} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 28px", minHeight: 0 }}>
-        <div style={{ width: 88, height: 88, borderRadius: DS.radius.xl, background: slide.bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, flexShrink: 0 }}>
-          <Icon name={slide.icon} size={36} color={slide.accent} strokeWidth={1.5} />
+      <div key={idx} className={dir > 0 ? "slide-right" : "slide-left"} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 32px", minHeight: 0 }}>
+        <div style={{ width: 80, height: 80, borderRadius: DS.radius.xl, background: slide.bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24, flexShrink: 0 }}>
+          <Icon name={slide.icon} size={34} color={slide.accent} strokeWidth={1.5} />
         </div>
-        <h1 style={{ fontSize: 26, fontWeight: 700, color: DS.colors.text, textAlign: "center", letterSpacing: "-0.5px", marginBottom: 12, flexShrink: 0 }}>{slide.title}</h1>
-        <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 280, flexShrink: 0 }}>{slide.body}</p>
+        {slide.label && (
+          <div style={{ display: "inline-flex", alignItems: "center", padding: "3px 12px", background: slide.bg, borderRadius: DS.radius.full, marginBottom: 12, flexShrink: 0 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: slide.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>{slide.label}</span>
+          </div>
+        )}
+        <h1 style={{ fontSize: idx === 0 ? 24 : 26, fontWeight: 700, color: DS.colors.text, textAlign: "center", letterSpacing: "-0.5px", marginBottom: 14, flexShrink: 0, lineHeight: 1.25 }}>{slide.title}</h1>
+        <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.65, maxWidth: 290, flexShrink: 0 }}>{slide.body}</p>
       </div>
       <div style={{ display: "flex", justifyContent: "center", gap: 6, paddingBottom: 16, flexShrink: 0 }}>
         {slides.map((_, i) => <button key={i} onClick={() => goTo(i)} style={{ width: i === idx ? 24 : 6, height: 6, borderRadius: DS.radius.full, background: i === idx ? DS.colors.accent : DS.colors.border, transition: "all 0.3s ease" }} />)}
       </div>
-      <div style={{ padding: "0 28px calc(140px + env(safe-area-inset-bottom))", display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
+      <div style={{ padding: "0 28px calc(env(safe-area-inset-bottom) + 48px)", display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
         {idx < slides.length - 1 ? (
           <>
             <button onClick={() => goTo(idx + 1)} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Continue</button>
             <button onClick={onComplete} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Skip</button>
           </>
         ) : (
-          <button onClick={onComplete} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Get started</button>
+          <>
+            <button onClick={onComplete} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Discover my colours</button>
+            <p style={{ textAlign: "center", fontSize: 12, color: DS.colors.textFaint, marginTop: 4 }}>Free to start · No card required</p>
+          </>
         )}
       </div>
     </div>
@@ -306,8 +349,23 @@ const AuthScreen = ({ onSignIn, onGuest, onOpenTerms }: { onSignIn: (user: User)
   const inputStyle: React.CSSProperties = { width: "100%", padding: "14px 16px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 15, color: DS.colors.text, background: DS.colors.bg, outline: "none", transition: "border-color 0.2s" };
   const generateReferralCode = (u: string) => (u.replace(/[^a-zA-Z]/g, "").toUpperCase().slice(0, 6) || "USER") + Math.floor(1000 + Math.random() * 9000);
   const saveProfile = async (userId: string, userName: string, userEmail: string, token: string, refCode: string, enteredCode: string) => {
+    const guestSeason = localStorage.getItem("solla_season_guest");
+    let seasonData = null;
+    if (guestSeason) {
+      try { seasonData = JSON.parse(guestSeason); } catch {}
+    }
     try {
-      await fetch(`${SUPABASE_URL}/rest/v1/profiles`, { method: "POST", headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" }, body: JSON.stringify({ id: userId, name: userName, user_plan: "free", referral_code: refCode, referred_by: enteredCode ? enteredCode.toUpperCase() : null, referral_count: 0 }) });
+      await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+        method: "POST",
+        headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
+        body: JSON.stringify({
+          id: userId, name: userName, user_plan: "free",
+          referral_code: refCode,
+          referred_by: enteredCode ? enteredCode.toUpperCase() : null,
+          referral_count: 0,
+          ...(seasonData ? { season_data: seasonData } : {}),
+        }),
+      });
     } catch {}
   };
   const handleAuth = async () => {
@@ -1267,6 +1325,7 @@ const getSeasonalMood = (season: string): string => {
 };
 
 
+const SEASON_IDENTITY: Record<string, string[]> = {
   Spring: [
     "You carry warmth into every room before you say a word. That's not charm — it's colouring.",
     "Springs are the people others describe as 'glowing'. You always have been.",
@@ -4686,13 +4745,21 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
         {screen === "onboarding" && <OnboardingScreen onComplete={() => update({ screen: "auth" })} />}
 {screen === "lifestyle-onboarding" && <LifestyleOnboardingScreen userId={user?.id || ""} token={localStorage.getItem("solla_token") || ""} onComplete={() => update({ screen: "main", activeSheet: "preview" as Sheet, tourStep: null, activeTab: "home" })} />}
         {screen === "auth" && <AuthScreen onOpenTerms={sheet => update({ activeSheet: sheet })} onSignIn={u => {
-  // Check user's own cached season first, then fall back to guest season
   const cachedSeason = localStorage.getItem(`solla_season_${u.id}`) || localStorage.getItem(`solla_season_guest`);
   const cachedGuestSeason = localStorage.getItem(`solla_season_guest`);
   if (cachedGuestSeason) {
-    // Copy guest season to user's ID
     localStorage.setItem(`solla_season_${u.id}`, cachedGuestSeason);
     localStorage.removeItem(`solla_season_guest`);
+    // Save to Supabase so they never need to re-analyse
+    const token = localStorage.getItem("solla_token");
+    try {
+      const parsedSeason = JSON.parse(cachedGuestSeason);
+      fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${u.id}`, {
+        method: "PATCH",
+        headers: { ...supabaseHeaders, Authorization: `Bearer ${token || SUPABASE_JWT_KEY}`, Prefer: "return=minimal" },
+        body: JSON.stringify({ season_data: parsedSeason }),
+      }).catch(() => {});
+    } catch {}
   }
   if (cachedSeason) {
     try {
