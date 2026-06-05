@@ -1813,15 +1813,6 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
       <div style={{ padding: "20px 16px 0" }}>
         {/* Mode switcher */}
         <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, marginBottom: 20, gap: 4 }}>
-          {(["single", "outfit"] as const).map(m => (
-            <button key={m} onClick={() => { setMode(m); reset(); }} style={{ flex: 1, padding: "8px 4px", borderRadius: DS.radius.md, fontSize: 13, fontWeight: mode === m ? 600 : 400, color: mode === m ? DS.colors.white : DS.colors.textMuted, background: mode === m ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
-              {m.charAt(0).toUpperCase() + m.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {/* Mode switcher */}
-        <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, marginBottom: 20, gap: 4 }}>
           {(["single", "outfit", "makeup"] as const).map(m => (
             <button key={m} onClick={() => { setMode(m); reset(); setMakeupResult(null); setMakeupPreview(null); setMakeupProductName(""); }} style={{ flex: 1, padding: "8px 4px", borderRadius: DS.radius.md, fontSize: 13, fontWeight: mode === m ? 600 : 400, color: mode === m ? DS.colors.white : DS.colors.textMuted, background: mode === m ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
               {m === "single" ? "Single" : m === "outfit" ? "Outfit" : "Makeup"}
