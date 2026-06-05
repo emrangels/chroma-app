@@ -36,7 +36,7 @@ interface SeasonData {
   hair: { best_colours: string[]; avoid: string[]; tip: string; };
   jewellery: { metals: string[]; stones: string[]; tip: string; };
   style: { silhouettes: string; patterns: string; fabrics: string; tip: string; };
-  body_shape: string; daily_tip: string;
+  daily_tip: string;
 }
 interface MakeupItem {
   id: string; user_id: string; name: string; brand?: string; category: string;
@@ -438,65 +438,16 @@ if (mode === "landing") return (
   );
 };
 
-const BodyShapeIcon = ({ shape, selected, color }: { shape: string; selected: boolean; color: string }) => {
-  const paths: Record<string, React.ReactNode> = {
-    Hourglass: (
-      <svg viewBox="0 0 40 80" width="40" height="80" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-        <path d="M8 4 Q20 4 32 4 Q24 20 22 32 Q20 38 20 40 Q20 42 18 48 Q16 60 8 76 Q20 76 32 76 Q24 60 22 48 Q20 42 20 40 Q20 38 18 32 Q16 20 8 4Z" />
-      </svg>
-    ),
-    Pear: (
-      <svg viewBox="0 0 40 80" width="40" height="80" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-        <path d="M13 4 Q20 4 27 4 Q24 18 22 30 Q20 36 18 48 Q14 62 8 76 Q20 76 32 76 Q26 62 22 48 Q20 36 18 30 Q16 18 13 4Z" />
-      </svg>
-    ),
-    Apple: (
-      <svg viewBox="0 0 40 80" width="40" height="80" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-        <path d="M10 4 Q20 4 30 4 Q32 18 32 32 Q32 44 28 56 Q24 68 20 76 Q16 68 12 56 Q8 44 8 32 Q8 18 10 4Z" />
-      </svg>
-    ),
-    Rectangle: (
-      <svg viewBox="0 0 40 80" width="40" height="80" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-        <path d="M10 4 Q20 4 30 4 Q30 20 30 36 Q30 52 30 68 Q20 76 20 76 Q20 76 10 68 Q10 52 10 36 Q10 20 10 4Z" />
-      </svg>
-    ),
-    "Inverted Triangle": (
-      <svg viewBox="0 0 40 80" width="40" height="80" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-        <path d="M6 4 Q20 4 34 4 Q30 20 26 36 Q23 50 21 62 Q20 70 20 76 Q20 70 19 62 Q17 50 14 36 Q10 20 6 4Z" />
-      </svg>
-    ),
-    Oval: (
-      <svg viewBox="0 0 40 80" width="40" height="80" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
-        <path d="M12 4 Q20 4 28 4 Q34 16 34 32 Q34 52 28 64 Q24 72 20 76 Q16 72 12 64 Q6 52 6 32 Q6 16 12 4Z" />
-      </svg>
-    ),
-  };
-  return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 40, height: 80 }}>
-      {paths[shape] || null}
-    </div>
-  );
-};
 
-const UploadScreen = ({ onUpload }: { onUpload: (file: File, bodyShape: string) => void }) => {
-  const [showBodyGuide, setShowBodyGuide] = useState(false);
+
+const UploadScreen = ({ onUpload }: { onUpload: (file: File) => void }) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [bodyShape, setBodyShape] = useState<string>("");
   const handleFile = (file: File) => setPreview(URL.createObjectURL(file));
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) handleFile(f); };
-  const handleAnalyse = () => { const f = fileRef.current?.files?.[0]; if (f && bodyShape) onUpload(f, bodyShape); };
+  const handleAnalyse = () => { const f = fileRef.current?.files?.[0]; if (f) onUpload(f); };
   const cameraRef = useRef<HTMLInputElement>(null);
-
-  const bodyShapes = [
-    { id: "Hourglass", label: "Hourglass" },
-    { id: "Pear", label: "Pear" },
-    { id: "Apple", label: "Apple" },
-    { id: "Rectangle", label: "Rectangle" },
-    { id: "Inverted Triangle", label: "Inv. Triangle" },
-    { id: "Oval", label: "Oval" },
-  ];
 
   return (
       <div className="screen fade-in" style={{ background: DS.colors.bg, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
@@ -537,33 +488,10 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File, bodyShape: string) 
           ))}
         </div>
 
-        {/* Body shape */}
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-  <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: DS.colors.text }}>Your body shape</p>
-  <button onClick={() => setShowBodyGuide(true)} style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 500, display: "flex", alignItems: "center", gap: 4 }}>
-    <Icon name="info" size={13} color={DS.colors.accent} strokeWidth={2} />
-    Not sure?
-  </button>
-</div>
-<p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 16, lineHeight: 1.5 }}>This helps personalise your style and fit recommendations.</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
-            {bodyShapes.map(shape => {
-              const isSelected = bodyShape === shape.id;
-              return (
-                <button key={shape.id} onClick={() => setBodyShape(shape.id)} style={{ padding: "16px 8px 12px", borderRadius: DS.radius.lg, border: `2px solid ${isSelected ? DS.colors.accent : DS.colors.border}`, background: isSelected ? DS.colors.accentLight : DS.colors.bg, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, transition: "all 0.2s" }}>
-                  <BodyShapeIcon shape={shape.id} selected={isSelected} color={isSelected ? DS.colors.accent : DS.colors.textFaint} />
-                  <span style={{ fontSize: 11, fontWeight: isSelected ? 600 : 400, color: isSelected ? DS.colors.accent : DS.colors.textMuted }}>{shape.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
         {/* CTA */}
         {preview ? (
-          <button onClick={handleAnalyse} disabled={!bodyShape} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: !bodyShape ? DS.colors.border : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>
-            {!bodyShape ? "Select your body shape to continue" : "Analyse my colours"}
+          <button onClick={handleAnalyse} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>
+            Analyse my colours
           </button>
         ) : (
           <>
@@ -572,36 +500,6 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File, bodyShape: string) 
           </>
         )}
       </div>
-      {showBodyGuide && (
-  <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={() => setShowBodyGuide(false)}>
-    <div style={{ width: "100%", maxHeight: "85vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
-      <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
-        <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
-      </div>
-      <div style={{ padding: "16px 24px" }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Body shapes guide</h2>
-        <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 20, lineHeight: 1.5 }}>Choose the shape that most closely matches your natural proportions - not your size.</p>
-        {[
-          { id: "Hourglass", desc: "Your shoulders and hips are roughly equal width with a clearly defined, narrow waist." },
-          { id: "Pear", desc: "Your hips are noticeably wider than your shoulders, with a defined waist." },
-          { id: "Apple", desc: "Your midsection is fuller, with less definition at the waist. Shoulders and hips are similar width." },
-          { id: "Rectangle", desc: "Your shoulders, waist and hips are all similar width with little waist definition." },
-          { id: "Inverted Triangle", desc: "Your shoulders are broader than your hips, with a straight or undefined waist." },
-          { id: "Oval", desc: "Fuller through the midsection with narrower shoulders and hips. Similar to Apple but rounder overall." },
-        ].map(shape => (
-          <button key={shape.id} onClick={() => { setBodyShape(shape.id); setShowBodyGuide(false); }} style={{ width: "100%", display: "flex", alignItems: "center", gap: 16, padding: "14px 0", borderBottom: `1px solid ${DS.colors.border}`, textAlign: "left", background: "none" }}>
-            <BodyShapeIcon shape={shape.id} selected={bodyShape === shape.id} color={bodyShape === shape.id ? DS.colors.accent : DS.colors.textFaint} />
-            <div style={{ flex: 1 }}>
-              <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 600, color: bodyShape === shape.id ? DS.colors.accent : DS.colors.text }}>{shape.id}</p>
-              <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted, lineHeight: 1.5 }}>{shape.desc}</p>
-            </div>
-            {bodyShape === shape.id && <Icon name="check" size={16} color={DS.colors.accent} strokeWidth={2.5} />}
-          </button>
-        ))}
-      </div>
-    </div>
-  </div>
-)}
     </div>
   );
 };
@@ -1319,15 +1217,11 @@ const loadExtendedPalette = async () => {
   const gradient = seasonGradients[seasonData.season] || seasonGradients.Summer;
   const textColor = seasonTextColors[seasonData.season] || "#1a2a4a";
   const accentColor = seasonAccentColors[seasonData.season] || "#4A6FD4";
-  const canAccessMakeup = plan !== "free";
   const canAccessHair = plan !== "free";
   const canAccessJewellery = plan !== "free";
-  const canAccessStyle = plan === "luxe";
   const categoryCards = [
-    { id: "makeup" as Sheet, icon: "droplet", label: "Makeup", teaser: "Find out exactly which foundation undertone, blush shades and lip colours suit your season", locked: !canAccessMakeup, requiredPlan: "Glow" },
     { id: "hair" as Sheet, icon: "scissors", label: "Hair", teaser: "Discover the exact hair colours and tones that make your natural colouring come alive", locked: !canAccessHair, requiredPlan: "Glow" },
     { id: "jewellery" as Sheet, icon: "gem", label: "Jewellery", teaser: "Discover which metals and stones are made for your colouring", locked: !canAccessJewellery, requiredPlan: "Glow" },
-    { id: "style" as Sheet, icon: "shirt", label: "Style & Fit", teaser: "Discover exactly which cuts, silhouettes and patterns work for your colouring and body shape", locked: !canAccessStyle, requiredPlan: "Luxe" },
   ];
   return (
     <div style={{ flex: 1, overflowY: "auto", background: DS.colors.bg }}>
@@ -2636,7 +2530,6 @@ const handleEditOutfit = async () => {
     history: chatMessages.map(m => ({ role: m.role, content: m.content })),
     season: seasonData.season,
     subseason: seasonData.subseason,
-    body_shape: seasonData.body_shape,
     wardrobe: [
       ...items.map(i => `${i.name} (${i.category}, ${i.formality || "casual"}, ${i.colour_name}, ${i.verdict ? "suits season" : "doesn't suit season"})`),
       ...outfits.map(o => `Saved outfit: "${o.name}" (${items.filter(i => o.item_ids.includes(i.id)).map(i => i.name).join(", ")})`)
@@ -4191,14 +4084,14 @@ if (parsedUser.email && parsedSeason?.season) {
       img.src = objectUrl;
     });
 
-  const handleUpload = async (file: File, bodyShape: string = "") => {
+  const handleUpload = async (file: File) => {
   update({ screen: "analysing" });
   try {
     const base64 = await resizeAndEncode(file);
     const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
-      body: JSON.stringify({ type: "analyse", image: base64, body_shape: bodyShape }),
+      body: JSON.stringify({ type: "analyse", image: base64 }),
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
@@ -4293,7 +4186,6 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
           { icon: "droplet", label: "Makeup", desc: `Your exact foundation undertone, blush and lip shades as a ${state.seasonData.season}` },
           { icon: "scissors", label: "Hair colours", desc: `The exact shades that make your ${state.seasonData.season} colouring come alive` },
           { icon: "gem", label: "Jewellery", desc: "Your metals and stones — personalised to your season" },
-          { icon: "shirt", label: "Style & Fit", desc: "Cuts, silhouettes and patterns that work for your body and season" },
         ].map(item => (
           <div key={item.label} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
             <div style={{ width: 36, height: 36, borderRadius: DS.radius.md, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
