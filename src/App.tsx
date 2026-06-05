@@ -442,13 +442,13 @@ if (mode === "landing") return (
         <div style={{ width: 72, height: 72, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
           <Icon name="sparkles" size={32} color={DS.colors.accent} />
         </div>
-        <h1 style={{ fontSize: 28, fontWeight: 700, color: DS.colors.text, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Welcome to Solla</h1>
-        <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 4 }}>Join women and men who finally know their colours.</p>
-        <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 48 }}>Know your colours. Build your wardrobe. Never ask "what do I wear?" again.</p>
+        <h1 style={{ fontSize: 28, fontWeight: 700, color: DS.colors.text, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Know your colours.</h1>
+        <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 4 }}>One selfie. Your season, your palette, your daily outfit — personalised to your exact colouring.</p>
+        <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 48 }}>Free to start. No card required.</p>
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}>
-          <button onClick={() => setMode("signup")} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Create account</button>
+          <button onClick={() => setMode("signup")} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Discover my colours — free</button>
           <button onClick={() => setMode("signin")} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.bg, color: DS.colors.text, fontSize: 15, fontWeight: 500, border: `1.5px solid ${DS.colors.border}` }}>Sign in</button>
-          <button onClick={onGuest} style={{ width: "100%", padding: "14px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Continue as guest</button>
+          <button onClick={onGuest} style={{ width: "100%", padding: "14px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Try without an account</button>
         </div>
       </div>
       <p style={{ fontSize: 11, color: DS.colors.textFaint, textAlign: "center", padding: "0 0 24px" }}>© 2026 Solla™. All rights reserved.</p>
@@ -537,13 +537,22 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File) => void }) => {
         <input ref={cameraRef} type="file" accept="image/*" capture="user" onChange={handleChange} style={{ display: "none" }} />
 
         {/* Tips */}
-        <div style={{ display: "flex", gap: 16, marginBottom: 28 }}>
-          {["Natural light", "No filters", "Face forward"].map(tip => (
-            <div key={tip} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-              <div style={{ width: 6, height: 6, borderRadius: DS.radius.full, background: DS.colors.success }} />
-              <span style={{ fontSize: 11, color: DS.colors.textMuted, textAlign: "center", fontWeight: 500 }}>{tip}</span>
-            </div>
-          ))}
+        <div style={{ background: DS.colors.surface, borderRadius: DS.radius.lg, padding: "12px 14px", marginBottom: 24 }}>
+          <p style={{ margin: "0 0 10px", fontSize: 12, fontWeight: 700, color: DS.colors.text }}>For the most accurate analysis:</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {[
+              { icon: "✓", text: "Natural daylight — stand near a window", good: true },
+              { icon: "✓", text: "No filters or beauty modes", good: true },
+              { icon: "✓", text: "Face the light directly — even coverage", good: true },
+              { icon: "✗", text: "No flash — it distorts your skin tone and will affect your results", good: false },
+              { icon: "✗", text: "No heavy makeup if possible", good: false },
+            ].map(tip => (
+              <div key={tip.text} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: tip.good ? DS.colors.success : DS.colors.danger, flexShrink: 0, marginTop: 1 }}>{tip.icon}</span>
+                <span style={{ fontSize: 12, color: DS.colors.textMuted, lineHeight: 1.5 }}>{tip.text}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* CTA */}
@@ -582,7 +591,10 @@ const AnalysingScreen = () => {
       </div>
       <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>Analysing your colours</h2>
       <p style={{ fontSize: 15, color: DS.colors.accent, fontWeight: 500, marginBottom: 16, transition: "all 0.4s" }}>{steps[step]}...</p>
-      <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", marginBottom: 32, maxWidth: 260 }}>Analysing your colours… This takes up to a minute — good things take time. Your personal colour profile and wardrobe guide will be ready shortly.</p>
+      <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", marginBottom: 32, maxWidth: 260 }}>This takes up to a minute — keep this screen open while we work.</p>
+      <div style={{ padding: "10px 16px", background: "#FFFBEB", borderRadius: DS.radius.md, border: "1px solid #FDE68A", marginBottom: 32, maxWidth: 280, textAlign: "center" }}>
+        <p style={{ margin: 0, fontSize: 12, color: "#92400E", fontWeight: 500, lineHeight: 1.5 }}>⚠️ Don't navigate away or let your screen time out — this will interrupt the analysis.</p>
+      </div>
       <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
   {steps.map((s, i) => (
     <div key={s} style={{ display: "flex", alignItems: "center", gap: 12, width: 240, margin: "0 auto" }}>
@@ -1023,12 +1035,12 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
             { q: "Can I re-analyse my colours?", a: "Yes — go to the Me tab and tap 'Re-analyse my colours'. This clears your current results and takes you back to the upload screen. For best results use a clear, well-lit selfie in natural light with no filters." },
             { q: "My results aren't showing — what do I do?", a: "If your colour guide isn't appearing, try re-analysing your colours. Go to the Me tab and tap 'Re-analyse my colours' to upload a new photo and get your results." },
             { q: "What do I get on the free plan?", a: "The free plan gives you your colour season, your 4 best colours to wear now, your season headline and a daily colour tip. It's your starting point — upgrade to Glow or Luxe to unlock your full colour guide and daily outfit engine." },
-            { q: "What's the difference between Glow and Luxe?", a: "Glow unlocks your subseason, full colour palette, colour profile (undertone, depth, chroma and contrast), makeup guide, hair colour guide, jewellery guide and colour checker. Luxe adds everything in Glow plus your daily outfit engine — wardrobe builder, outfit creator, AI stylist chat, style and fit guide, and an extended palette of 24+ colours. If you want to stop asking 'what do I wear today?' — Luxe is built for that." },
+            { q: "What's the difference between Glow and Luxe?", a: "Glow unlocks your subseason, full colour palette, colour profile (undertone, depth, chroma and contrast), makeup guide, hair colour guide, jewellery guide and colour checker. Luxe adds everything in Glow plus your daily outfit engine — wardrobe builder, outfit creator, weekly planner, AI stylist chat, and an extended palette of 24+ colours. If you want to stop asking 'what do I wear today?' — Luxe is built for that." },
             { q: "How does the AI stylist work?", a: "The AI stylist lives in your Wardrobe tab and knows your colour season, lifestyle and every item you've added. Ask it what to wear today, what to wear for a specific occasion, how to style a piece you're not sure about, or to analyse your whole wardrobe for gaps. The more items you add, the smarter it gets." },
-            { q: "Do all my clothes need to be my season colours?", a: "No — and this is one of the most common misconceptions about colour analysis. Colour season matters most for items worn near your face: tops, jackets, scarves, earrings and makeup. These directly affect how your skin looks. Items worn away from your face — trousers, skirts, shoes, bags — have much more flexibility. Neutral colours like black, white, navy, grey and camel work across most seasons. Solla uses a three-state verdict: ✓ suits your season (great near your face), ~ neutral (works away from your face paired with season colours up top), and ✗ avoid (clashes regardless of placement)." },
-            { q: "What is the daily outfit suggestion?", a: "The daily outfit suggestion on your home tab uses your current weather and colour season to suggest a cohesive outfit each day. On Luxe, it pulls from your actual wardrobe items so suggestions are based on clothes you actually own. Allow location access for weather-based suggestions, or enter your postcode if location is unavailable. The suggestions improve over time as you add more wardrobe items and chat with your AI stylist." },
-            { q: "Can I pause my subscription instead of cancelling?", a: "Yes — when you tap Cancel subscription in the Me tab, you'll be offered the option to pause for one month instead. Your wardrobe, colour profile and all your data will be waiting when you return. You won't be charged during the pause." },
-            { q: "What is the colour checker?", a: "The colour checker lives in the Checker tab. Upload a photo of any clothing item, full outfit or colour swatches and Solla will instantly tell you whether each colour suits your season. Single item mode checks one piece at a time, outfit mode analyses every garment in a full look, and swatch mode is perfect for checking lipsticks or fabric samples held against your skin. Available on Glow and Luxe." },
+            { q: "How do I take a good selfie for analysis?", a: "The accuracy of your entire colour profile depends on your selfie — so this matters. Stand near a window in natural daylight. No flash — flash distorts your skin tone and will affect your results. No filters or beauty modes. Face the light directly so it falls evenly on your face. Plain or neutral background is best. No heavy makeup if possible, or minimal. The AI analyses your undertone, depth and chroma from the photo — accurate light is everything." },
+            { q: "What is the daily outfit suggestion?", a: "The daily outfit suggestion on your Season tab uses your current weather and colour season to suggest a cohesive outfit each day. On Glow and Luxe, it pulls from your actual wardrobe items so suggestions are based on clothes you actually own. Allow location access for weather-based suggestions, or enter your postcode if location is unavailable." },
+            { q: "What is the colour checker?", a: "The colour checker lives in the Checker tab. Upload a photo of any clothing item or full outfit and Solla will instantly tell you whether each colour suits your season. Single mode checks one piece at a time, Outfit mode analyses every garment in a full look, and Makeup mode checks any makeup product by name or photo. Available on Glow and Luxe." },
+            { q: "Can I check makeup products in the Checker tab?", a: "Yes — go to the Checker tab and select Makeup mode. Enter the product name for the most accurate result (e.g. 'Charlotte Tilbury Pillow Talk'), or upload a photo of a swatch on your inner arm in natural light. Select the product type and tap Check. You can save results directly to your makeup kit in the Wardrobe tab." },
             { q: "How does Solla learn my preferences?", a: "The more you use Solla and chat with your AI stylist, the better it understands your style. Your lifestyle, dress code and occasions from onboarding feed into every suggestion. Your wardrobe items — including their formality tags — help the stylist make relevant recommendations. Over time, feedback you give in the chat (thumbs up or down) helps refine suggestions to better match your taste." },
             { q: "What formality tags can I add to wardrobe items?", a: "When adding items to your wardrobe you can tag each piece as Casual, Smart casual, Work, Formal or Active. These tags help the AI stylist suggest outfits appropriate for your occasion — so if you ask for a work outfit it won't suggest your gym gear, and if you ask for a weekend look it won't pull your formal blazer." },
             { q: "How do I contact Solla?", a: "For any questions, feedback or support email us at hello@solla.com.au. We aim to respond within 1-2 business days." },
@@ -1594,28 +1606,30 @@ const loadExtendedPalette = async () => {
         <p style={{ margin: 0, fontSize: 14, color: textColor, lineHeight: 1.6, opacity: 0.85, maxWidth: 300 }}>{seasonData.headline}</p>
 
         {/* Identity statement */}
-        <p style={{ margin: "14px 0 0", fontSize: 14, color: textColor, lineHeight: 1.7, fontStyle: "italic", opacity: 0.9, maxWidth: 300 }}>{getIdentityStatement(seasonData.season)}</p>
+        <p style={{ margin: "10px 0 0", fontSize: 13, color: textColor, lineHeight: 1.6, fontStyle: "italic", opacity: 0.8, maxWidth: 300 }}>{getIdentityStatement(seasonData.season)}</p>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 16 }}>
+        <div style={{ marginTop: 14 }}>
           <button onClick={() => setShowShare(true)} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(255,255,255,0.3)", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 600, color: textColor, border: `1px solid rgba(255,255,255,0.4)` }}>
             <Icon name="share" size={14} color={textColor} strokeWidth={2} />
             Share my season
           </button>
-          {streak > 0 && (
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "8px 14px", background: "rgba(255,255,255,0.2)", borderRadius: DS.radius.full, border: `1px solid rgba(255,255,255,0.3)` }}>
-              <span style={{ fontSize: 14 }}>🔥</span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: textColor }}>{streak}</span>
-            </div>
-          )}
         </div>
-{showShare && <ShareCard seasonData={seasonData} onClose={() => setShowShare(false)} />}
+{showShare && <ShareCard seasonData={seasonData} streak={streak} onClose={() => setShowShare(false)} />}
       </div>
       <div style={{ margin: "0 16px", background: DS.colors.bg, borderRadius: `0 0 ${DS.radius.lg} ${DS.radius.lg}`, padding: "14px 16px", borderLeft: `3px solid ${accentColor}` }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
           <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: accentColor, letterSpacing: "0.08em", textTransform: "uppercase" }}>
             {new Date().toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long" })}
           </p>
-          <span style={{ fontSize: 10, color: DS.colors.textFaint, fontWeight: 500 }}>{seasonData.season}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {streak > 0 && (
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
+                <span style={{ fontSize: 12 }}>🔥</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.textMuted }}>{streak} day{streak !== 1 ? "s" : ""}</span>
+              </div>
+            )}
+            <span style={{ fontSize: 10, color: DS.colors.textFaint, fontWeight: 500 }}>{seasonData.season}</span>
+          </div>
         </div>
         <p style={{ margin: "0 0 8px", fontSize: 14, color: DS.colors.text, lineHeight: 1.6, fontWeight: 500 }}>{getSeasonalMood(seasonData.season)}</p>
         <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5, paddingTop: 8, borderTop: `1px solid ${DS.colors.border}` }}>{getDailyTip(seasonData.season, seasonData.daily_tip)}</p>
@@ -1703,6 +1717,12 @@ const loadExtendedPalette = async () => {
     setWeather({ temp, desc, icon: "map-pin" });
     generateOutfit(temp, desc, cacheKey);
   }} />
+)}
+{!loadingWeather && !weatherOutfit && weather && weather.desc !== "denied" && (
+  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+    <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>Add your wardrobe items to get a personalised outfit suggestion based on clothes you actually own.</p>
+    <button onClick={() => onTabChange("wardrobe")} style={{ alignSelf: "flex-start", padding: "8px 16px", borderRadius: DS.radius.full, background: DS.colors.accentLight, fontSize: 13, color: DS.colors.accentDark, fontWeight: 600 }}>Add wardrobe items →</button>
+  </div>
 )}
         </div>
       )}
@@ -2549,9 +2569,16 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ margin: 0, fontSize: 17, fontWeight: 700, color: DS.colors.text, letterSpacing: "-0.3px" }}>{user?.name || "Guest"}</p>
             <p style={{ margin: "2px 0 6px", fontSize: 13, color: DS.colors.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.email || ""}</p>
-            <span style={{ display: "inline-block", fontSize: 11, fontWeight: 600, color: planColors[plan], background: plan === "free" ? DS.colors.surface : plan === "glow" ? DS.colors.accentLight : "#FFF7ED", padding: "2px 10px", borderRadius: DS.radius.full, border: `1px solid ${planColors[plan]}30` }}>
-              {planLabel[plan]} plan
-            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ display: "inline-block", fontSize: 11, fontWeight: 600, color: planColors[plan], background: plan === "free" ? DS.colors.surface : plan === "glow" ? DS.colors.accentLight : "#FFF7ED", padding: "2px 10px", borderRadius: DS.radius.full, border: `1px solid ${planColors[plan]}30` }}>
+                {planLabel[plan]} plan
+              </span>
+              {user?.id && getStreak(user.id) > 0 && (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: 11, fontWeight: 600, color: DS.colors.textMuted, background: DS.colors.surface, padding: "2px 10px", borderRadius: DS.radius.full, border: `1px solid ${DS.colors.border}` }}>
+                  🔥 {getStreak(user.id)} day{getStreak(user.id) !== 1 ? "s" : ""}
+                </span>
+              )}
+            </div>
           </div>
         </div>
         {seasonData && (
@@ -2726,7 +2753,7 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 32px" }} onClick={() => setShowReanalyseWarning(false)}>
           <div style={{ background: DS.colors.bg, borderRadius: DS.radius.xl, padding: "28px 24px", width: "100%" }} onClick={e => e.stopPropagation()}>
             <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.3px" }}>Re-analyse your colours?</h3>
-            <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 24 }}>Your current season results will be cleared and you'll need to upload a new selfie. This cannot be undone.</p>
+            <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 24 }}>Your current season results will be cleared and you'll need to upload a new selfie. Your wardrobe items, outfits and all other data will be kept. This cannot be undone.</p>
             <button onClick={onReanalyse} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 15, fontWeight: 600, marginBottom: 10 }}>Yes, re-analyse</button>
             <button onClick={() => setShowReanalyseWarning(false)} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Cancel</button>
           </div>
@@ -2775,6 +2802,7 @@ const [planGenerated, setPlanGenerated] = useState(() => {
   const [planItemSearch, setPlanItemSearch] = useState("");
   const [planItemCategoryFilter, setPlanItemCategoryFilter] = useState("All");
   const [pendingPlanItemIds, setPendingPlanItemIds] = useState<string[]>([]);
+  const [showFaceRuleTip, setShowFaceRuleTip] = useState(false);
   const [makeupItems, setMakeupItems] = useState<MakeupItem[]>([]);
   const [makeupLoading, setMakeupLoading] = useState(false);
   const [makeupOnboarded, setMakeupOnboarded] = useState(() => !!localStorage.getItem(`solla_makeup_onboarded_${user?.id}`));
@@ -2997,6 +3025,13 @@ const [planGenerated, setPlanGenerated] = useState(() => {
       setItemPreviews([]); setItemResults([]); setItemNames([]); setItemCategories([]);
       setItemPrice("");
       if (fileRef.current) fileRef.current.value = "";
+      // Show face rule tip first time a non-green item is added
+      const hasNonGreen = itemResults.some(r => (r.verdict_v2 || (r.verdict ? "yes" : "no")) !== "yes");
+      const tipShown = localStorage.getItem(`solla_face_tip_${user?.id}`);
+      if (hasNonGreen && !tipShown) {
+        setShowFaceRuleTip(true);
+        localStorage.setItem(`solla_face_tip_${user?.id}`, "true");
+      }
     } catch {}
     finally { setLoading(false); }
   };
@@ -3195,11 +3230,11 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           {(["items", "outfits", "plan", "makeup", "chat"] as const).map(v => (
             <button key={v} onClick={() => {
               if (isGuest && v !== "items") { onSignUp?.(); return; }
-              if (isFreePlan && (v === "outfits" || v === "plan" || v === "chat")) { onUpgrade(); return; }
+              if (isFreePlan && (v === "outfits" || v === "plan" || v === "chat" || v === "makeup")) { onUpgrade(); return; }
               setView(v);
             }} style={{ flex: 1, padding: "6px 2px", borderRadius: DS.radius.md, fontSize: 12, fontWeight: view === v ? 600 : 400, color: view === v ? DS.colors.white : DS.colors.textMuted, background: view === v ? DS.colors.accent : "transparent", transition: "all 0.2s", position: "relative" }}>
               {v === "items" ? "Wardrobe" : v === "outfits" ? "Outfits" : v === "plan" ? "Plan" : v === "makeup" ? "Makeup" : "Stylist"}
-              {isFreePlan && (v === "outfits" || v === "plan" || v === "chat") && (
+              {isFreePlan && (v === "outfits" || v === "plan" || v === "chat" || v === "makeup") && (
                 <span style={{ position: "absolute", top: 1, right: 2, fontSize: 8, color: DS.colors.textFaint }}>🔒</span>
               )}
             </button>
@@ -3220,8 +3255,8 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           </div>
         )}
     {/* Free tier banner */}
-        {isFreePlan && (
-          <div style={{ margin: "0 16px 12px", padding: "12px 14px", background: DS.colors.accentLight, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        {isFreePlan && items.length > 0 && (
+          <div style={{ margin: "0 0 12px", padding: "12px 14px", background: DS.colors.accentLight, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div>
               <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.accentDark }}>{items.length}/{freeItemLimit} free items used</p>
               <p style={{ margin: "2px 0 0", fontSize: 12, color: DS.colors.accentDark, opacity: 0.8 }}>Upgrade to Luxe for unlimited wardrobe + daily outfits</p>
@@ -3287,14 +3322,11 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           ) : gridView ? (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 80 }}>
               {filteredItems.map(item => (
-                <div key={item.id} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, overflow: "hidden" }}>
+                <div key={item.id} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `2px solid ${item.verdict_v2 === "yes" ? "#86EFAC" : item.verdict_v2 === "neutral" ? "#FDE68A" : item.verdict_v2 === "no" ? "#FCA5A5" : item.verdict ? "#86EFAC" : "#FCA5A5"}`, overflow: "hidden" }}>
                   <div style={{ width: "100%", aspectRatio: "1", background: item.image_url ? "#F5F5F5" : item.hex, position: "relative" }}>
                     {item.image_url && <img src={item.image_url} style={{ width: "100%", height: "100%", objectFit: "contain", position: "absolute", inset: 0, padding: 4 }} />}
                     <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 4 }}>
                       <button onClick={() => handleToggleStar(item)} style={{ width: 28, height: 28, borderRadius: DS.radius.full, background: "rgba(255,255,255,0.9)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: item.starred ? "#FFD700" : DS.colors.border }}>★</button>
-                    </div>
-                    <div style={{ position: "absolute", bottom: 8, left: 8, padding: "2px 8px", borderRadius: DS.radius.full, background: item.verdict_v2 === "yes" ? "#F0FDF4" : item.verdict_v2 === "neutral" ? "#FFFBEB" : item.verdict_v2 === "no" ? "#FEF2F2" : item.verdict ? "#F0FDF4" : "#FEF2F2" }}>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: item.verdict_v2 === "yes" ? DS.colors.success : item.verdict_v2 === "neutral" ? "#D97706" : item.verdict_v2 === "no" ? DS.colors.danger : item.verdict ? DS.colors.success : DS.colors.danger }}>{item.verdict_v2 === "yes" ? "✓" : item.verdict_v2 === "neutral" ? "~" : item.verdict_v2 === "no" ? "✗" : item.verdict ? "✓" : "✗"}</span>
                     </div>
                   </div>
                   <div style={{ padding: "10px 12px" }}>
@@ -3442,10 +3474,18 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             </button>
           </div>
           {!planGenerated && !loadingPlan && (
-            <div style={{ textAlign: "center", padding: "40px 0" }}>
-              <Icon name="sparkles" size={40} color={DS.colors.border} />
-              <p style={{ fontSize: 15, fontWeight: 600, color: DS.colors.textMuted, marginTop: 12 }}>No plan yet</p>
-              <p style={{ fontSize: 13, color: DS.colors.textFaint, marginTop: 4, maxWidth: 240, margin: "8px auto 0", lineHeight: 1.6 }}>Tap Generate plan and Solla will build a full week of season-approved outfits from your wardrobe.</p>
+            <div style={{ textAlign: "center", padding: "40px 20px" }}>
+              <div style={{ width: 64, height: 64, borderRadius: DS.radius.xl, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                <Icon name="sparkles" size={28} color={DS.colors.accent} strokeWidth={1.5} />
+              </div>
+              <p style={{ fontSize: 16, fontWeight: 700, color: DS.colors.text, marginBottom: 8 }}>Your week, sorted.</p>
+              <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, maxWidth: 260, margin: "0 auto 24px" }}>Solla builds a full week of season-approved outfits from your wardrobe. Lock the days you love, regenerate the ones you don't.</p>
+              <button onClick={generateWeeklyPlan} style={{ padding: "14px 32px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 15, fontWeight: 600 }}>
+                Generate my week
+              </button>
+              {items.length === 0 && (
+                <p style={{ marginTop: 16, fontSize: 12, color: DS.colors.textFaint }}>Add wardrobe items first for personalised suggestions.</p>
+              )}
             </div>
           )}
           {loadingPlan && (
@@ -4280,6 +4320,19 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           </div>
         </div>
       )}
+      {/* Face rule tip — shows once after first neutral/no item */}
+      {showFaceRuleTip && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 32px" }} onClick={() => setShowFaceRuleTip(false)}>
+          <div style={{ background: DS.colors.bg, borderRadius: DS.radius.xl, padding: "28px 24px", width: "100%" }} onClick={e => e.stopPropagation()}>
+            <div style={{ width: 48, height: 48, borderRadius: DS.radius.lg, background: "#FFFBEB", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+              <span style={{ fontSize: 22 }}>💡</span>
+            </div>
+            <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.3px" }}>Not everything needs to suit your season</h3>
+            <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 20 }}>Colour matters most near your face — tops, jackets, scarves, earrings. Items worn lower down (trousers, shoes, bags) have much more flexibility. Use ~ and ✗ items away from your face, paired with season colours up top.</p>
+            <button onClick={() => setShowFaceRuleTip(false)} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 15, fontWeight: 600 }}>Got it</button>
+          </div>
+        </div>
+      )}
       {/* Edit Item Sheet */}
 {editingItem && (
   <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={() => setEditingItem(null)}>
@@ -4320,7 +4373,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
     </div>
   );
 };
-const ShareCard = ({ seasonData, onClose }: { seasonData: SeasonData; onClose: () => void }) => {
+const ShareCard = ({ seasonData, streak = 0, onClose }: { seasonData: SeasonData; streak?: number; onClose: () => void }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [generating, setGenerating] = useState(false);
   const gradient = seasonGradients[seasonData.season] || seasonGradients.Summer;
@@ -4398,6 +4451,7 @@ const ShareCard = ({ seasonData, onClose }: { seasonData: SeasonData; onClose: (
         {/* Footer */}
         <div style={{ padding: "20px 28px 28px" }}>
           <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: textColor }}>Stop guessing. Start dressing with confidence.</p>
+          {streak >= 3 && <p style={{ margin: "0 0 4px", fontSize: 12, color: accentColor, fontWeight: 600 }}>🔥 {streak} days of knowing my colours</p>}
           <p style={{ margin: "0 0 2px", fontSize: 11, color: textColor, opacity: 0.6 }}>Your daily outfit engine · Powered by colour science</p>
           <p style={{ margin: 0, fontSize: 11, color: accentColor, fontWeight: 600 }}>solla.com.au · @sollaapp</p>
           <p style={{ margin: "4px 0 0", fontSize: 10, color: textColor, opacity: 0.5 }}>© 2026 Solla™. All rights reserved.</p>
@@ -4771,7 +4825,7 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
   } else {
     update({ user: u, screen: "upload", isGuest: false });
   }
-}} onGuest={() => update({ isGuest: true, screen: "upload" })} />}
+}} onGuest={() => update({ isGuest: true, screen: "onboarding" })} />}
         {screen === "upload" && <UploadScreen onUpload={handleUpload} />}
         {screen === "analysing" && <AnalysingScreen />}
         {screen === "main" && (
