@@ -1207,8 +1207,99 @@ const getDailyTip = (season: string, fallback: string): string => {
   return tips[dayOfYear % tips.length];
 };
 
+const SEASON_IDENTITY: Record<string, string[]> = {
+  Spring: [
+    "You carry warmth into every room before you say a word. That's not charm — it's colouring.",
+    "Springs are the people others describe as 'glowing'. You always have been.",
+    "Your energy is light, clear and infectious. Your palette was built to match it.",
+    "You look best in the colours of late afternoon sun — warm, golden, alive.",
+    "There's a brightness to you that cool, heavy colours have always fought against. Now you know why.",
+    "People feel more optimistic around Springs. Your colouring is part of that.",
+    "You were made for colour. Not loud colour — warm, clear, joyful colour.",
+    "Your best self has always been your warmest self. Your palette makes that visible.",
+    "Springs are rare. Most people spend years wearing colours that dull them. You don't have to.",
+    "There's nothing soft or washed-out about you. Your palette reflects exactly that.",
+  ],
+  Summer: [
+    "You have a softness people trust immediately. That's not weakness — it's your power.",
+    "Summers are the people who make a room feel safe. Your palette reflects exactly that.",
+    "You carry elegance without effort. Cool, muted tones are simply the truth of you.",
+    "People remember how you made them feel. Your colouring is part of why.",
+    "You look best in the colours of early morning — soft, cool, before the world gets loud.",
+    "There is a quietness to your beauty that loud colours have always fought against.",
+    "Summers are underestimated. Then suddenly, undeniable.",
+    "Your palette is not subtle — it's precise. There's a difference.",
+    "You were never meant to wear black. You were made for something far more interesting.",
+    "The best version of you has always lived in soft, cool, considered tones. Now you have the words for it.",
+  ],
+  Autumn: [
+    "You have a groundedness that people lean on without realising it. Your palette is built from the same place.",
+    "Autumns are the people others describe as 'real'. Warm, deep, unhurried.",
+    "There's a richness to you that pastels and icy tones have always diminished. Now you know why.",
+    "You look best in the colours of October — deep, warm, alive with texture.",
+    "People trust Autumns. There's something in your warmth that reads as safe.",
+    "You were made for depth. Terracotta, rust, forest, gold — these aren't just colours, they're you.",
+    "Your colouring has always had a quiet authority. The right palette makes it visible.",
+    "Autumn colouring ages beautifully. The depth that suits you now will suit you always.",
+    "You carry warmth that cool, bright colours have spent years trying to cool down. They were wrong to try.",
+    "There is an earthiness to you that is genuinely rare. Own it completely.",
+  ],
+  Winter: [
+    "You have a presence that enters a room before you do. Your palette was built for exactly that.",
+    "Winters are the people you don't forget. High contrast, high impact, unforgettable.",
+    "There's a clarity to you that muted, warm tones have always blurred. Now you know why.",
+    "You look best in colours that match your intensity — deep, cool, uncompromising.",
+    "People notice Winters. Not because you try — because your colouring demands it.",
+    "You were made for contrast. Black, white, jewel tones — these aren't bold choices for you, they're natural ones.",
+    "Your colouring has always had an edge. The right palette doesn't soften it — it sharpens it.",
+    "Winters don't need to try hard. The palette does the work.",
+    "You carry a cool precision that warm, earthy colours have spent years trying to soften. They were wrong to try.",
+    "There is an intensity to you that is genuinely rare. Your palette finally matches it.",
+  ],
+};
+
+const getIdentityStatement = (season: string): string => {
+  const statements = SEASON_IDENTITY[season];
+  if (!statements) return "";
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+  return statements[dayOfYear % statements.length];
+};
+
+const getStreak = (userId: string): number => {
+  try {
+    const data = localStorage.getItem(`solla_streak_${userId}`);
+    if (!data) return 0;
+    const { count, lastDate } = JSON.parse(data);
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (lastDate === today) return count;
+    if (lastDate === yesterday) return count; // still active, will increment on open
+    return 0; // broken streak
+  } catch { return 0; }
+};
+
+const incrementStreak = (userId: string): number => {
+  try {
+    const data = localStorage.getItem(`solla_streak_${userId}`);
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (data) {
+      const { count, lastDate } = JSON.parse(data);
+      if (lastDate === today) return count; // already incremented today
+      const newCount = lastDate === yesterday ? count + 1 : 1; // continue or restart
+      localStorage.setItem(`solla_streak_${userId}`, JSON.stringify({ count: newCount, lastDate: today }));
+      return newCount;
+    }
+    localStorage.setItem(`solla_streak_${userId}`, JSON.stringify({ count: 1, lastDate: today }));
+    return 1;
+  } catch { return 0; }
+};
+
+
 const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade, onReanalyse, onTabChange }: { seasonData: SeasonData | null; user: User | null; onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void; onReanalyse: () => void; onTabChange: (tab: Tab) => void; }) => {
-  const plan = user?.plan || "free"; const [showShare, setShowShare] = useState(false);const [selectedColour, setSelectedColour] = useState<PaletteColour | null>(null);
+  const plan = user?.plan || "free"; const [showShare, setShowShare] = useState(false); const [selectedColour, setSelectedColour] = useState<PaletteColour | null>(null);
+  const [streak, setStreak] = useState(0);
+  useEffect(() => { if (user?.id) setStreak(incrementStreak(user.id)); }, [user?.id]);
 const [extendedPalette, setExtendedPalette] = useState<PaletteColour[]>([]);
 const [loadingExtended, setLoadingExtended] = useState(false);
 const [showExtended, setShowExtended] = useState(false);
@@ -1258,9 +1349,9 @@ const generateOutfit = async (temp: number, desc: string) => {
     const palette = (seasonData!.palette?.best || []).map((c: PaletteColour) => c.name).slice(0, 3).join(", ");
     const token = localStorage.getItem("solla_token");
     let wardrobeContext = "";
-    if (user?.id && user?.plan === "luxe") {
+    if (user?.id && (user?.plan === "luxe" || user?.plan === "glow")) {
       try {
-        const wRes = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?user_id=eq.${user.id}&select=name,category,colour_name,verdict&limit=20`, {
+        const wRes = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?user_id=eq.${user.id}&select=name,category,colour_name,verdict,verdict_v2,formality&limit=30`, {
           headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token || SUPABASE_JWT_KEY}` }
         });
         const wData = await wRes.json();
@@ -1375,16 +1466,45 @@ const loadExtendedPalette = async () => {
             <span style={{ fontSize: 15, color: accentColor, fontWeight: 500 }}>{seasonData.subseason}</span>
           )}
         </div>
-        <p style={{ margin: 0, fontSize: 14, color: textColor, lineHeight: 1.6, opacity: 0.85, maxWidth: 300 }}>{seasonData.headline}</p><button onClick={() => setShowShare(true)} style={{ marginTop: 16, display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(255,255,255,0.3)", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 600, color: textColor, border: `1px solid rgba(255,255,255,0.4)` }}>
-  <Icon name="share" size={14} color={textColor} strokeWidth={2} />
-  Share my season
-</button>
+        <p style={{ margin: 0, fontSize: 14, color: textColor, lineHeight: 1.6, opacity: 0.85, maxWidth: 300 }}>{seasonData.headline}</p>
+
+        {/* Identity statement */}
+        <p style={{ margin: "14px 0 0", fontSize: 14, color: textColor, lineHeight: 1.7, fontStyle: "italic", opacity: 0.9, maxWidth: 300 }}>{getIdentityStatement(seasonData.season)}</p>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 16 }}>
+          <button onClick={() => setShowShare(true)} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(255,255,255,0.3)", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 600, color: textColor, border: `1px solid rgba(255,255,255,0.4)` }}>
+            <Icon name="share" size={14} color={textColor} strokeWidth={2} />
+            Share my season
+          </button>
+          {streak > 0 && (
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "8px 14px", background: "rgba(255,255,255,0.2)", borderRadius: DS.radius.full, border: `1px solid rgba(255,255,255,0.3)` }}>
+              <span style={{ fontSize: 14 }}>🔥</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: textColor }}>{streak}</span>
+            </div>
+          )}
+        </div>
 {showShare && <ShareCard seasonData={seasonData} onClose={() => setShowShare(false)} />}
       </div>
       <div style={{ margin: "0 16px", background: DS.colors.bg, borderRadius: `0 0 ${DS.radius.lg} ${DS.radius.lg}`, padding: "12px 16px", borderLeft: `3px solid ${accentColor}`, display: "flex", alignItems: "flex-start", gap: 10 }}>
         <Icon name="sparkles" size={14} color={accentColor} strokeWidth={2} />
-        <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{getDailyTip(seasonData.season, seasonData.daily_tip)}</p>
+        <div style={{ flex: 1 }}>
+          <p style={{ margin: "0 0 3px", fontSize: 10, fontWeight: 600, color: accentColor, letterSpacing: "0.06em", textTransform: "uppercase" }}>Today's colour note</p>
+          <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{getDailyTip(seasonData.season, seasonData.daily_tip)}</p>
+        </div>
       </div>
+      {streak > 0 && [3, 7, 14, 30].includes(streak) && (
+        <div style={{ margin: "0 16px 4px", padding: "12px 14px", background: `${accentColor}15`, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 20 }}>🔥</span>
+          <div>
+            <p style={{ margin: "0 0 2px", fontSize: 13, fontWeight: 700, color: DS.colors.text }}>
+              {streak === 3 ? "3 days in a row" : streak === 7 ? "One week" : streak === 14 ? "Two weeks" : "30 days"}
+            </p>
+            <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted }}>
+              {streak === 3 ? "Your eye is starting to train." : streak === 7 ? "You're dressing differently now." : streak === 14 ? "This is becoming instinct." : "You know your colours completely."}
+            </p>
+          </div>
+        </div>
+      )}
       {nudge && !nudgeDismissed && (
         <div style={{ margin: "0 16px 4px", padding: "12px 14px", background: DS.colors.accentLight, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ flex: 1 }}>
@@ -1402,7 +1522,9 @@ const loadExtendedPalette = async () => {
         <div style={{ margin: "0 16px 4px", padding: "14px 16px", background: DS.colors.surface, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>Today's outfit</p>
-            {weather && weather.desc !== "denied" && <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted }}>{weather.temp}°C · {weather.desc}</p>}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              {weather && weather.desc !== "denied" && <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted }}>{weather.temp}°C · {weather.desc}</p>}
+            </div>
           </div>
           {loadingWeather && <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted }}>Finding your perfect outfit for today…</p>}
           {!loadingWeather && weatherOutfit && (() => {
@@ -2520,6 +2642,7 @@ const [planGenerated, setPlanGenerated] = useState(() => {
   const [planItemSelector, setPlanItemSelector] = useState<string | null>(null);
   const [planItemSearch, setPlanItemSearch] = useState("");
   const [planItemCategoryFilter, setPlanItemCategoryFilter] = useState("All");
+  const [pendingPlanItemIds, setPendingPlanItemIds] = useState<string[]>([]);
   const [makeupItems, setMakeupItems] = useState<MakeupItem[]>([]);
   const [makeupLoading, setMakeupLoading] = useState(false);
   const [makeupOnboarded, setMakeupOnboarded] = useState(() => !!localStorage.getItem(`solla_makeup_onboarded_${user?.id}`));
@@ -3285,7 +3408,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                   )}
                   <div style={{ display: "flex", gap: 12, marginTop: 10, flexWrap: "wrap" }}>
                     {!day.locked && (
-                      <button onClick={() => setPlanItemSelector(day.day)} style={{ fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>
+                      <button onClick={() => { setPendingPlanItemIds(day.item_ids || []); setPlanItemSelector(day.day); }} style={{ fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>
                         + Select items
                       </button>
                     )}
@@ -3825,24 +3948,15 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             </div>
             <div style={{ padding: "16px 24px" }}>
               <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Select items for {planItemSelector}</h2>
-              <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 16 }}>Tap items to add or remove them from this day.</p>
+              <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 16 }}>Tap to select or deselect. Tap Done to save.</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {items.map(item => {
-                  const dayPlan = weeklyPlan.find(d => d.day === planItemSelector);
-                  const selectedIds = dayPlan?.item_ids || [];
-                  const isSelected = selectedIds.includes(item.id);
+                  const isSelected = pendingPlanItemIds.includes(item.id);
                   return (
                     <button key={item.id} onClick={() => {
-                      setWeeklyPlan(prev => {
-                        const updated = prev.map(d => {
-                          if (d.day !== planItemSelector) return d;
-                          const current = d.item_ids || [];
-                          const newIds = isSelected ? current.filter(id => id !== item.id) : [...current, item.id];
-                          return { ...d, item_ids: newIds };
-                        });
-                        localStorage.setItem(`solla_weekly_plan_${user?.id}`, JSON.stringify(updated));
-                        return updated;
-                      });
+                      setPendingPlanItemIds(prev =>
+                        isSelected ? prev.filter(id => id !== item.id) : [...prev, item.id]
+                      );
                     }} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${isSelected ? DS.colors.accent : DS.colors.border}`, background: isSelected ? DS.colors.accentLight : DS.colors.bg, textAlign: "left" }}>
                       {item.image_url ? (
                         <img src={item.image_url} style={{ width: 44, height: 44, borderRadius: DS.radius.sm, objectFit: "cover", flexShrink: 0 }} />
@@ -3858,7 +3972,16 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                   );
                 })}
               </div>
-              <button onClick={() => setPlanItemSelector(null)} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 15, fontWeight: 600, marginTop: 20 }}>
+              <button onClick={() => {
+                setWeeklyPlan(prev => {
+                  const updated = prev.map(d =>
+                    d.day === planItemSelector ? { ...d, item_ids: pendingPlanItemIds } : d
+                  );
+                  localStorage.setItem(`solla_weekly_plan_${user?.id}`, JSON.stringify(updated));
+                  return updated;
+                });
+                setPlanItemSelector(null);
+              }} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 15, fontWeight: 600, marginTop: 20 }}>
                 Done
               </button>
             </div>
