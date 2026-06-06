@@ -1435,6 +1435,12 @@ const incrementStreak = (userId: string): number => {
 const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade, onReanalyse, onTabChange }: { seasonData: SeasonData | null; user: User | null; onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void; onReanalyse: () => void; onTabChange: (tab: Tab) => void; }) => {
   const plan = user?.plan || "free"; const [showShare, setShowShare] = useState(false); const [selectedColour, setSelectedColour] = useState<PaletteColour | null>(null);
   const [streak, setStreak] = useState(0);
+  const [outfitFeedback, setOutfitFeedback] = useState<"up" | "down" | null>(() => {
+    const today = new Date().toDateString();
+    const key = `solla_outfit_feedback_${user?.id || "guest"}_${today}`;
+    const val = localStorage.getItem(key);
+    return val === "up" || val === "down" ? val : null;
+  });
   useEffect(() => { if (user?.id) setStreak(incrementStreak(user.id)); }, [user?.id]);
 const [extendedPalette, setExtendedPalette] = useState<PaletteColour[]>([]);
 const [loadingExtended, setLoadingExtended] = useState(false);
@@ -1708,6 +1714,23 @@ const loadExtendedPalette = async () => {
         <button onClick={() => { localStorage.setItem("solla_stylist_prefill", `Style today's outfit for me: ${outfitSummary}. Any tweaks or alternatives?`); onTabChange("wardrobe"); }} style={{ marginTop: 4, alignSelf: "flex-start", fontSize: 12, color: DS.colors.accent, fontWeight: 600 }}>
           Style with AI →
         </button>
+        {outfitFeedback ? (
+          <p style={{ margin: "6px 0 0", fontSize: 12, color: DS.colors.textFaint }}>{outfitFeedback === "up" ? "👍 Glad it works!" : "👎 Noted — we'll do better tomorrow."}</p>
+        ) : (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+            <span style={{ fontSize: 12, color: DS.colors.textFaint }}>How's this?</span>
+            <button onClick={() => {
+              const key = `solla_outfit_feedback_${user?.id || "guest"}_${new Date().toDateString()}`;
+              localStorage.setItem(key, "up");
+              setOutfitFeedback("up");
+            }} style={{ padding: "4px 12px", borderRadius: DS.radius.full, background: DS.colors.surface, fontSize: 13, border: `1px solid ${DS.colors.border}` }}>👍</button>
+            <button onClick={() => {
+              const key = `solla_outfit_feedback_${user?.id || "guest"}_${new Date().toDateString()}`;
+              localStorage.setItem(key, "down");
+              setOutfitFeedback("down");
+            }} style={{ padding: "4px 12px", borderRadius: DS.radius.full, background: DS.colors.surface, fontSize: 13, border: `1px solid ${DS.colors.border}` }}>👎</button>
+          </div>
+        )}
       </div>
     );
   } catch {
@@ -1732,6 +1755,24 @@ const loadExtendedPalette = async () => {
 )}
         </div>
       )}
+      {/* See your week link — shows if plan exists */}
+      {plan !== "free" && (() => {
+        try {
+          const saved = localStorage.getItem(`solla_weekly_plan_${user?.id}`);
+          if (!saved) return null;
+          const planData = JSON.parse(saved);
+          if (!Array.isArray(planData) || planData.length === 0) return null;
+          return (
+            <button onClick={() => { onTabChange("wardrobe"); localStorage.setItem("solla_wardrobe_tab", "plan"); }} style={{ margin: "0 16px 4px", padding: "12px 16px", background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", width: "calc(100% - 32px)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <Icon name="sparkles" size={14} color={DS.colors.accent} strokeWidth={2} />
+                <span style={{ fontSize: 13, fontWeight: 600, color: DS.colors.text }}>Your week is planned</span>
+              </div>
+              <span style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 600 }}>See your week →</span>
+            </button>
+          );
+        } catch { return null; }
+      })()}
       {plan === "free" && (
         <button onClick={onUpgrade} style={{ margin: "0 16px 4px", padding: "16px", background: seasonData.season === "Spring" ? "linear-gradient(135deg, #E8845A 0%, #D4A843 100%)" : seasonData.season === "Autumn" ? "linear-gradient(135deg, #C26B3A 0%, #8B4513 100%)" : seasonData.season === "Winter" ? "linear-gradient(135deg, #2E4057 0%, #6B3FA0 100%)" : `linear-gradient(135deg, ${DS.colors.accent} 0%, #9B6FD4 100%)`, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
@@ -2856,6 +2897,12 @@ const [planGenerated, setPlanGenerated] = useState(() => {
       setView("chat");
       setChatInput(prefill);
       localStorage.removeItem("solla_stylist_prefill");
+    }
+    // Pick up plan tab navigation from Season tab "See your week" button
+    const planTab = localStorage.getItem("solla_wardrobe_tab");
+    if (planTab === "plan") {
+      setView("plan");
+      localStorage.removeItem("solla_wardrobe_tab");
     }
   }, []);
   const [chatLoading, setChatLoading] = useState(false);
@@ -4544,6 +4591,23 @@ export default function App() {
     wardrobeItems: [], checkerMode: "single", onboardingIndex: 0, tourStep: null, showDay3Prompt: false,
   });
   const update = (patch: Partial<AppState>) => setState(s => ({ ...s, ...patch }));
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: any) => { e.preventDefault(); setInstallPrompt(e); };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  // Show install banner after 45s on main screen if not already installed
+  useEffect(() => {
+    if (state.screen !== "main" || !installPrompt) return;
+    const dismissed = localStorage.getItem("solla_install_dismissed");
+    if (dismissed) return;
+    const t = setTimeout(() => setShowInstallBanner(true), 45000);
+    return () => clearTimeout(t);
+  }, [state.screen, installPrompt]);
 
   const handleSignOut = () => {
     localStorage.removeItem("solla_token");
@@ -4958,6 +5022,33 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
   />
 )}
       </div>
+      {/* Add to home screen banner */}
+      {showInstallBanner && installPrompt && (
+        <div style={{ position: "fixed", bottom: 90, left: 16, right: 16, zIndex: 3000, background: DS.colors.text, borderRadius: DS.radius.lg, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12, boxShadow: DS.shadow.lg }}>
+          <div style={{ width: 40, height: 40, borderRadius: DS.radius.md, background: DS.colors.accent, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Icon name="sparkles" size={20} color={DS.colors.white} strokeWidth={1.5} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ margin: "0 0 2px", fontSize: 13, fontWeight: 700, color: DS.colors.white }}>Add Solla to your home screen</p>
+            <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.6)" }}>Open instantly, like an app</p>
+          </div>
+          <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+            <button onClick={() => {
+              installPrompt.prompt();
+              installPrompt.userChoice.then((choice: any) => {
+                setShowInstallBanner(false);
+                setInstallPrompt(null);
+                if (choice.outcome === "dismissed") localStorage.setItem("solla_install_dismissed", "true");
+              });
+            }} style={{ padding: "8px 14px", borderRadius: DS.radius.md, background: DS.colors.accent, fontSize: 13, fontWeight: 600, color: DS.colors.white }}>
+              Add
+            </button>
+            <button onClick={() => { setShowInstallBanner(false); localStorage.setItem("solla_install_dismissed", "true"); }} style={{ padding: "8px", borderRadius: DS.radius.md, background: "rgba(255,255,255,0.1)" }}>
+              <Icon name="x" size={14} color={DS.colors.white} />
+            </button>
+          </div>
+        </div>
+      )}
     <Analytics />
     </>
   );
