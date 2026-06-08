@@ -64,6 +64,28 @@ interface AppState {
 showDay3Prompt: boolean;
 }
 
+// ─── Affiliate shopping ──────────────────────────────────────────────────────
+// Commission Factory affiliate IDs — swap in when approved
+const AFFILIATE_ID_ICONIC = ""; // TODO: add CF affiliate ID for THE ICONIC
+const AFFILIATE_ID_ASOS = "";   // TODO: add CF affiliate ID for ASOS
+
+const buildShopLinks = (colourName: string, category?: string) => {
+  const q = encodeURIComponent(`${colourName}${category && category !== "Top" ? " " + category.toLowerCase() : ""}`);
+  const iconicBase = `https://www.theiconic.com.au/search/?q=${q}&gender=female`;
+  const asosBase = `https://www.asos.com/au/search/?q=${q}&refine=gender%3Awomen`;
+  const iconicUrl = AFFILIATE_ID_ICONIC
+    ? `https://t.cfjump.com/t/${AFFILIATE_ID_ICONIC}?u=${encodeURIComponent(iconicBase)}`
+    : iconicBase;
+  const asosUrl = AFFILIATE_ID_ASOS
+    ? `https://t.cfjump.com/t/${AFFILIATE_ID_ASOS}?u=${encodeURIComponent(asosBase)}`
+    : asosBase;
+  return [
+    { retailer: "THE ICONIC", url: iconicUrl, flag: "🇦🇺", note: "Free returns" },
+    { retailer: "ASOS", url: asosUrl, flag: "🌍", note: "Ships to AU" },
+  ];
+};
+// ─────────────────────────────────────────────────────────────────────────────
+
 const SUPABASE_URL = "https://hnbpasabtwafnlxzlppr.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_e14xp3bV8O2Wu-gdC6HiUQ_gRYU5rbp";
 const SUPABASE_JWT_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuYnBhc2FidHdhZm5seHpscHByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMTY5NjcsImV4cCI6MjA5MjU5Mjk2N30.YrBhMxN96k_OFEcWHYZ41up73ZEvEtRZWXwExo8GTxY";
@@ -2040,6 +2062,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [checkingIndex, setCheckingIndex] = useState<number | null>(null);
   const [saveSheet, setSaveSheet] = useState<{ item: CheckResult["items"][0]; previewSrc?: string } | null>(null);
+  const [shopSheet, setShopSheet] = useState<{ item: CheckResult["items"][0] } | null>(null);
   const [saveName, setSaveName] = useState("");
   const [saveCategory, setSaveCategory] = useState("Top");
   const [saveFormality, setSaveFormality] = useState("Casual");
@@ -2355,17 +2378,24 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                     </div>
                     <p style={{ margin: "0 0 4px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{item.reason}</p>
                     <p style={{ margin: "0 0 12px", fontSize: 13, color: DS.colors.accent, fontWeight: 500, lineHeight: 1.5 }}>{item.tip}</p>
-                    {user && user.plan !== "free" && (
-                      <button onClick={() => {
-                        setSaveMakeupSheet({ item, previewSrc: makeupPreview || undefined });
-                        setSaveMakeupName(makeupCheckMode === "name" ? makeupProductName : item.colour_name);
-                        setSaveMakeupShade(item.colour_name);
-                        setSaveMakeupCategory(makeupProductCategory);
-                        setSaveMakeupBrand("");
-                      }} style={{ padding: "6px 14px", borderRadius: DS.radius.full, background: "#FFF0F5", fontSize: 12, color: "#C2185B", fontWeight: 500 }}>
-                        + Save to my kit
-                      </button>
-                    )}
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 2 }}>
+                      {item.verdict_v2 === "yes" && (
+                        <button onClick={() => setShopSheet({ item })} style={{ padding: "6px 14px", borderRadius: DS.radius.full, background: "#F0FDF4", border: `1px solid #86EFAC`, fontSize: 12, color: DS.colors.success, fontWeight: 600, display: "flex", alignItems: "center", gap: 5 }}>
+                          <span>🛍</span> Shop this shade
+                        </button>
+                      )}
+                      {user && (user.plan === "glow" || user.plan === "luxe") && (
+                        <button onClick={() => {
+                          setSaveMakeupSheet({ item, previewSrc: makeupPreview || undefined });
+                          setSaveMakeupName(makeupCheckMode === "name" ? makeupProductName : item.colour_name);
+                          setSaveMakeupShade(item.colour_name);
+                          setSaveMakeupCategory(makeupProductCategory);
+                          setSaveMakeupBrand("");
+                        }} style={{ padding: "6px 14px", borderRadius: DS.radius.full, background: "#FFF0F5", fontSize: 12, color: "#C2185B", fontWeight: 500 }}>
+                          + Save to my kit
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -2485,6 +2515,41 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
 
         {error && <p style={{ fontSize: 13, color: DS.colors.danger, padding: "8px 12px", background: "#FEF2F2", borderRadius: DS.radius.sm, marginBottom: 16 }}>{error}</p>}
 
+        {/* Shop this colour sheet */}
+        {shopSheet && (
+          <div onClick={() => setShopSheet(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 3000, display: "flex", alignItems: "flex-end" }}>
+            <div onClick={e => e.stopPropagation()} style={{ width: "100%", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, padding: "0 0 48px" }}>
+              <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+                <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
+              </div>
+              <div style={{ padding: "16px 24px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: DS.radius.full, background: shopSheet.item.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
+                  <div>
+                    <h2 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 2px" }}>Shop {shopSheet.item.colour_name}</h2>
+                    <p style={{ fontSize: 12, color: DS.colors.textMuted, margin: 0 }}>This colour suits your season — here's where to find it</p>
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {buildShopLinks(shopSheet.item.colour_name, shopSheet.item.piece).map(link => (
+                    <a key={link.retailer} href={link.url} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, background: DS.colors.bg, textDecoration: "none" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <span style={{ fontSize: 20 }}>{link.flag}</span>
+                        <div>
+                          <p style={{ margin: "0 0 2px", fontSize: 14, fontWeight: 700, color: DS.colors.text }}>{link.retailer}</p>
+                          <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted }}>{link.note}</p>
+                        </div>
+                      </div>
+                      <Icon name="chevronRight" size={16} color={DS.colors.textFaint} />
+                    </a>
+                  ))}
+                </div>
+                <p style={{ margin: "16px 0 0", fontSize: 11, color: DS.colors.textFaint, textAlign: "center", lineHeight: 1.5 }}>Solla may earn a small commission on purchases — at no extra cost to you. This helps keep the app free to start.</p>
+                <button onClick={() => setShopSheet(null)} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.textMuted, fontWeight: 500, marginTop: 12 }}>Close</button>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Save to Wardrobe Sheet */}
         {saveSheet && (
           <div onClick={() => setSaveSheet(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 3000, display: "flex", alignItems: "flex-end" }}>
@@ -2583,18 +2648,25 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                     </div>
                   </div>
                   <p style={{ margin: "0 0 4px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{item.reason}</p>
-                  <p style={{ margin: 0, fontSize: 13, color: DS.colors.accent, lineHeight: 1.5, fontWeight: 500 }}>{item.tip}</p>
-{user?.plan === "luxe" && (
-  <button onClick={() => openSaveSheet(item, previews[idx])} style={{ marginTop: 8, padding: "6px 14px", borderRadius: DS.radius.full, background: DS.colors.accentLight, fontSize: 12, color: DS.colors.accentDark, fontWeight: 500 }}>
-    + Save to wardrobe
-  </button>
-)}
-{user?.plan === "glow" && (
-  <button onClick={onUpgrade} style={{ marginTop: 8, padding: "8px 14px", borderRadius: DS.radius.full, background: "#FFF7ED", border: `1px solid #C26B3A`, display: "flex", alignItems: "center", gap: 6 }}>
-    <Icon name="lock" size={12} color="#C26B3A" strokeWidth={2} />
-    <span style={{ fontSize: 12, color: "#C26B3A", fontWeight: 600 }}>Save to wardrobe — unlock with Luxe</span>
-  </button>
-)}
+                  <p style={{ margin: "0 0 8px", fontSize: 13, color: DS.colors.accent, lineHeight: 1.5, fontWeight: 500 }}>{item.tip}</p>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {(item.verdict_v2 === "yes" || item.verdict === true) && (
+                      <button onClick={() => setShopSheet({ item })} style={{ padding: "6px 14px", borderRadius: DS.radius.full, background: "#F0FDF4", border: `1px solid #86EFAC`, fontSize: 12, color: DS.colors.success, fontWeight: 600, display: "flex", alignItems: "center", gap: 5 }}>
+                        <span>🛍</span> Shop this colour
+                      </button>
+                    )}
+                    {user?.plan === "luxe" && (
+                      <button onClick={() => openSaveSheet(item, previews[idx])} style={{ padding: "6px 14px", borderRadius: DS.radius.full, background: DS.colors.accentLight, fontSize: 12, color: DS.colors.accentDark, fontWeight: 500 }}>
+                        + Save to wardrobe
+                      </button>
+                    )}
+                    {user?.plan === "glow" && (
+                      <button onClick={onUpgrade} style={{ padding: "6px 14px", borderRadius: DS.radius.full, background: "#FFF7ED", border: `1px solid #C26B3A`, display: "flex", alignItems: "center", gap: 6 }}>
+                        <Icon name="lock" size={12} color="#C26B3A" strokeWidth={2} />
+                        <span style={{ fontSize: 12, color: "#C26B3A", fontWeight: 600 }}>Save to wardrobe — unlock with Luxe</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
