@@ -4357,7 +4357,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                       </button>
                     ))}
                   </div>
-                  <input value={itemPrice} onChange={e => setItemPrice(e.target.value)} placeholder="Price paid (optional, e.g. 89.99)" keyboardtype="decimal-pad" style={{ width: "100%", padding: "10px 12px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 13, color: DS.colors.text, background: DS.colors.surface, outline: "none", marginTop: 8, fontFamily: DS.font }} />
+                  <input value={itemPrice} onChange={e => setItemPrice(e.target.value)} placeholder="Price paid (optional, e.g. 89.99)" inputMode="decimal" style={{ width: "100%", padding: "10px 12px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 13, color: DS.colors.text, background: DS.colors.surface, outline: "none", marginTop: 8, fontFamily: DS.font }} />
                 </div>
               ))}
 
