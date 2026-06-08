@@ -145,7 +145,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
           </div>
           <div style={{ fontSize: 42, fontWeight: 700, color: DS.colors.white, letterSpacing: "-1px" }}>Solla™</div>
         </div>
-        <div className="tag-anim" style={{ marginTop: 12, fontSize: 15, color: "rgba(255,255,255,0.75)", fontWeight: 400, letterSpacing: "0.02em" }}>Never wonder what to wear again</div>
+        <div className="tag-anim" style={{ marginTop: 12, fontSize: 15, color: "rgba(255,255,255,0.75)", fontWeight: 400, letterSpacing: "0.02em" }}>Finally know your colours</div>
         <div className="dots-anim" style={{ marginTop: 48, display: "flex", gap: 6, justifyContent: "center" }}>
           {[0, 1, 2].map(i => <div key={i} style={{ width: 5, height: 5, borderRadius: DS.radius.full, background: DS.colors.white, animation: `pulse 1.2s ease ${i * 0.2}s infinite` }} />)}
         </div>
@@ -157,8 +157,8 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
 const slides = [
   {
     icon: "camera",
-    title: "You've been guessing your colours your whole life.",
-    body: "One selfie changes that. Solla analyses your exact undertone, depth and colouring — and tells you precisely which colours make you look alive.",
+    title: "Finally know your colours.",
+    body: "One selfie changes everything. Solla analyses your exact undertone, depth and colouring — and tells you precisely which colours make you look alive, and which ones are working against you.",
     bg: "#EDE9FF",
     accent: DS.colors.accent,
     label: null,
@@ -173,8 +173,8 @@ const slides = [
   },
   {
     icon: "sparkles",
-    title: "Never ask what to wear again.",
-    body: "Add your wardrobe and Solla builds your daily outfit — weather-aware, season-approved, pulled from clothes you actually own. Every morning, sorted.",
+    title: "Every morning, know exactly what to wear.",
+    body: "Add your wardrobe and Solla builds your daily outfit — weather-aware, season-approved, pulled from clothes you actually own. Getting dressed stops being a question.",
     bg: "#FFF1E6",
     accent: "#E8845A",
     label: "Daily outfit engine",
@@ -442,8 +442,8 @@ if (mode === "landing") return (
         <div style={{ width: 72, height: 72, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
           <Icon name="sparkles" size={32} color={DS.colors.accent} />
         </div>
-        <h1 style={{ fontSize: 28, fontWeight: 700, color: DS.colors.text, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Know your colours.</h1>
-        <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 4 }}>One selfie. Your season, your palette, your daily outfit — personalised to your exact colouring.</p>
+        <h1 style={{ fontSize: 28, fontWeight: 700, color: DS.colors.text, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Finally know your colours.</h1>
+        <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 4 }}>One selfie reveals your exact colour season — your palette, your daily outfit, your makeup guide. Personalised to your colouring.</p>
         <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 48 }}>Free to start. No card required.</p>
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}>
           <button onClick={() => setMode("signup")} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Discover my colours — free</button>
@@ -1394,6 +1394,41 @@ const SEASON_IDENTITY: Record<string, string[]> = {
   ],
 };
 
+const SEASON_CELEBRITIES: Record<string, { name: string; known_for: string }[]> = {
+  Spring: [
+    { name: "Margot Robbie", known_for: "actress" },
+    { name: "Blake Lively", known_for: "actress" },
+    { name: "Reese Witherspoon", known_for: "actress" },
+    { name: "Hailey Bieber", known_for: "model" },
+    { name: "Sienna Miller", known_for: "actress" },
+    { name: "Cameron Diaz", known_for: "actress" },
+  ],
+  Summer: [
+    { name: "Jennifer Aniston", known_for: "actress" },
+    { name: "Gwyneth Paltrow", known_for: "actress" },
+    { name: "Nicole Kidman", known_for: "actress" },
+    { name: "Cate Blanchett", known_for: "actress" },
+    { name: "Natalie Portman", known_for: "actress" },
+    { name: "Taylor Swift", known_for: "musician" },
+  ],
+  Autumn: [
+    { name: "Beyoncé", known_for: "musician" },
+    { name: "Jessica Alba", known_for: "actress" },
+    { name: "Eva Longoria", known_for: "actress" },
+    { name: "Jennifer Lopez", known_for: "musician" },
+    { name: "Penélope Cruz", known_for: "actress" },
+    { name: "Julianne Moore", known_for: "actress" },
+  ],
+  Winter: [
+    { name: "Dua Lipa", known_for: "musician" },
+    { name: "Zendaya", known_for: "actress" },
+    { name: "Anne Hathaway", known_for: "actress" },
+    { name: "Kim Kardashian", known_for: "entrepreneur" },
+    { name: "Megan Fox", known_for: "actress" },
+    { name: "Olivia Rodrigo", known_for: "musician" },
+  ],
+};
+
 const getIdentityStatement = (season: string): string => {
   const statements = SEASON_IDENTITY[season];
   if (!statements) return "";
@@ -1878,6 +1913,30 @@ const loadExtendedPalette = async () => {
             </div>
           </div>}
         </div>
+        {/* You share your season with... */}
+        {(() => {
+          const celebs = SEASON_CELEBRITIES[seasonData.season];
+          if (!celebs) return null;
+          return (
+            <div style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "16px" }}>
+              <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 600, color: DS.colors.text }}>You share your season with</p>
+              <p style={{ margin: "0 0 14px", fontSize: 12, color: DS.colors.textMuted }}>These celebrities are also {seasonData.season}s</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {celebs.slice(0, 4).map((celeb, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: DS.radius.full, background: accentColor + "20", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: accentColor }}>{celeb.name.charAt(0)}</span>
+                    </div>
+                    <div>
+                      <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>{celeb.name}</p>
+                      <p style={{ margin: 0, fontSize: 11, color: DS.colors.textFaint }}>{celeb.known_for}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
         {categoryCards.map(card => (
           <button key={card.id} onClick={() => card.locked ? onUpgrade() : onOpenSheet(card.id)} style={{ background: card.locked ? DS.colors.surface : DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "14px 16px", textAlign: "left", width: "100%", display: "flex", flexDirection: "column", gap: 6 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -3063,7 +3122,7 @@ const [planGenerated, setPlanGenerated] = useState(() => {
           verdict_v2: result.verdict_v2 || (result.verdict ? "yes" : "no"),
           tip: result.tip,
           starred: false,
-          price: null,
+          price: itemPrice ? parseFloat(itemPrice) : null,
           image_url,
         };
         const res = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items`, {
@@ -3414,6 +3473,11 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                         <span style={{ fontSize: 11, color: DS.colors.textFaint }}>·</span>
                         <span style={{ fontSize: 11, color: DS.colors.textFaint }}>{item.colour_name}</span>
                         {item.formality && <><span style={{ fontSize: 11, color: DS.colors.textFaint }}>·</span><span style={{ fontSize: 11, color: DS.colors.textFaint }}>{item.formality}</span></>}
+                        {item.price && item.price > 0 && (() => {
+                          const wearCount = Math.max(1, Math.floor((Date.now() - new Date(item.created_at).getTime()) / (1000 * 60 * 60 * 24 * 7)));
+                          const cpw = (item.price / wearCount).toFixed(2);
+                          return <><span style={{ fontSize: 11, color: DS.colors.textFaint }}>·</span><span style={{ fontSize: 11, color: DS.colors.success, fontWeight: 500 }}>${cpw}/wear</span></>;
+                        })()}
                       </div>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -4273,6 +4337,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                       </button>
                     ))}
                   </div>
+                  <input value={itemPrice} onChange={e => setItemPrice(e.target.value)} placeholder="Price paid (optional, e.g. 89.99)" keyboardtype="decimal-pad" style={{ width: "100%", padding: "10px 12px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 13, color: DS.colors.text, background: DS.colors.surface, outline: "none", marginTop: 8, fontFamily: DS.font }} />
                 </div>
               ))}
 
