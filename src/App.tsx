@@ -156,44 +156,44 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
 
 const slides = [
   {
-    icon: "camera",
-    title: "Finally know your colours.",
-    body: "One selfie changes everything. Solla analyses your exact undertone, depth and colouring — and tells you precisely which colours make you look alive, and which ones are working against you.",
+    icon: "sparkles",
+    title: "You've been dressing without the most important information.",
+    body: "Most people never find out their colour season. The ones who do can't unsee it. One selfie is all it takes.",
     bg: "#EDE9FF",
     accent: DS.colors.accent,
     label: null,
   },
   {
-    icon: "palette",
-    title: "One selfie tells you everything.",
-    body: "Your season, your subseason, your full colour palette, your exact makeup shades, your hair colours, your jewellery metals — all from a single photo. Under a minute.",
+    icon: "camera",
+    title: "One selfie. Your exact colouring, decoded.",
+    body: "Your season, your full palette, your exact makeup shades, your hair colours, your jewellery metals — all from a single photo. Under a minute.",
     bg: "#E8F4FD",
     accent: "#4A90C4",
     label: "Colour analysis",
   },
   {
-    icon: "sparkles",
+    icon: "hanger",
     title: "Every morning, know exactly what to wear.",
-    body: "Add your wardrobe and Solla builds your daily outfit — weather-aware, season-approved, pulled from clothes you actually own. Getting dressed stops being a question.",
+    body: "Weather-aware, season-approved, pulled from clothes you actually own. Getting dressed stops being a question.",
     bg: "#FFF1E6",
     accent: "#E8845A",
     label: "Daily outfit engine",
   },
   {
-    icon: "image",
-    title: "Check anything before you buy it.",
-    body: "Shopping online or standing in Sephora? Photograph it. Solla tells you instantly whether it suits your season — clothes, makeup, anything.",
+    icon: "sparkles",
+    title: "Something true about you that changes how you see yourself.",
+    body: "Your colour season isn't a trend. It's your colouring — the way you were born. Once you know it, you can't go back.",
     bg: "#E8F5EE",
     accent: "#1A9E6E",
-    label: "Colour checker",
+    label: "Your identity",
   },
   {
-    icon: "sparkles",
-    title: "Solla gets smarter every day you use it.",
-    body: "The more you add, check and chat with your AI stylist, the better Solla knows your style, your life and what you actually reach for. This is the last styling app you'll need.",
+    icon: "crown",
+    title: "The last styling app you'll need.",
+    body: "Your wardrobe, your colour checker, your AI stylist — all built around your exact colours. Free to start. No card required.",
     bg: "#EDE9FF",
     accent: DS.colors.accent,
-    label: "AI stylist",
+    label: null,
   },
 ];
 
@@ -618,10 +618,26 @@ const tabs: { id: Tab; icon: string; label: string }[] = [
 ];
 
 const tourSteps = [
-  { tab: "home" as Tab, title: "Your colour season", body: "Your palette, daily tip and personal colour guide — your style starting point." },
-  { tab: "checker" as Tab, title: "Colour checker", body: "Upload any item or outfit to see if it suits your season." },
-  { tab: "wardrobe" as Tab, title: "Your daily outfit engine", body: "Add your clothes, build outfits and wake up knowing exactly what to wear." },
-  { tab: "me" as Tab, title: "Your profile", body: "Manage your account, plan and preferences here." },
+  {
+    tab: "home" as Tab,
+    title: "Your Season tab",
+    body: "Your colour season, daily mood, colour tip and outfit suggestion live here. This is your home base — open it every morning.",
+  },
+  {
+    tab: "checker" as Tab,
+    title: "Colour Checker",
+    body: "Before you buy anything — photograph it. Solla tells you instantly if it suits your season. Works for clothes, makeup, anything.",
+  },
+  {
+    tab: "wardrobe" as Tab,
+    title: "Your Wardrobe",
+    body: "Add your clothes and Solla checks each one against your season. The more you add, the smarter your daily outfit suggestions get.",
+  },
+  {
+    tab: "me" as Tab,
+    title: "Your Profile",
+    body: "Your colour profile, plan details and settings live here. Tap any colour profile attribute to understand what it means for you.",
+  },
 ];
 
 const TourTooltip = ({ step, total, onNext, onSkip, activeTab, onTabChange }: { step: number; total: number; onNext: () => void; onSkip: () => void; activeTab: Tab; onTabChange: (tab: Tab) => void; }) => {
@@ -629,15 +645,19 @@ const TourTooltip = ({ step, total, onNext, onSkip, activeTab, onTabChange }: { 
   useEffect(() => { onTabChange(current.tab); }, [step]);
   return (
     <div style={{ position: "fixed", bottom: 90, left: 16, right: 16, zIndex: 2000 }}>
-      <div style={{ background: DS.colors.accent, borderRadius: DS.radius.lg, padding: "16px 18px", boxShadow: DS.shadow.lg }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>{step + 1} of {total}</span>
-          <button onClick={onSkip} style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>Skip tour</button>
+      <div style={{ background: DS.colors.text, borderRadius: DS.radius.xl, padding: "20px 20px 16px", boxShadow: DS.shadow.lg }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+          <div style={{ display: "flex", gap: 4 }}>
+            {tourSteps.map((_, i) => (
+              <div key={i} style={{ width: i === step ? 20 : 6, height: 6, borderRadius: DS.radius.full, background: i === step ? DS.colors.accent : "rgba(255,255,255,0.2)", transition: "all 0.3s" }} />
+            ))}
+          </div>
+          <button onClick={onSkip} style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", fontWeight: 500 }}>Skip</button>
         </div>
-        <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 700, color: DS.colors.white }}>{current.title}</p>
-        <p style={{ margin: "0 0 14px", fontSize: 13, color: "rgba(255,255,255,0.85)", lineHeight: 1.5 }}>{current.body}</p>
-        <button onClick={onNext} style={{ width: "100%", padding: "10px", borderRadius: DS.radius.md, background: DS.colors.white, fontSize: 13, fontWeight: 600, color: DS.colors.accent }}>
-          {step < total - 1 ? "Next" : "Get started"}
+        <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 700, color: DS.colors.white }}>{current.title}</p>
+        <p style={{ margin: "0 0 16px", fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: 1.55 }}>{current.body}</p>
+        <button onClick={onNext} style={{ width: "100%", padding: "12px", borderRadius: DS.radius.lg, background: DS.colors.accent, fontSize: 14, fontWeight: 600, color: DS.colors.white }}>
+          {step < total - 1 ? "Next →" : "Let's go"}
         </button>
       </div>
     </div>
