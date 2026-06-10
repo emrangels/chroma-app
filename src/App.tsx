@@ -64,19 +64,6 @@ interface AppState {
 showDay3Prompt: boolean;
 }
 
-// GA4 custom event tracking
-const trackEvent = (name: string, params?: Record<string, any>) => {
-  try {
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag("event", name, params || {});
-    }
-  } catch {}
-};
-
-// Commission Factory affiliate IDs - swap in when approved
-const AFFILIATE_ID_ICONIC = ""; // TODO: paste CF affiliate ID for THE ICONIC
-const AFFILIATE_ID_ASOS = "";   // TODO: paste CF affiliate ID for ASOS
-
 const SUPABASE_URL = "https://hnbpasabtwafnlxzlppr.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_e14xp3bV8O2Wu-gdC6HiUQ_gRYU5rbp";
 const SUPABASE_JWT_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuYnBhc2FidHdhZm5seHpscHByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMTY5NjcsImV4cCI6MjA5MjU5Mjk2N30.YrBhMxN96k_OFEcWHYZ41up73ZEvEtRZWXwExo8GTxY";
@@ -140,7 +127,7 @@ const Icon = ({ name, size = 24, color = "currentColor", strokeWidth = 1.5 }: { 
 };
 
 const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
-  useEffect(() => { const t = setTimeout(onComplete, 1500); return () => clearTimeout(t); }, [onComplete]);
+  useEffect(() => { const t = setTimeout(onComplete, 2800); return () => clearTimeout(t); }, [onComplete]);
   return (
     <div className="screen" style={{ background: DS.colors.accent, alignItems: "center", justifyContent: "center" }}>
       <style>{`
@@ -211,11 +198,6 @@ const slides = [
 ];
 
 const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
-  useEffect(() => {
-    const seen = localStorage.getItem("solla_onboarding_seen");
-    if (seen) { onComplete(); }
-  }, []);
-  const markSeen = () => { localStorage.setItem("solla_onboarding_seen", "true"); onComplete(); };
   const [idx, setIdx] = useState(0);
   const [dir, setDir] = useState(1);
   const goTo = (next: number) => { setDir(next > idx ? 1 : -1); setIdx(next); };
@@ -247,11 +229,11 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
         {idx < slides.length - 1 ? (
           <>
             <button onClick={() => goTo(idx + 1)} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Continue</button>
-            <button onClick={markSeen} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Skip</button>
+            <button onClick={onComplete} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Skip</button>
           </>
         ) : (
           <>
-            <button onClick={markSeen} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Discover my colours</button>
+            <button onClick={onComplete} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Discover my colours</button>
             <p style={{ textAlign: "center", fontSize: 12, color: DS.colors.textFaint, marginTop: 4 }}>Free to start · No card required</p>
           </>
         )}
@@ -293,12 +275,6 @@ const LifestyleOnboardingScreen = ({ onComplete, userId, token }: { onComplete: 
       subtitle: "We'll focus on solving this for you.",
       options: ["Not knowing what suits me", "Getting dressed takes too long", "Everything feels boring", "I buy things I never wear", "Dressing for my body"],
     },
-    {
-      key: "budget",
-      title: "What's your typical budget per clothing item?",
-      subtitle: "This helps us suggest outfits and shops that fit your lifestyle.",
-      options: ["Under $50", "$50 to $150", "$150 to $300", "$300+", "It varies"],
-    },
   ];
   const q = questions[step];
   const selected = answers[q.key];
@@ -318,7 +294,6 @@ const LifestyleOnboardingScreen = ({ onComplete, userId, token }: { onComplete: 
             occasions: updated.occasions,
             style_personality: updated.style_personality,
             style_challenge: updated.style_challenge,
-            budget: updated.budget,
           }),
         });
       } catch {}
@@ -527,30 +502,35 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File) => void }) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [consentGiven, setConsentGiven] = useState(() => !!localStorage.getItem("solla_ai_consent"));
   const handleFile = (file: File) => setPreview(URL.createObjectURL(file));
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) handleFile(f); };
   const handleAnalyse = () => { const f = fileRef.current?.files?.[0]; if (f) onUpload(f); };
   const cameraRef = useRef<HTMLInputElement>(null);
 
+  if (!consentGiven) return (
+    <div className="screen fade-in" style={{ background: DS.colors.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 28px" }}>
+      <div style={{ width: 64, height: 64, borderRadius: DS.radius.xl, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
+        <Icon name="camera" size={28} color={DS.colors.accent} strokeWidth={1.5} />
+      </div>
+      <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 12, textAlign: "center" }}>Before your analysis</h1>
+      <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.7, marginBottom: 8, textAlign: "center", maxWidth: 300 }}>Your selfie is analysed by Anthropic's AI to determine your colour season. Your photo is processed securely and not stored permanently after analysis is complete.</p>
+      <p style={{ fontSize: 13, color: DS.colors.textFaint, lineHeight: 1.6, marginBottom: 32, textAlign: "center", maxWidth: 300 }}>By continuing you consent to your photo being sent to Anthropic's AI for colour analysis. No other use is made of your photo.</p>
+      <button onClick={() => { localStorage.setItem("solla_ai_consent", "true"); setConsentGiven(true); }} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
+        I agree - analyse my colours
+      </button>
+      <button onClick={() => window.history.back()} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>
+        Cancel
+      </button>
+      <p style={{ marginTop: 20, fontSize: 11, color: DS.colors.textFaint, textAlign: "center", lineHeight: 1.5, maxWidth: 280 }}>Powered by Anthropic Claude. See our <span style={{ color: DS.colors.accent }}>Privacy Policy</span> for full details.</p>
+    </div>
+  );
+
   return (
       <div className="screen fade-in" style={{ background: DS.colors.bg, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
       <div style={{ padding: "40px 28px 120px", display: "flex", flexDirection: "column" }}>
         <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Take your selfie</h1>
-        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 16, lineHeight: 1.6 }}>One photo is all it takes. Your personal colour profile is ready in under a minute.</p>
-
-        <div style={{ background: "linear-gradient(135deg, #EEF2FF 0%, #DDE6FF 100%)", borderRadius: DS.radius.lg, padding: "14px 16px", marginBottom: 20, display: "flex", gap: 12, alignItems: "center" }}>
-          <div style={{ flexShrink: 0 }}>
-            <div style={{ display: "flex", gap: 4 }}>
-              {["#C8B4C8","#A8B8C8","#C4A8C0","#8898A8"].map((hex, i) => (
-                <div key={i} style={{ width: 20, height: 20, borderRadius: 6, background: hex }} />
-              ))}
-            </div>
-          </div>
-          <div>
-            <p style={{ margin: "0 0 2px", fontSize: 12, fontWeight: 700, color: "#1a2a4a" }}>True Summer example</p>
-            <p style={{ margin: 0, fontSize: 11, color: "#4A6FD4", lineHeight: 1.4 }}>Cool, soft colouring - dusty rose, powder blue, soft lavender. Finally having the words for why some outfits just work.</p>
-          </div>
-        </div>
+        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.6 }}>One photo is all it takes. Your personal colour profile and daily outfit engine - ready in under a minute.</p>
 
         {/* Photo upload */}
         <div onClick={() => !preview && fileRef.current?.click()} onDragOver={e => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={e => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files?.[0]; if (f) handleFile(f); }}
@@ -580,10 +560,10 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File) => void }) => {
           <p style={{ margin: "0 0 10px", fontSize: 12, fontWeight: 700, color: DS.colors.text }}>For the most accurate analysis:</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {[
-              { icon: "✗", text: "No flash - it distorts your skin tone and will affect your results", good: false },
               { icon: "✓", text: "Natural daylight - stand near a window", good: true },
               { icon: "✓", text: "No filters or beauty modes", good: true },
               { icon: "✓", text: "Face the light directly - even coverage", good: true },
+              { icon: "✗", text: "No flash - it distorts your skin tone and will affect your results", good: false },
               { icon: "✗", text: "No heavy makeup if possible", good: false },
             ].map(tip => (
               <div key={tip.text} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
@@ -630,20 +610,6 @@ const AnalysingScreen = () => {
       </div>
       <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>Analysing your colours</h2>
       <p style={{ fontSize: 15, color: DS.colors.accent, fontWeight: 500, marginBottom: 16, transition: "all 0.4s" }}>{steps[step]}...</p>
-      {(() => {
-        const facts = [
-          "True Summers look best in dusty rose and powder blue - never stark black.",
-          "Warm undertones suit golden jewellery. Cool undertones suit silver.",
-          "Your colour season is determined by undertone, depth and chroma.",
-          "The right colours near your face reduce the need for makeup.",
-          "Colour season analysis was developed in the 1980s by Johannes Itten.",
-          "High contrast colouring suits bold colour combinations.",
-          "Autumns look best in earthy tones - terracotta, olive, warm brown.",
-          "Low chroma means muted tones suit you better than vivid ones.",
-        ];
-        const factIdx = Math.floor(Date.now() / 4000) % facts.length;
-        return <p style={{ fontSize: 13, color: DS.colors.accent, textAlign: "center", marginBottom: 16, maxWidth: 280, lineHeight: 1.6, fontStyle: "italic", minHeight: 48 }}>{facts[factIdx]}</p>;
-      })()}
       <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", marginBottom: 32, maxWidth: 260 }}>This takes up to a minute - keep this screen open while we work.</p>
       <div style={{ padding: "10px 16px", background: "#FFFBEB", borderRadius: DS.radius.md, border: "1px solid #FDE68A", marginBottom: 32, maxWidth: 280, textAlign: "center" }}>
         <p style={{ margin: 0, fontSize: 12, color: "#92400E", fontWeight: 500, lineHeight: 1.5 }}>⚠️ Don't navigate away or let your screen time out - this will interrupt the analysis.</p>
@@ -671,10 +637,10 @@ const tabs: { id: Tab; icon: string; label: string }[] = [
 ];
 
 const tourSteps = [
-  { tab: "home" as Tab, title: "Your Colours tab", body: "Your colour season, daily tip, outfit suggestion and full palette live here. Open it every morning." },
-  { tab: "wardrobe" as Tab, title: "Your Wardrobe", body: "Add your clothes and Solla checks each one against your season. The more you add, the smarter your daily outfit suggestions get." },
-  { tab: "checker" as Tab, title: "Colour Checker", body: "Before you buy anything - photograph it. Solla tells you instantly if it suits your season. Works for clothes, makeup, anything." },
-  { tab: "me" as Tab, title: "Your Profile", body: "Your colour profile, plan details and settings live here." },
+  { tab: "home" as Tab, title: "Your colour season", body: "Your palette, daily tip and personal colour guide - your style starting point." },
+  { tab: "checker" as Tab, title: "Colour checker", body: "Upload any item or outfit to see if it suits your season." },
+  { tab: "wardrobe" as Tab, title: "Your daily outfit engine", body: "Add your clothes, build outfits and wake up knowing exactly what to wear." },
+  { tab: "me" as Tab, title: "Your profile", body: "Manage your account, plan and preferences here." },
 ];
 
 const TourTooltip = ({ step, total, onNext, onSkip, activeTab, onTabChange }: { step: number; total: number; onNext: () => void; onSkip: () => void; activeTab: Tab; onTabChange: (tab: Tab) => void; }) => {
@@ -773,8 +739,6 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
   const [loading, setLoading] = useState(false);
   const [userCount, setUserCount] = useState(16);
 
-  useEffect(() => { trackEvent("paywall_viewed", { plan: currentPlan }); }, []);
-
   useEffect(() => {
     fetch(`${SUPABASE_URL}/rest/v1/profiles?select=id`, {
       headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, Prefer: "count=exact" },
@@ -793,7 +757,6 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
   };
 
   const handleUpgrade = async (selectedPlan: "glow" | "luxe") => {
-    trackEvent("upgrade_clicked", { plan: selectedPlan, billing });
     if (isGuest && onSignUp) { onSignUp(); return; }
     setLoading(true);
     try {
@@ -833,7 +796,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
         </div>
         <div style={{ padding: "20px 24px 0" }}>
           <div style={{ width: 48, height: 48, borderRadius: DS.radius.lg, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-            <Icon name="sparkles" size={22} color={DS.colors.accent} />
+            <Icon name="crown" size={22} color={DS.colors.accent} />
           </div>
 
           {isGuest ? (
@@ -844,7 +807,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
               <Icon name="sparkles" size={12} color={DS.colors.accent} />
               <span style={{ fontSize: 12, color: DS.colors.accentDark, fontWeight: 600 }}>Join {userCount}+ people who finally know their colours 🌸</span>
               </div>
-              <button onClick={() => onSignUp?.()} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Create account to continue</button>
+              <button onClick={() => onSignUp?.()} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Create free account</button>
               <button onClick={onClose} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Maybe later</button>
             </>
           ) : (
@@ -889,6 +852,9 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
                 ))}
                 <button onClick={() => handleUpgrade("luxe")} disabled={loading} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: "#C26B3A", color: DS.colors.white, fontSize: 15, fontWeight: 600, marginTop: 14, opacity: loading ? 0.7 : 1 }}>
                   {loading ? "Starting trial..." : "Try Luxe free for 7 days - no charge until day 8"}
+                </button>
+                <button onClick={() => handleUpgrade("luxe")} disabled={loading} style={{ width: "100%", padding: "10px", borderRadius: DS.radius.lg, background: "transparent", border: `1px solid #C26B3A`, color: "#C26B3A", fontSize: 13, fontWeight: 500, marginTop: 8, opacity: loading ? 0.7 : 1 }}>
+                  {billing === "monthly" ? "Or buy now - $14.99/mo, no trial" : "Or buy now - $99.99/yr, no trial"}
                 </button>
               </div>
 
@@ -1035,14 +1001,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           </div>
           <div>
             <p style={{ margin: "0 0 8px", fontSize: 11, fontWeight: 600, color: DS.colors.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>Stylist tip</p>
-            <p style={{ margin: "0 0 12px", fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{seasonData?.hair?.tip}</p>
-            <button onClick={() => {
-              const text = `My colour season is ${seasonData?.season} (${seasonData?.subseason}). Best hair colours: ${seasonData?.hair?.best_colours?.join(", ")}. Avoid: ${seasonData?.hair?.avoid?.join(", ")}. Stylist tip: ${seasonData?.hair?.tip}`;
-              navigator.clipboard.writeText(text);
-            }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: DS.radius.full, background: DS.colors.accentLight, border: `1px solid ${DS.colors.accent}30`, fontSize: 12, color: DS.colors.accentDark, fontWeight: 600 }}>
-              <Icon name="share" size={12} color={DS.colors.accent} />
-              Copy for my hairdresser
-            </button>
+            <p style={{ margin: 0, fontSize: 14, color: DS.colors.text, lineHeight: 1.7 }}>{seasonData?.hair?.tip}</p>
           </div>
         </div>
       )}
@@ -1117,20 +1076,16 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
       {activeSheet === "privacy" && (
         <div style={{ padding: "16px 24px" }}>
           <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Privacy Policy</h2>
-          <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 24 }}>Last updated: 10 June 2026</p>
+          <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 24 }}>Last updated: 9 May 2026</p>
           {[
-            { q: "What information do we collect?", a: "We collect your name, email address, username, password and contact or authentication data when you create an account. We also collect photos you upload for colour analysis. We automatically collect log and usage data, device data, and geolocation information (used only for weather-based outfit suggestions and not stored permanently)." },
-            { q: "What sensitive information do we collect?", a: "We collect photos (selfies) for AI-powered colour season analysis. These are transmitted securely to Anthropic for processing and are not stored permanently on our servers after analysis is complete. This data is treated as biometric data and handled with additional care." },
-            { q: "How do we process your information?", a: "We use your information to provide personalised AI-powered colour season analysis and styling recommendations, manage your account, process payments, respond to support enquiries, send service communications, improve our services, and comply with our legal obligations." },
-            { q: "Who do we share your information with?", a: "We share data with Anthropic (AI processing - photos are transmitted for colour analysis and not stored permanently), Supabase (database), Stripe (payments - we do not store or access your card details), and Vercel (hosting and analytics). We do not sell your personal information to third parties." },
-            { q: "How are photos handled?", a: "Photos you upload for colour analysis are transmitted securely to Anthropic's API for processing. They are not stored permanently on our servers after analysis is complete. Wardrobe item photos are stored securely in Supabase and are only accessible to you." },
-            { q: "Do we use AI?", a: "Yes. Solla uses Anthropic's AI to provide colour season analysis, styling recommendations, outfit suggestions and AI stylist chat. Your photos and inputs are processed by Anthropic in accordance with their privacy policy. You can opt out of AI processing at any time by deleting your account from the Me tab." },
-            { q: "How long do we keep your data?", a: "We retain your personal information for as long as you have an account with us. When you request account deletion, your data is permanently removed within 30 days. You can cancel a deletion request by signing back in within that 30-day window." },
-            { q: "How do I delete my account?", a: "Go to the Me tab in the app and tap 'Delete my account'. Your account will be scheduled for permanent deletion after 30 days. You can cancel by signing back in within that window. You can also contact hello@solla.com.au for help." },
-            { q: "What are your rights?", a: "Under the Australian Privacy Act 1988 you have the right to access, correct, or delete your personal information. If you believe we are unlawfully processing your data you can lodge a complaint with the Office of the Australian Information Commissioner at oaic.gov.au. Contact hello@solla.com.au to exercise your rights." },
+            { q: "What information do we collect?", a: "We collect your name, email address, and password when you create an account. We also collect photos you upload for colour analysis, and wardrobe item photos and descriptions. We automatically collect log and usage data, and device information." },
+            { q: "How do we use your information?", a: "We use your information to provide personalised AI-powered colour season analysis and styling recommendations, manage your account, process payments, respond to support enquiries, send service communications, and improve our services." },
+            { q: "Who do we share your information with?", a: "We share data with Anthropic (AI processing), Supabase (database), Stripe (payments), and Vercel (hosting and analytics). We do not sell your personal information to third parties." },
+            { q: "How are photos handled?", a: "Photos you upload for colour analysis are transmitted securely to Anthropic for processing and are not stored permanently on our servers after analysis is complete." },
+            { q: "How long do we keep your data?", a: "We retain your personal information for as long as you have an account with us. When you close your account we will delete or anonymise your information unless required by law." },
+            { q: "What are your rights?", a: "Under the Australian Privacy Act 1988 you have the right to access, correct, or delete your personal information. Contact us at hello@solla.com.au to exercise these rights or to lodge a complaint." },
             { q: "How do we keep your information safe?", a: "We use HTTPS encryption, row-level database security, and JWT authentication. However no method of internet transmission is 100% secure." },
-            { q: "Do we collect information from minors?", a: "No. Solla is not directed at users under 18. If we become aware that a user is under 18, we will deactivate their account and delete their data." },
-            { q: "Contact us", a: "For privacy questions contact hello@solla.com.au or write to Solla, Data Protection Officer, Parcel Locker 10127 32034, 515 Brighton Road, Brighton SA 5048, Australia. You can also lodge a complaint with the Office of the Australian Information Commissioner at oaic.gov.au." },
+            { q: "Contact us", a: "For privacy questions contact hello@solla.com.au or write to Solla, Parcel Locker 10127 32034, 515 Brighton Road, Brighton SA 5048. You can also lodge a complaint with the Office of the Australian Information Commissioner at oaic.gov.au." },
           ].map((item, i) => (
             <FaqItem key={i} question={item.q} answer={item.a} />
           ))}
@@ -1139,12 +1094,10 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
       {activeSheet === "terms" && (
         <div style={{ padding: "16px 24px" }}>
           <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Terms of Service</h2>
-          <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 24 }}>Last updated: 10 June 2026</p>
+          <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 24 }}>Last updated: 9 May 2026</p>
           {[
             { q: "Who can use Solla?", a: "You must be at least 18 years of age to use Solla. By using our services you confirm that you meet this requirement." },
-            { q: "Free trial", a: "Glow and Luxe plans include a free 7-day trial. You will not be charged until day 8. Cancel any time before day 8 and you will not be charged a thing." },
-            { q: "Refunds", a: "We do not offer refunds for partial billing periods. If you cancel during a free trial before day 8, you will not be charged. For billing enquiries contact hello@solla.com.au." },
-            { q: "How do I cancel?", a: "You can cancel anytime from the Me tab - tap your plan and select Cancel subscription. Cancellations take effect at the end of the current billing period. You will keep access until then. You can also email hello@solla.com.au for help." },
+            { q: "How do I cancel?", a: "You can cancel anytime from the Me tab - tap your plan and select Cancel subscription. Cancellations take effect at the end of the current billing period. You will keep access until then. We do not offer refunds for partial periods. You can also email hello@solla.com.au for help." },
             { q: "AI-generated content", a: "Solla uses AI to generate colour analysis and styling recommendations. These are provided for informational and personal styling purposes only. Results may vary and should be used as guidance rather than definitive advice. We do not guarantee accuracy." },
             { q: "Acceptable use", a: "You agree not to use Solla for unlawful purposes, upload photos of others without consent, attempt to reverse engineer the app, use automated tools to access our services, or share your account credentials." },
             { q: "Intellectual property", a: "All content, design, code, and branding within Solla is owned by Emma Nagel (trading as Solla) and protected by Australian and international copyright law." },
@@ -1500,21 +1453,13 @@ const incrementStreak = (userId: string): number => {
 const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade, onReanalyse, onTabChange }: { seasonData: SeasonData | null; user: User | null; onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void; onReanalyse: () => void; onTabChange: (tab: Tab) => void; }) => {
   const plan = user?.plan || "free"; const [showShare, setShowShare] = useState(false); const [selectedColour, setSelectedColour] = useState<PaletteColour | null>(null);
   const [streak, setStreak] = useState(0);
-  const [streakIsNew, setStreakIsNew] = useState(false);
   const [outfitFeedback, setOutfitFeedback] = useState<"up" | "down" | null>(() => {
     const today = new Date().toDateString();
     const key = `solla_outfit_feedback_${user?.id || "guest"}_${today}`;
     const val = localStorage.getItem(key);
     return val === "up" || val === "down" ? val : null;
   });
-  useEffect(() => {
-    if (user?.id) {
-      const prev = getStreak(user.id);
-      const newStreak = incrementStreak(user.id);
-      setStreak(newStreak);
-      if (newStreak === 1 && prev === 0) setStreakIsNew(true);
-    }
-  }, [user?.id]);
+  useEffect(() => { if (user?.id) setStreak(incrementStreak(user.id)); }, [user?.id]);
 const [extendedPalette, setExtendedPalette] = useState<PaletteColour[]>([]);
 const [loadingExtended, setLoadingExtended] = useState(false);
 const [showExtended, setShowExtended] = useState(false);
@@ -1675,9 +1620,9 @@ const loadExtendedPalette = async () => {
     { id: "jewellery" as Sheet, icon: "gem", label: "Jewellery", teaser: "Discover which metals and stones are made for your colouring", locked: !canAccessJewellery, requiredPlan: "Glow" },
   ];
   return (
-    <div style={{ flex: 1, overflowY: "auto", background: DS.colors.bg, WebkitOverflowScrolling: "touch" }}>
+    <div style={{ flex: 1, overflowY: "auto", background: DS.colors.bg }}>
       <div style={{ background: gradient, padding: "52px 24px 28px" }}>
-        <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 600, color: accentColor, letterSpacing: "0.08em", textTransform: "uppercase" }}>Your colours</p>
+        <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 600, color: accentColor, letterSpacing: "0.08em", textTransform: "uppercase" }}>Your season</p>
         <h1 style={{ margin: "0 0 4px", fontSize: 42, fontWeight: 700, color: textColor, letterSpacing: "-1.5px", lineHeight: 1 }}>{seasonData.season}</h1>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
           {plan === "free" ? (
@@ -1694,7 +1639,7 @@ const loadExtendedPalette = async () => {
         <p style={{ margin: "10px 0 0", fontSize: 13, color: textColor, lineHeight: 1.6, fontStyle: "italic", opacity: 0.8, maxWidth: 300 }}>{getIdentityStatement(seasonData.season)}</p>
 
         <div style={{ marginTop: 14 }}>
-          <button onClick={() => { trackEvent("share_card_opened"); setShowShare(true); }} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(255,255,255,0.3)", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 600, color: textColor, border: `1px solid rgba(255,255,255,0.4)` }}>
+          <button onClick={() => setShowShare(true)} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(255,255,255,0.3)", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 600, color: textColor, border: `1px solid rgba(255,255,255,0.4)` }}>
             <Icon name="share" size={14} color={textColor} strokeWidth={2} />
             Share my season
           </button>
@@ -1719,16 +1664,10 @@ const loadExtendedPalette = async () => {
         <p style={{ margin: "0 0 8px", fontSize: 14, color: DS.colors.text, lineHeight: 1.6, fontWeight: 500 }}>{getSeasonalMood(seasonData.season)}</p>
         <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5, paddingTop: 8, borderTop: `1px solid ${DS.colors.border}` }}>{getDailyTip(seasonData.season, seasonData.daily_tip)}</p>
       </div>
-      {streak > 0 && [3, 7, 14, 30].includes(streak) && (() => { trackEvent("streak_milestone", { days: streak }); return null; })()}
       {streak > 0 && [3, 7, 14, 30].includes(streak) && (
         <div style={{ margin: "0 16px 4px", padding: "12px 14px", background: `${accentColor}15`, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 20 }}>🔥</span>
           <div>
-            {(() => {
-              const next = streak < 3 ? 3 : streak < 7 ? 7 : streak < 14 ? 14 : streak < 30 ? 30 : null;
-              const daysTo = next ? next - streak : null;
-              return daysTo && daysTo > 0 ? <p style={{ margin: "0 0 4px", fontSize: 11, color: DS.colors.textFaint }}>{daysTo} day{daysTo !== 1 ? "s" : ""} to your next milestone</p> : null;
-            })()}
             <p style={{ margin: "0 0 2px", fontSize: 13, fontWeight: 700, color: DS.colors.text }}>
               {streak === 3 ? "3 days in a row" : streak === 7 ? "One week" : streak === 14 ? "Two weeks" : "30 days"}
             </p>
@@ -1736,20 +1675,6 @@ const loadExtendedPalette = async () => {
               {streak === 3 ? "Your eye is starting to train." : streak === 7 ? "You're dressing differently now." : streak === 14 ? "This is becoming instinct." : "You know your colours completely."}
             </p>
           </div>
-        </div>
-      )}
-      {streakIsNew && streak === 1 && (
-        <div style={{ margin: "0 16px 4px", padding: "12px 14px", background: DS.colors.accentLight, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 20 }}>🌸</span>
-          <div>
-            <p style={{ margin: "0 0 2px", fontSize: 13, fontWeight: 700, color: DS.colors.text }}>Day 1 - your journey starts today</p>
-            <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted }}>Come back tomorrow to start your streak.</p>
-          </div>
-        </div>
-      )}
-      {streak < 0 && (
-        <div style={{ margin: "0 16px 4px", padding: "12px 14px", background: DS.colors.surface, borderRadius: DS.radius.lg }}>
-          <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted }}>Your streak reset - start a new one today 🌸</p>
         </div>
       )}
       {nudge && !nudgeDismissed && (
@@ -1816,13 +1741,11 @@ const loadExtendedPalette = async () => {
               const key = `solla_outfit_feedback_${user?.id || "guest"}_${new Date().toDateString()}`;
               localStorage.setItem(key, "up");
               setOutfitFeedback("up");
-              trackEvent("outfit_feedback", { verdict: "up" });
             }} style={{ padding: "4px 12px", borderRadius: DS.radius.full, background: DS.colors.surface, fontSize: 13, border: `1px solid ${DS.colors.border}` }}>👍</button>
             <button onClick={() => {
               const key = `solla_outfit_feedback_${user?.id || "guest"}_${new Date().toDateString()}`;
               localStorage.setItem(key, "down");
               setOutfitFeedback("down");
-              trackEvent("outfit_feedback", { verdict: "down" });
             }} style={{ padding: "4px 12px", borderRadius: DS.radius.full, background: DS.colors.surface, fontSize: 13, border: `1px solid ${DS.colors.border}` }}>👎</button>
           </div>
         )}
@@ -1876,7 +1799,7 @@ const loadExtendedPalette = async () => {
                 <span style={{ fontSize: 11, fontWeight: 700, color: DS.colors.white }}>FREE FOR 7 DAYS</span>
               </div>
             </div>
-            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: DS.colors.white }}>Your makeup, hair and full colour guide are ready</p>
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: DS.colors.white }}>Your makeup, hair and outfit engine are ready</p>
             <p style={{ margin: "3px 0 0", fontSize: 12, color: "rgba(255,255,255,0.85)" }}>No charge until day 8 · Cancel anytime</p>
           </div>
           <Icon name="chevronRight" size={16} color={DS.colors.white} />
@@ -2212,7 +2135,6 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
         allResults.push(data);
       }
       setResults(allResults);
-      trackEvent("checker_used", { mode, items: allResults.length });
     } catch (e) { setError(e instanceof Error ? e.message : "Something went wrong."); }
     finally { setLoading(false); setCheckingIndex(null); }
   };
@@ -2243,7 +2165,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
   );
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", background: DS.colors.bg, WebkitOverflowScrolling: "touch" }}>
+    <div style={{ flex: 1, overflowY: "auto", background: DS.colors.bg }}>
       <div style={{ padding: "20px 16px 0" }}>
         {/* Mode switcher */}
         <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, marginBottom: 20, gap: 4 }}>
@@ -2715,7 +2637,7 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
   };
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", background: DS.colors.bg, WebkitOverflowScrolling: "touch" }}>
+    <div style={{ flex: 1, overflowY: "auto", background: DS.colors.bg }}>
       {/* Profile header */}
       <div style={{ padding: "40px 24px 24px", background: DS.colors.surface, borderBottom: `1px solid ${DS.colors.border}` }}>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -2854,29 +2776,6 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
             <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.text }}>Re-analyse my colours</span>
             <span style={{ marginLeft: "auto" }}><Icon name="chevronRight" size={16} color={DS.colors.textFaint} /></span>
           </button>
-          <button onClick={() => window.location.href = "mailto:hello@solla.com.au?subject=Report an issue with Solla"} style={{ width: "100%", padding: "16px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${DS.colors.border}` }}>
-            <Icon name="bell" size={18} color={DS.colors.text} />
-            <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.text }}>Report an issue</span>
-            <span style={{ marginLeft: "auto" }}><Icon name="chevronRight" size={16} color={DS.colors.textFaint} /></span>
-          </button>
-          <button onClick={async () => {
-            if (!window.confirm("Delete your account? Your data will be permanently deleted after 30 days. You can cancel by signing back in within that time.")) return;
-            const token = localStorage.getItem("solla_token");
-            if (!user?.id || !token) return;
-            try {
-              await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}`, {
-                method: "PATCH",
-                headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
-                body: JSON.stringify({ pending_deletion: true, deletion_requested_at: new Date().toISOString() }),
-              });
-              alert("Your account is scheduled for deletion in 30 days. Sign back in to cancel.");
-              onSignOut();
-            } catch { alert("Something went wrong. Please email hello@solla.com.au to delete your account."); }
-          }} style={{ width: "100%", padding: "16px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${DS.colors.border}` }}>
-            <Icon name="trash" size={18} color={DS.colors.danger} />
-            <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.danger }}>Delete my account</span>
-            <span style={{ marginLeft: "auto" }}><Icon name="chevronRight" size={16} color={DS.colors.textFaint} /></span>
-          </button>
           <button onClick={onSignOut} style={{ width: "100%", padding: "16px", display: "flex", alignItems: "center", gap: 12 }}>
             <Icon name="logout" size={18} color={DS.colors.danger} />
             <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.danger }}>Sign out</span>
@@ -2944,7 +2843,7 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
 const WardrobeTab = ({ user, seasonData, onUpgrade, onSignUp, isGuest }: { user: User | null; seasonData: SeasonData | null; onUpgrade: () => void; onSignUp?: () => void; isGuest?: boolean; }) => {
   const plan = user?.plan || "free";
   const canAccess = true;
-  const freeItemLimit = 5;
+  const freeItemLimit = 3;
   const isFreePlan = plan === "free";
 
   const [view, setView] = useState<"items" | "outfits" | "plan" | "makeup" | "chat">("items");
@@ -3195,7 +3094,7 @@ const [planGenerated, setPlanGenerated] = useState(() => {
           verdict_v2: result.verdict_v2 || (result.verdict ? "yes" : "no"),
           tip: result.tip,
           starred: false,
-          price: itemPrice ? parseFloat(itemPrice) : null,
+          price: null,
           image_url,
         };
         const res = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items`, {
@@ -3207,7 +3106,6 @@ const [planGenerated, setPlanGenerated] = useState(() => {
         if (Array.isArray(data)) setItems(prev => [data[0], ...prev]);
       }
       setShowAddItem(false);
-      trackEvent("wardrobe_item_added", { count: itemResults.length });
       setItemPreviews([]); setItemResults([]); setItemNames([]); setItemCategories([]);
       setItemPrice("");
       if (fileRef.current) fileRef.current.value = "";
@@ -3430,7 +3328,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
 
       {/* Items view */}
       {view === "items" && (
-  <div style={{ flex: 1, overflowY: "auto", padding: "16px", WebkitOverflowScrolling: "touch" }}>
+  <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
 
     {/* Guest prompt */}
         {isGuest && (
@@ -3501,12 +3399,9 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           {/* Items grid */}
           {filteredItems.length === 0 ? (
             <div style={{ textAlign: "center", padding: "40px 0" }}>
-              <div style={{ width: 64, height: 64, borderRadius: DS.radius.xl, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-                <Icon name="hanger" size={32} color={DS.colors.accent} strokeWidth={1.5} />
-              </div>
-              <p style={{ fontSize: 16, fontWeight: 700, color: DS.colors.text, marginBottom: 8, letterSpacing: "-0.3px" }}>Your outfit engine is ready</p>
-              <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, maxWidth: 260, margin: "0 auto 16px" }}>It just needs your clothes. Add your items and wake up every morning knowing exactly what to wear - season-approved, weather-aware, from clothes you actually own.</p>
-              <button onClick={() => setShowAddItem(true)} style={{ padding: "12px 24px", borderRadius: DS.radius.full, background: DS.colors.accent, color: DS.colors.white, fontSize: 14, fontWeight: 600 }}>Add your first item</button>
+              <Icon name="hanger" size={40} color={DS.colors.border} />
+              <p style={{ fontSize: 15, fontWeight: 600, color: DS.colors.textMuted, marginTop: 12 }}>Your wardrobe is empty</p>
+              <p style={{ fontSize: 13, color: DS.colors.textFaint, marginTop: 4, lineHeight: 1.6, maxWidth: 260, margin: "8px auto 0" }}>Add your clothes and your daily outfit suggestions get smarter - Solla learns what you own, what suits your season, and what you love wearing.</p>
             </div>
           ) : gridView ? (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 80 }}>
@@ -3550,11 +3445,6 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                         <span style={{ fontSize: 11, color: DS.colors.textFaint }}>·</span>
                         <span style={{ fontSize: 11, color: DS.colors.textFaint }}>{item.colour_name}</span>
                         {item.formality && <><span style={{ fontSize: 11, color: DS.colors.textFaint }}>·</span><span style={{ fontSize: 11, color: DS.colors.textFaint }}>{item.formality}</span></>}
-                        {item.price && item.price > 0 && (() => {
-                          const wearCount = Math.max(1, Math.floor((Date.now() - new Date(item.created_at).getTime()) / (1000 * 60 * 60 * 24 * 7)));
-                          const cpw = (item.price / wearCount).toFixed(2);
-                          return <><span style={{ fontSize: 11, color: DS.colors.textFaint }}>·</span><span style={{ fontSize: 11, color: DS.colors.success, fontWeight: 500 }}>${cpw}/wear</span></>;
-                        })()}
                       </div>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -3575,7 +3465,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           {/* Add item button */}
          {!isGuest && <button onClick={() => {
             if (!seasonData) {
-              alert("Complete your colour analysis first - tap the My Colours tab to get started.");
+              alert("Complete your colour analysis first - tap the Season tab to get started.");
               return;
             }
             if (isFreePlan && items.length >= freeItemLimit) {
@@ -3591,7 +3481,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
 
       {/* Outfits view */}
       {view === "outfits" && (
-        <div style={{ flex: 1, overflowY: "auto", padding: "16px", WebkitOverflowScrolling: "touch" }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
           {outfits.length > 0 && (
           <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4, marginBottom: 16 }}>
             {["All", "Casual", "Work", "Going out", "Active", "Special occasion"].map(cat => {
@@ -3657,7 +3547,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
 
       {/* Weekly plan */}
       {view === "plan" && (
-        <div style={{ flex: 1, overflowY: "auto", padding: "16px", WebkitOverflowScrolling: "touch" }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <div>
               <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: DS.colors.text }}>Your week ahead</p>
@@ -3774,7 +3664,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                   )}
                   <div style={{ display: "flex", gap: 12, marginTop: 10, flexWrap: "wrap" }}>
                     {!day.locked && (
-                      <button onClick={() => { setPendingPlanItemIds(day.item_ids || []); setPlanItemSelector(day.day); }} style={{ fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>
+                      <button onClick={() => { setPendingPlanItemIds([...(day.item_ids || [])]); setPlanItemSelector(day.day); }} style={{ fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>
                         + Select items
                       </button>
                     )}
@@ -3814,7 +3704,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
       )}
 {/* Makeup tab */}
       {view === "makeup" && (
-        <div style={{ flex: 1, overflowY: "auto", padding: "16px", WebkitOverflowScrolling: "touch" }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
 
           {/* Onboarding - first time */}
           {!makeupOnboarded && (
@@ -4255,7 +4145,19 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
   ✦ Analyse my wardrobe
 </button>
 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-  {["What should I wear to a job interview?", "Build me a capsule wardrobe for my season", "What colours should I never wear together?"].map(suggestion => (
+  {(items.length >= 5 ? [
+    "What am I wearing too much of?",
+    "Build me a capsule wardrobe from what I have",
+    "What colours should I never wear together?",
+  ] : items.length > 0 ? [
+    `What else should I add for my ${seasonData?.season || ""} season?`,
+    "What should I wear to a job interview?",
+    "What colours should I never wear together?",
+  ] : [
+    "What should I wear to a job interview?",
+    `What are the key pieces for a ${seasonData?.season || ""} wardrobe?`,
+    "What colours should I never wear together?",
+  ]).map(suggestion => (
                     <button key={suggestion} onClick={() => { setChatInput(suggestion); }} style={{ padding: "10px 14px", borderRadius: DS.radius.md, background: DS.colors.surface, fontSize: 13, color: DS.colors.textMuted, textAlign: "left", border: `1px solid ${DS.colors.border}` }}>
                       {suggestion}
                     </button>
@@ -4416,9 +4318,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                   </div>
                 </div>
               ))}
-              {itemResults.length > 0 && (
-                <input value={itemPrice} onChange={e => setItemPrice(e.target.value)} placeholder="Price paid (optional, e.g. 89.99)" inputMode="decimal" style={{ width: "100%", padding: "10px 12px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 13, color: DS.colors.text, background: DS.colors.surface, outline: "none", marginBottom: 12, fontFamily: DS.font }} />
-              )}
+
               <button onClick={handleAddItems} disabled={!itemResults.length || loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: !itemResults.length ? DS.colors.border : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>
                 {loading ? "Adding..." : itemResults.length > 1 ? `Add ${itemResults.length} items to wardrobe` : "Add to wardrobe"}
               </button>
@@ -4647,7 +4547,7 @@ const ShareCard = ({ seasonData, streak = 0, onClose }: { seasonData: SeasonData
 
         {/* Footer */}
         <div style={{ padding: "20px 28px 28px" }}>
-          <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: textColor }}>Finally know your colours.</p>
+          <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: textColor }}>Stop guessing. Start dressing with confidence.</p>
           {streak >= 3 && <p style={{ margin: "0 0 4px", fontSize: 12, color: accentColor, fontWeight: 600 }}>🔥 {streak} days of knowing my colours</p>}
           <p style={{ margin: "0 0 2px", fontSize: 11, color: textColor, opacity: 0.6 }}>Your daily outfit engine · Powered by colour science</p>
           <p style={{ margin: 0, fontSize: 11, color: accentColor, fontWeight: 600 }}>solla.com.au · @sollaapp</p>
@@ -4972,7 +4872,6 @@ if (parsedUser.email && parsedSeason?.season) {
     });
 
   const handleUpload = async (file: File) => {
-  trackEvent("analysis_started");
   update({ screen: "analysing" });
   try {
     const base64 = await resizeAndEncode(file);
@@ -4985,7 +4884,6 @@ if (parsedUser.email && parsedSeason?.season) {
     if (data.error) throw new Error(data.error);
     localStorage.setItem(`solla_season_${state.user?.id || "guest"}`, JSON.stringify(data));
     localStorage.setItem(`solla_analysed_${state.user?.id || "guest"}`, new Date().toISOString());
-    trackEvent("analysis_completed", { season: data.season });
     // Save to Supabase if logged in
     const token = localStorage.getItem("solla_token");
     if (token && state.user?.id) {
