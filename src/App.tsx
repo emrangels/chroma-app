@@ -1117,16 +1117,20 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
       {activeSheet === "privacy" && (
         <div style={{ padding: "16px 24px" }}>
           <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Privacy Policy</h2>
-          <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 24 }}>Last updated: 9 May 2026</p>
+          <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 24 }}>Last updated: 10 June 2026</p>
           {[
-            { q: "What information do we collect?", a: "We collect your name, email address, and password when you create an account. We also collect photos you upload for colour analysis, and wardrobe item photos and descriptions. We automatically collect log and usage data, and device information." },
-            { q: "How do we use your information?", a: "We use your information to provide personalised AI-powered colour season analysis and styling recommendations, manage your account, process payments, respond to support enquiries, send service communications, and improve our services." },
-            { q: "Who do we share your information with?", a: "We share data with Anthropic (AI processing), Supabase (database), Stripe (payments), and Vercel (hosting and analytics). We do not sell your personal information to third parties." },
-            { q: "How are photos handled?", a: "Photos you upload for colour analysis are transmitted securely to Anthropic for processing and are not stored permanently on our servers after analysis is complete." },
-            { q: "How long do we keep your data?", a: "We retain your personal information for as long as you have an account with us. When you close your account we will delete or anonymise your information unless required by law." },
-            { q: "What are your rights?", a: "Under the Australian Privacy Act 1988 you have the right to access, correct, or delete your personal information. Contact us at hello@solla.com.au to exercise these rights or to lodge a complaint." },
+            { q: "What information do we collect?", a: "We collect your name, email address, username, password and contact or authentication data when you create an account. We also collect photos you upload for colour analysis. We automatically collect log and usage data, device data, and geolocation information (used only for weather-based outfit suggestions and not stored permanently)." },
+            { q: "What sensitive information do we collect?", a: "We collect photos (selfies) for AI-powered colour season analysis. These are transmitted securely to Anthropic for processing and are not stored permanently on our servers after analysis is complete. This data is treated as biometric data and handled with additional care." },
+            { q: "How do we process your information?", a: "We use your information to provide personalised AI-powered colour season analysis and styling recommendations, manage your account, process payments, respond to support enquiries, send service communications, improve our services, and comply with our legal obligations." },
+            { q: "Who do we share your information with?", a: "We share data with Anthropic (AI processing - photos are transmitted for colour analysis and not stored permanently), Supabase (database), Stripe (payments - we do not store or access your card details), and Vercel (hosting and analytics). We do not sell your personal information to third parties." },
+            { q: "How are photos handled?", a: "Photos you upload for colour analysis are transmitted securely to Anthropic's API for processing. They are not stored permanently on our servers after analysis is complete. Wardrobe item photos are stored securely in Supabase and are only accessible to you." },
+            { q: "Do we use AI?", a: "Yes. Solla uses Anthropic's AI to provide colour season analysis, styling recommendations, outfit suggestions and AI stylist chat. Your photos and inputs are processed by Anthropic in accordance with their privacy policy. You can opt out of AI processing at any time by deleting your account from the Me tab." },
+            { q: "How long do we keep your data?", a: "We retain your personal information for as long as you have an account with us. When you request account deletion, your data is permanently removed within 30 days. You can cancel a deletion request by signing back in within that 30-day window." },
+            { q: "How do I delete my account?", a: "Go to the Me tab in the app and tap 'Delete my account'. Your account will be scheduled for permanent deletion after 30 days. You can cancel by signing back in within that window. You can also contact hello@solla.com.au for help." },
+            { q: "What are your rights?", a: "Under the Australian Privacy Act 1988 you have the right to access, correct, or delete your personal information. If you believe we are unlawfully processing your data you can lodge a complaint with the Office of the Australian Information Commissioner at oaic.gov.au. Contact hello@solla.com.au to exercise your rights." },
             { q: "How do we keep your information safe?", a: "We use HTTPS encryption, row-level database security, and JWT authentication. However no method of internet transmission is 100% secure." },
-            { q: "Contact us", a: "For privacy questions contact hello@solla.com.au or write to Solla, Parcel Locker 10127 32034, 515 Brighton Road, Brighton SA 5048. You can also lodge a complaint with the Office of the Australian Information Commissioner at oaic.gov.au." },
+            { q: "Do we collect information from minors?", a: "No. Solla is not directed at users under 18. If we become aware that a user is under 18, we will deactivate their account and delete their data." },
+            { q: "Contact us", a: "For privacy questions contact hello@solla.com.au or write to Solla, Data Protection Officer, Parcel Locker 10127 32034, 515 Brighton Road, Brighton SA 5048, Australia. You can also lodge a complaint with the Office of the Australian Information Commissioner at oaic.gov.au." },
           ].map((item, i) => (
             <FaqItem key={i} question={item.q} answer={item.a} />
           ))}
@@ -1135,10 +1139,12 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
       {activeSheet === "terms" && (
         <div style={{ padding: "16px 24px" }}>
           <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Terms of Service</h2>
-          <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 24 }}>Last updated: 9 May 2026</p>
+          <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 24 }}>Last updated: 10 June 2026</p>
           {[
             { q: "Who can use Solla?", a: "You must be at least 18 years of age to use Solla. By using our services you confirm that you meet this requirement." },
-            { q: "How do I cancel?", a: "You can cancel anytime from the Me tab - tap your plan and select Cancel subscription. Cancellations take effect at the end of the current billing period. You will keep access until then. We do not offer refunds for partial periods. You can also email hello@solla.com.au for help." },
+            { q: "Free trial", a: "Glow and Luxe plans include a free 7-day trial. You will not be charged until day 8. Cancel any time before day 8 and you will not be charged a thing." },
+            { q: "Refunds", a: "We do not offer refunds for partial billing periods. If you cancel during a free trial before day 8, you will not be charged. For billing enquiries contact hello@solla.com.au." },
+            { q: "How do I cancel?", a: "You can cancel anytime from the Me tab - tap your plan and select Cancel subscription. Cancellations take effect at the end of the current billing period. You will keep access until then. You can also email hello@solla.com.au for help." },
             { q: "AI-generated content", a: "Solla uses AI to generate colour analysis and styling recommendations. These are provided for informational and personal styling purposes only. Results may vary and should be used as guidance rather than definitive advice. We do not guarantee accuracy." },
             { q: "Acceptable use", a: "You agree not to use Solla for unlawful purposes, upload photos of others without consent, attempt to reverse engineer the app, use automated tools to access our services, or share your account credentials." },
             { q: "Intellectual property", a: "All content, design, code, and branding within Solla is owned by Emma Nagel (trading as Solla) and protected by Australian and international copyright law." },
