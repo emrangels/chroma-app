@@ -35,12 +35,12 @@ Deno.serve(async (req) => {
     if (type === "welcome") {
       await sendEmail(
         email,
-        "You're one selfie away from knowing your colours 🌸",
+        "Your colours are waiting 🌸",
         base(`
           <h1 style="font-size:22px;font-weight:700;color:#1a1a2e;margin:0 0 12px;">Hi ${firstName} 👋</h1>
-          <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 16px;">Welcome to Solla — the app that tells you exactly what colours to wear and helps you stop staring at your wardrobe every morning.</p>
-          <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 8px;">To get started, verify your email and then take your first selfie. Your full colour guide will be ready in under a minute.</p>
-          ${btn("https://solla.com.au", "Verify my email & get started →")}
+          <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 16px;">Welcome to Solla. You're about to find out something most people never learn about themselves — your colour season.</p>
+          <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 8px;">Verify your email, take your selfie, and your full colour profile will be ready in under a minute. Your palette, your daily tip, and 5 wardrobe items to get you started — all free.</p>
+          ${btn("https://solla.com.au", "Verify my email and get started →")}
           <p style="font-size:13px;color:#888;margin:16px 0 0;">Questions? Just reply to this email — I read every one.<br/>— Emma, founder of Solla</p>
         `)
       );
@@ -48,12 +48,12 @@ Deno.serve(async (req) => {
     } else if (type === "day3") {
       await sendEmail(
         email,
-        `${firstName}, there's more to your ${season} season than you think 🎨`,
+        `${firstName}, your ${season} guide is ready 🎨`,
         base(`
           <h1 style="font-size:22px;font-weight:700;color:#1a1a2e;margin:0 0 12px;">You're a ${season} 🌸</h1>
-          <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 16px;">Now you know your season — but that's just the beginning. Your subseason tells you exactly which shades within ${season} work best for your specific colouring.</p>
-          <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 8px;">Unlock Glow to get your full colour palette, makeup guide, hair colours, jewellery guide — and the colour checker so you can photograph any item and instantly know if it works.</p>
-          ${btn("https://solla.com.au", "Unlock my full colour guide →")}
+          <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 16px;">Most ${season}s tell us the makeup guide is what changes everything. Your exact foundation undertone, blush shades and lip colours are ready — personalised to your specific colouring.</p>
+          <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 8px;">Unlock Glow to get your full colour palette, makeup guide, hair colours, jewellery guide and colour checker. Try everything free for 7 days.</p>
+          ${btn("https://solla.com.au", "Unlock my full colour guide — free for 7 days →")}
           <p style="font-size:13px;color:#888;margin:16px 0 0;">— Emma, founder of Solla</p>
         `)
       );
@@ -61,12 +61,51 @@ Deno.serve(async (req) => {
     } else if (type === "day7") {
       await sendEmail(
         email,
-        `Still asking "what do I wear?" — here's the answer, ${firstName}`,
+        `${firstName}, do you know what to wear tomorrow?`,
         base(`
-          <h1 style="font-size:22px;font-weight:700;color:#1a1a2e;margin:0 0 12px;">Your daily outfit engine is waiting 👗</h1>
+          <h1 style="font-size:22px;font-weight:700;color:#1a1a2e;margin:0 0 12px;">Finally know what to wear 👗</h1>
           <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 16px;">As a ${season}, you have a specific set of colours that make you look alive — and a wardrobe that might be working against you without you knowing.</p>
-          <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 8px;">Luxe gives you the full picture: wardrobe builder, outfit creator, AI stylist, and daily outfit suggestions based on your season. Add your clothes once, never wonder what to wear again.</p>
-          ${btn("https://solla.com.au", "Build my outfit engine →")}
+          <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 8px;">Luxe gives you the full picture: wardrobe builder, daily outfit suggestions, outfit creator, AI stylist and extended palette. Add your clothes once, wake up every morning knowing exactly what to wear.</p>
+          ${btn("https://solla.com.au", "Try Luxe free for 7 days →")}
+          <p style="font-size:13px;color:#888;margin:16px 0 0;">— Emma, founder of Solla</p>
+        `)
+      );
+
+    } else if (type === "trial_ending") {
+      await sendEmail(
+        email,
+        `Your free trial ends tomorrow, ${firstName}`,
+        base(`
+          <h1 style="font-size:22px;font-weight:700;color:#1a1a2e;margin:0 0 12px;">Your trial ends in 24 hours ⏰</h1>
+          <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 16px;">Your free trial ends tomorrow. After that, you'll drop back to the free plan and lose access to your full colour guide, daily outfits and AI stylist.</p>
+          <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 8px;">Keep everything you've built — your wardrobe, your outfits, your makeup kit. Continue for $6.99/mo on Glow or $14.99/mo on Luxe.</p>
+          ${btn("https://solla.com.au", "Keep my colour guide →")}
+          <p style="font-size:13px;color:#888;margin:16px 0 0;">Cancel anytime from the Me tab. No questions asked.<br/>— Emma, founder of Solla</p>
+        `)
+      );
+
+    } else if (type === "winback") {
+      await sendEmail(
+        email,
+        `We kept your colours safe, ${firstName} 🌸`,
+        base(`
+          <h1 style="font-size:22px;font-weight:700;color:#1a1a2e;margin:0 0 12px;">Your ${season} profile is still here</h1>
+          <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 16px;">You cancelled your subscription, but your colour profile and wardrobe are still saved. Whenever you're ready, everything is waiting for you exactly as you left it.</p>
+          <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 8px;">Come back anytime — your season doesn't change, and neither does your palette.</p>
+          ${btn("https://solla.com.au", "Come back to Solla →")}
+          <p style="font-size:13px;color:#888;margin:16px 0 0;">— Emma, founder of Solla</p>
+        `)
+      );
+
+    } else if (type === "wardrobe_nudge") {
+      await sendEmail(
+        email,
+        `${firstName}, your outfit engine needs one thing`,
+        base(`
+          <h1 style="font-size:22px;font-weight:700;color:#1a1a2e;margin:0 0 12px;">Add your first wardrobe item 👗</h1>
+          <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 16px;">You're on Luxe — which means your daily outfit engine is ready. It just needs your clothes.</p>
+          <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 8px;">Add even one item and Solla starts building outfits around it. Add ten and you'll never wonder what to wear again. Takes less than a minute per item.</p>
+          ${btn("https://solla.com.au", "Add my first item →")}
           <p style="font-size:13px;color:#888;margin:16px 0 0;">— Emma, founder of Solla</p>
         `)
       );
