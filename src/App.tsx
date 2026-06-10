@@ -158,7 +158,7 @@ const slides = [
   {
     icon: "camera",
     title: "You've been guessing your colours your whole life.",
-    body: "One selfie changes that. Solla analyses your exact undertone, depth and colouring — and tells you precisely which colours make you look alive.",
+    body: "One selfie changes that. Solla analyses your exact undertone, depth and colouring - and tells you precisely which colours make you look alive.",
     bg: "#EDE9FF",
     accent: DS.colors.accent,
     label: null,
@@ -166,7 +166,7 @@ const slides = [
   {
     icon: "palette",
     title: "One selfie tells you everything.",
-    body: "Your season, your subseason, your full colour palette, your exact makeup shades, your hair colours, your jewellery metals — all from a single photo. Under a minute.",
+    body: "Your season, your subseason, your full colour palette, your exact makeup shades, your hair colours, your jewellery metals - all from a single photo. Under a minute.",
     bg: "#E8F4FD",
     accent: "#4A90C4",
     label: "Colour analysis",
@@ -174,7 +174,7 @@ const slides = [
   {
     icon: "sparkles",
     title: "Never ask what to wear again.",
-    body: "Add your wardrobe and Solla builds your daily outfit — weather-aware, season-approved, pulled from clothes you actually own. Every morning, sorted.",
+    body: "Add your wardrobe and Solla builds your daily outfit - weather-aware, season-approved, pulled from clothes you actually own. Every morning, sorted.",
     bg: "#FFF1E6",
     accent: "#E8845A",
     label: "Daily outfit engine",
@@ -182,7 +182,7 @@ const slides = [
   {
     icon: "image",
     title: "Check anything before you buy it.",
-    body: "Shopping online or standing in Sephora? Photograph it. Solla tells you instantly whether it suits your season — clothes, makeup, anything.",
+    body: "Shopping online or standing in Sephora? Photograph it. Solla tells you instantly whether it suits your season - clothes, makeup, anything.",
     bg: "#E8F5EE",
     accent: "#1A9E6E",
     label: "Colour checker",
@@ -388,7 +388,7 @@ const AuthScreen = ({ onSignIn, onGuest, onOpenTerms }: { onSignIn: (user: User)
         } catch {}
       }
       if (mode === "signup") {
-        // Send welcome email regardless of userId — email is always available
+        // Send welcome email regardless of userId - email is always available
         fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
           method: "POST",
           headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
@@ -443,10 +443,10 @@ if (mode === "landing") return (
           <Icon name="sparkles" size={32} color={DS.colors.accent} />
         </div>
         <h1 style={{ fontSize: 28, fontWeight: 700, color: DS.colors.text, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Know your colours.</h1>
-        <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 4 }}>One selfie. Your season, your palette, your daily outfit — personalised to your exact colouring.</p>
+        <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 4 }}>One selfie. Your season, your palette, your daily outfit - personalised to your exact colouring.</p>
         <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 48 }}>Free to start. No card required.</p>
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}>
-          <button onClick={() => setMode("signup")} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Discover my colours — free</button>
+          <button onClick={() => setMode("signup")} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Discover my colours - free</button>
           <button onClick={() => setMode("signin")} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.bg, color: DS.colors.text, fontSize: 15, fontWeight: 500, border: `1.5px solid ${DS.colors.border}` }}>Sign in</button>
           <button onClick={onGuest} style={{ width: "100%", padding: "14px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Try without an account</button>
         </div>
@@ -511,7 +511,7 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File) => void }) => {
       <div className="screen fade-in" style={{ background: DS.colors.bg, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
       <div style={{ padding: "40px 28px 120px", display: "flex", flexDirection: "column" }}>
         <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Take your selfie</h1>
-        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.6 }}>One photo is all it takes. Your personal colour profile and daily outfit engine — ready in under a minute.</p>
+        <p style={{ fontSize: 14, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.6 }}>One photo is all it takes. Your personal colour profile and daily outfit engine - ready in under a minute.</p>
 
         {/* Photo upload */}
         <div onClick={() => !preview && fileRef.current?.click()} onDragOver={e => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={e => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files?.[0]; if (f) handleFile(f); }}
@@ -541,10 +541,10 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File) => void }) => {
           <p style={{ margin: "0 0 10px", fontSize: 12, fontWeight: 700, color: DS.colors.text }}>For the most accurate analysis:</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {[
-              { icon: "✓", text: "Natural daylight — stand near a window", good: true },
+              { icon: "✓", text: "Natural daylight - stand near a window", good: true },
               { icon: "✓", text: "No filters or beauty modes", good: true },
-              { icon: "✓", text: "Face the light directly — even coverage", good: true },
-              { icon: "✗", text: "No flash — it distorts your skin tone and will affect your results", good: false },
+              { icon: "✓", text: "Face the light directly - even coverage", good: true },
+              { icon: "✗", text: "No flash - it distorts your skin tone and will affect your results", good: false },
               { icon: "✗", text: "No heavy makeup if possible", good: false },
             ].map(tip => (
               <div key={tip.text} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
@@ -591,9 +591,9 @@ const AnalysingScreen = () => {
       </div>
       <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>Analysing your colours</h2>
       <p style={{ fontSize: 15, color: DS.colors.accent, fontWeight: 500, marginBottom: 16, transition: "all 0.4s" }}>{steps[step]}...</p>
-      <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", marginBottom: 32, maxWidth: 260 }}>This takes up to a minute — keep this screen open while we work.</p>
+      <p style={{ fontSize: 13, color: DS.colors.textFaint, textAlign: "center", marginBottom: 32, maxWidth: 260 }}>This takes up to a minute - keep this screen open while we work.</p>
       <div style={{ padding: "10px 16px", background: "#FFFBEB", borderRadius: DS.radius.md, border: "1px solid #FDE68A", marginBottom: 32, maxWidth: 280, textAlign: "center" }}>
-        <p style={{ margin: 0, fontSize: 12, color: "#92400E", fontWeight: 500, lineHeight: 1.5 }}>⚠️ Don't navigate away or let your screen time out — this will interrupt the analysis.</p>
+        <p style={{ margin: 0, fontSize: 12, color: "#92400E", fontWeight: 500, lineHeight: 1.5 }}>⚠️ Don't navigate away or let your screen time out - this will interrupt the analysis.</p>
       </div>
       <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
   {steps.map((s, i) => (
@@ -618,7 +618,7 @@ const tabs: { id: Tab; icon: string; label: string }[] = [
 ];
 
 const tourSteps = [
-  { tab: "home" as Tab, title: "Your colour season", body: "Your palette, daily tip and personal colour guide — your style starting point." },
+  { tab: "home" as Tab, title: "Your colour season", body: "Your palette, daily tip and personal colour guide - your style starting point." },
   { tab: "checker" as Tab, title: "Colour checker", body: "Upload any item or outfit to see if it suits your season." },
   { tab: "wardrobe" as Tab, title: "Your daily outfit engine", body: "Add your clothes, build outfits and wake up knowing exactly what to wear." },
   { tab: "me" as Tab, title: "Your profile", body: "Manage your account, plan and preferences here." },
@@ -797,7 +797,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
               <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>Experience the full Luxe plan free. Choose your plan on day 8.</p>
               <div style={{ background: DS.colors.surface, borderRadius: DS.radius.md, padding: "12px 14px", marginBottom: 12, borderLeft: `3px solid ${DS.colors.accent}` }}>
                 <p style={{ margin: "0 0 4px", fontSize: 13, color: DS.colors.text, lineHeight: 1.6, fontStyle: "italic" }}>"I finally understand why some outfits just work and others don't. Game changer."</p>
-                <p style={{ margin: 0, fontSize: 11, color: DS.colors.textFaint, fontWeight: 500 }}>— Solla member</p>
+                <p style={{ margin: 0, fontSize: 11, color: DS.colors.textFaint, fontWeight: 500 }}>- Solla member</p>
               </div>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#F0FDF4", padding: "4px 12px", borderRadius: DS.radius.full, marginBottom: 20 }}>
                 <Icon name="check" size={12} color={DS.colors.success} strokeWidth={2.5} />
@@ -813,7 +813,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
                 ))}
               </div>
 
-              {/* Luxe trial CTA — primary */}
+              {/* Luxe trial CTA - primary */}
               <div style={{ borderRadius: DS.radius.lg, border: `2px solid #C26B3A`, background: "#FFF7ED", padding: "16px", marginBottom: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -825,7 +825,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
                     {billing === "annual" && <div style={{ fontSize: 11, color: DS.colors.textFaint }}>{pricing.luxe.monthlyEquiv}</div>}
                   </div>
                 </div>
-                {["Everything in Glow", "Daily outfit suggestions — wake up knowing what to wear", "Wardrobe builder — see which items actually work for you", "Weekly outfit planner — your whole week sorted", "Outfit creator — build outfits you know will look good", "AI stylist — ask anything about your colours, style and wardrobe", "Extended palette — 24+ colours you can wear confidently", "Makeup kit — build and check your full colour-matched kit"].map(f => (
+                {["Everything in Glow", "Daily outfit suggestions - wake up knowing what to wear", "Wardrobe builder - see which items actually work for you", "Weekly outfit planner - your whole week sorted", "Outfit creator - build outfits you know will look good", "AI stylist - ask anything about your colours, style and wardrobe", "Extended palette - 24+ colours you can wear confidently", "Makeup kit - build and check your full colour-matched kit"].map(f => (
                   <div key={f} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                     <Icon name="check" size={12} color="#C26B3A" strokeWidth={2.5} />
                     <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{f}</span>
@@ -836,7 +836,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
                 </button>
               </div>
 
-              {/* Glow option — secondary */}
+              {/* Glow option - secondary */}
               <div style={{ borderRadius: DS.radius.lg, border: `1.5px solid ${DS.colors.border}`, background: DS.colors.bg, padding: "14px 16px", marginBottom: 16 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
                   <span style={{ fontSize: 15, fontWeight: 600, color: DS.colors.text }}>Glow</span>
@@ -902,7 +902,7 @@ const FaqItem = ({ question, answer }: { question: string; answer: string }) => 
   );
 };
 
-// SheetOverlay — rendered at ROOT level, outside all overflow:hidden containers
+// SheetOverlay - rendered at ROOT level, outside all overflow:hidden containers
 const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet; seasonData: SeasonData | null; onClose: () => void; }) => (
   <div
     style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 1000, display: "flex", alignItems: "flex-end" }}
@@ -1030,25 +1030,25 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.5 }}>Everything you need to know about colour season analysis.</p>
           {[
             { q: "What does Solla mean?", a: "Solla is a name with warmth woven into it from multiple directions. In Tamil it means 'to say' or 'to tell' - which felt right for an app built around revealing something true about you. In Scandinavian tradition, Solla is a given name derived from the word for sun, carrying connotations of light and warmth. In Sri Lankan slang, a solla moment is a small, simple happiness - the kind you might feel when you finally put on a colour that just works. We liked that. Solla is about knowing your colours, dressing with intention, and finding joy in the small things - like getting dressed in the morning." },
-            { q: "What is colour season analysis?", a: "Colour season analysis is a method of identifying which colours harmonise with your natural colouring — your skin tone, undertone, eye colour and hair colour. By grouping these into four seasons (Spring, Summer, Autumn, Winter) and 12 sub-seasons, we can identify the colours that make you look vibrant and alive versus those that wash you out or clash." },
-            { q: "What are the four seasons?", a: "Spring — warm, clear and bright colouring. Summer — cool, soft and muted colouring. Autumn - warm, deep and earthy colouring. Winter - cool, deep and high contrast colouring. Each season has three sub-seasons that add further nuance." },
+            { q: "What is colour season analysis?", a: "Colour season analysis is a method of identifying which colours harmonise with your natural colouring - your skin tone, undertone, eye colour and hair colour. By grouping these into four seasons (Spring, Summer, Autumn, Winter) and 12 sub-seasons, we can identify the colours that make you look vibrant and alive versus those that wash you out or clash." },
+            { q: "What are the four seasons?", a: "Spring - warm, clear and bright colouring. Summer - cool, soft and muted colouring. Autumn - warm, deep and earthy colouring. Winter - cool, deep and high contrast colouring. Each season has three sub-seasons that add further nuance." },
             { q: "What is undertone?", a: "Undertone is the subtle hue beneath your skin's surface. Warm undertones have golden or yellow hints. Cool undertones have pink or blue hints. Neutral undertones are a mix of both. It's the single most important factor in colour analysis." },
             { q: "What is chroma?", a: "Chroma describes how clear or muted your colouring is. High chroma means vivid, saturated features - you suit bold colours. Low chroma means soft, blended features - you suit muted, toned-down shades." },
             { q: "What is contrast?", a: "Contrast is the difference between your hair, skin and eye colour. High contrast (e.g. dark hair, light skin) suits bold colour combinations. Low contrast suits tonal, harmonious combinations." },
             { q: "How do I use the colour checker?", a: "Go to the Checker tab and upload a photo of any clothing item, full outfit, or colour swatches. Solla will analyse the colours against your season and give you a verdict with styling tips." },
             { q: "How do I add items to my wardrobe?", a: "Go to the Wardrobe tab and tap the + button. Upload a photo of the item - Solla will automatically identify the colour and check it against your season. Name the item, select a category, and save." },
             { q: "How do I edit or move an item in my wardrobe?", a: "Tap the edit icon (refresh symbol) on any wardrobe item to change the name or category. To delete, tap the trash icon." },
-            { q: "Can I re-analyse my colours?", a: "Yes — go to the Me tab and tap 'Re-analyse my colours'. This clears your current results and takes you back to the upload screen. For best results use a clear, well-lit selfie in natural light with no filters." },
-            { q: "My results aren't showing — what do I do?", a: "If your colour guide isn't appearing, try re-analysing your colours. Go to the Me tab and tap 'Re-analyse my colours' to upload a new photo and get your results." },
+            { q: "Can I re-analyse my colours?", a: "Yes - go to the Me tab and tap 'Re-analyse my colours'. This clears your current results and takes you back to the upload screen. For best results use a clear, well-lit selfie in natural light with no filters." },
+            { q: "My results aren't showing - what do I do?", a: "If your colour guide isn't appearing, try re-analysing your colours. Go to the Me tab and tap 'Re-analyse my colours' to upload a new photo and get your results." },
             { q: "What do I get on the free plan?", a: "The free plan gives you your colour season, your 5 best colours to wear now, your season headline and a daily colour tip. You can also add up to 5 items to your wardrobe and check them against your season. Upgrade to Glow or Luxe to unlock your full colour guide and daily outfit engine." },
             { q: "What's the difference between Glow and Luxe?", a: "Glow unlocks your subseason, full colour palette, colour profile (undertone, depth, chroma and contrast), makeup guide, hair colour guide, jewellery guide, colour checker and a daily outfit suggestion. Luxe adds everything in Glow plus unlimited wardrobe, outfit creator, weekly planner, AI stylist chat, makeup kit and an extended palette of 24+ colours. If you want to stop asking 'what do I wear today?' - Luxe is built for that." },
             { q: "How does the AI stylist work?", a: "The AI stylist lives in your Wardrobe tab and knows your colour season, lifestyle and every item you've added. Ask it what to wear today, what to wear for a specific occasion, how to style a piece you're not sure about, or to analyse your whole wardrobe for gaps. The more items you add, the smarter it gets." },
-            { q: "How do I take a good selfie for analysis?", a: "The accuracy of your entire colour profile depends on your selfie — so this matters. Stand near a window in natural daylight. No flash — flash distorts your skin tone and will affect your results. No filters or beauty modes. Face the light directly so it falls evenly on your face. Plain or neutral background is best. No heavy makeup if possible, or minimal. The AI analyses your undertone, depth and chroma from the photo — accurate light is everything." },
+            { q: "How do I take a good selfie for analysis?", a: "The accuracy of your entire colour profile depends on your selfie - so this matters. Stand near a window in natural daylight. No flash - flash distorts your skin tone and will affect your results. No filters or beauty modes. Face the light directly so it falls evenly on your face. Plain or neutral background is best. No heavy makeup if possible, or minimal. The AI analyses your undertone, depth and chroma from the photo - accurate light is everything." },
             { q: "What is the daily outfit suggestion?", a: "The daily outfit suggestion on your Season tab uses your current weather and colour season to suggest a cohesive outfit each day. On Glow and Luxe, it pulls from your actual wardrobe items so suggestions are based on clothes you actually own. Allow location access for weather-based suggestions, or enter your postcode if location is unavailable." },
             { q: "What is the colour checker?", a: "The colour checker lives in the Checker tab. Upload a photo of any clothing item or full outfit and Solla will instantly tell you whether each colour suits your season. Single mode checks one piece at a time, Outfit mode analyses every garment in a full look, and Makeup mode checks any makeup product by name or photo. Available on Glow and Luxe." },
-            { q: "Can I check makeup products in the Checker tab?", a: "Yes — go to the Checker tab and select Makeup mode. Enter the product name for the most accurate result (e.g. 'Charlotte Tilbury Pillow Talk'), or upload a photo of a swatch on your inner arm in natural light. Select the product type and tap Check. You can save results directly to your makeup kit in the Wardrobe tab." },
-            { q: "How does Solla learn my preferences?", a: "The more you use Solla and chat with your AI stylist, the better it understands your style. Your lifestyle, dress code and occasions from onboarding feed into every suggestion. Your wardrobe items — including their formality tags — help the stylist make relevant recommendations. Over time, feedback you give in the chat (thumbs up or down) helps refine suggestions to better match your taste." },
-            { q: "What formality tags can I add to wardrobe items?", a: "When adding items to your wardrobe you can tag each piece as Casual, Smart casual, Work, Formal or Active. These tags help the AI stylist suggest outfits appropriate for your occasion — so if you ask for a work outfit it won't suggest your gym gear, and if you ask for a weekend look it won't pull your formal blazer." },
+            { q: "Can I check makeup products in the Checker tab?", a: "Yes - go to the Checker tab and select Makeup mode. Enter the product name for the most accurate result (e.g. 'Charlotte Tilbury Pillow Talk'), or upload a photo of a swatch on your inner arm in natural light. Select the product type and tap Check. You can save results directly to your makeup kit in the Wardrobe tab." },
+            { q: "How does Solla learn my preferences?", a: "The more you use Solla and chat with your AI stylist, the better it understands your style. Your lifestyle, dress code and occasions from onboarding feed into every suggestion. Your wardrobe items - including their formality tags - help the stylist make relevant recommendations. Over time, feedback you give in the chat (thumbs up or down) helps refine suggestions to better match your taste." },
+            { q: "What formality tags can I add to wardrobe items?", a: "When adding items to your wardrobe you can tag each piece as Casual, Smart casual, Work, Formal or Active. These tags help the AI stylist suggest outfits appropriate for your occasion - so if you ask for a work outfit it won't suggest your gym gear, and if you ask for a weekend look it won't pull your formal blazer." },
             { q: "How do I contact Solla?", a: "For any questions, feedback or support email us at hello@solla.com.au. We aim to respond within 1-2 business days." },
           ].map((item, i) => (
             <FaqItem key={i} question={item.q} answer={item.a} />
@@ -1079,7 +1079,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 24 }}>Last updated: 9 May 2026</p>
           {[
             { q: "Who can use Solla?", a: "You must be at least 18 years of age to use Solla. By using our services you confirm that you meet this requirement." },
-            { q: "How do I cancel?", a: "You can cancel anytime from the Me tab — tap your plan and select Cancel subscription. Cancellations take effect at the end of the current billing period. You will keep access until then. We do not offer refunds for partial periods. You can also email hello@solla.com.au for help." },
+            { q: "How do I cancel?", a: "You can cancel anytime from the Me tab - tap your plan and select Cancel subscription. Cancellations take effect at the end of the current billing period. You will keep access until then. We do not offer refunds for partial periods. You can also email hello@solla.com.au for help." },
             { q: "AI-generated content", a: "Solla uses AI to generate colour analysis and styling recommendations. These are provided for informational and personal styling purposes only. Results may vary and should be used as guidance rather than definitive advice. We do not guarantee accuracy." },
             { q: "Acceptable use", a: "You agree not to use Solla for unlawful purposes, upload photos of others without consent, attempt to reverse engineer the app, use automated tools to access our services, or share your account credentials." },
             { q: "Intellectual property", a: "All content, design, code, and branding within Solla is owned by Emma Nagel (trading as Solla) and protected by Australian and international copyright law." },
@@ -1121,7 +1121,7 @@ const PostcodeWeather = ({ seasonData, onResult }: { seasonData: SeasonData | nu
     try {
       const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${postcode}&country=Australia&format=json&limit=1`);
       const geoData = await geoRes.json();
-      if (!geoData?.[0]) { setError("Postcode not found — try again."); setLoading(false); return; }
+      if (!geoData?.[0]) { setError("Postcode not found - try again."); setLoading(false); return; }
       const { lat, lon } = geoData[0];
       const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&timezone=auto`);
       const weatherData = await weatherRes.json();
@@ -1129,7 +1129,7 @@ const PostcodeWeather = ({ seasonData, onResult }: { seasonData: SeasonData | nu
       const code = weatherData.current.weathercode;
       const desc = code <= 1 ? "sunny" : code <= 3 ? "partly cloudy" : code <= 67 ? "rainy" : code <= 77 ? "snowy" : "overcast";
       onResult(temp, desc);
-    } catch { setError("Something went wrong — try again."); }
+    } catch { setError("Something went wrong - try again."); }
     finally { setLoading(false); }
   };
   return (
@@ -1147,132 +1147,132 @@ const PostcodeWeather = ({ seasonData, onResult }: { seasonData: SeasonData | nu
 };
 const DAILY_TIPS: Record<string, string[]> = {
   Spring: [
-    "Warm peach tones near your face will make your skin glow — try a peachy blush instead of pink.",
+    "Warm peach tones near your face will make your skin glow - try a peachy blush instead of pink.",
     "Your best neutrals are warm camel and ivory, not stark white or grey.",
-    "Coral and warm terracotta are your power colours — own them.",
+    "Coral and warm terracotta are your power colours - own them.",
     "Light golden jewellery complements your warm undertone far better than silver.",
-    "Try layering warm cream with a pop of turquoise — it's a classic Spring combination.",
+    "Try layering warm cream with a pop of turquoise - it's a classic Spring combination.",
     "Your season thrives in natural fabrics like linen and cotton in warm, light tones.",
-    "Avoid black near your face — it creates harsh contrast against your soft, warm colouring.",
+    "Avoid black near your face - it creates harsh contrast against your soft, warm colouring.",
     "A warm apricot lip is more flattering than a cool berry on your Spring colouring.",
-    "Bright, clear colours suit you best — dusty or muted tones can wash you out.",
-    "Golden hour light was made for Springs — your colouring comes alive in warm sunlight.",
-    "Try a warm peach or coral nail colour — it harmonises beautifully with your skin tone.",
+    "Bright, clear colours suit you best - dusty or muted tones can wash you out.",
+    "Golden hour light was made for Springs - your colouring comes alive in warm sunlight.",
+    "Try a warm peach or coral nail colour - it harmonises beautifully with your skin tone.",
     "Your best whites are cream and warm off-white, never stark or blue-based white.",
     "Warm golden highlights in your hair will enhance your natural radiance.",
     "Light teal and aqua are unexpected but stunning accent colours for Springs.",
-    "Avoid cool-toned makeup — always reach for warm-based foundations and blushes.",
+    "Avoid cool-toned makeup - always reach for warm-based foundations and blushes.",
     "A bright cobalt or warm turquoise scarf near your face will make your eyes pop.",
-    "Ivory, warm beige and camel are your wardrobe foundations — build from these.",
+    "Ivory, warm beige and camel are your wardrobe foundations - build from these.",
     "Your season pairs beautifully with natural wood and warm metallic accessories.",
-    "When in doubt, choose the warmer version of any colour — it will always serve you better.",
+    "When in doubt, choose the warmer version of any colour - it will always serve you better.",
     "Soft golden or peachy eyeshadow enhances your natural warmth more than cool greys.",
     "Light warm greens like sage or chartreuse are surprisingly powerful on Springs.",
-    "Your skin responds beautifully to warmth — embrace warm lighting wherever possible.",
-    "Avoid dark, heavy colours in winter — layer warm light tones instead for the same cosy effect.",
-    "Warm red-oranges and corals are your reds — cool blue-reds clash with your undertone.",
-    "Your best denim is a lighter, warm-washed blue — dark or grey-toned denim dulls your look.",
+    "Your skin responds beautifully to warmth - embrace warm lighting wherever possible.",
+    "Avoid dark, heavy colours in winter - layer warm light tones instead for the same cosy effect.",
+    "Warm red-oranges and corals are your reds - cool blue-reds clash with your undertone.",
+    "Your best denim is a lighter, warm-washed blue - dark or grey-toned denim dulls your look.",
     "Peach, apricot and warm yellow florals are made for your colouring.",
-    "Try warm chartreuse or yellow-green as a statement colour — it's unexpectedly brilliant on Springs.",
-    "Your colouring has natural clarity — bright, vivid tones reflect that energy back.",
+    "Try warm chartreuse or yellow-green as a statement colour - it's unexpectedly brilliant on Springs.",
+    "Your colouring has natural clarity - bright, vivid tones reflect that energy back.",
     "Light, bright and warm: your three words for getting dressed every morning.",
     "Warm gold-toned eyeshadow at the inner corner of your eyes makes them appear brighter instantly.",
   ],
   Summer: [
-    "Dusty rose and soft lavender are your superpower colours — they make your skin look luminous.",
-    "Your best neutrals are cool greige, soft taupe and blue-grey — never warm beige.",
-    "Avoid stark black near your face — try deep plum, charcoal or navy instead.",
+    "Dusty rose and soft lavender are your superpower colours - they make your skin look luminous.",
+    "Your best neutrals are cool greige, soft taupe and blue-grey - never warm beige.",
+    "Avoid stark black near your face - try deep plum, charcoal or navy instead.",
     "Silver and white gold jewellery harmonises perfectly with your cool undertone.",
-    "Soft, muted tones suit you best — highly saturated colours can overwhelm your gentle colouring.",
+    "Soft, muted tones suit you best - highly saturated colours can overwhelm your gentle colouring.",
     "Cool-toned pinks and mauves make your lips look naturally beautiful.",
-    "Powder blue and soft sage are your neutral workhorses — more versatile than beige for you.",
+    "Powder blue and soft sage are your neutral workhorses - more versatile than beige for you.",
     "A dusty rose or soft berry blush will give you that effortless, healthy flush.",
-    "Your colouring is softer than it looks — muted and blended outfits feel most harmonious.",
-    "Avoid warm golden tones in hair and makeup — ashy cool tones will suit you far better.",
-    "Denim in a cooler, greyer wash is your best friend — it works with almost everything in your palette.",
+    "Your colouring is softer than it looks - muted and blended outfits feel most harmonious.",
+    "Avoid warm golden tones in hair and makeup - ashy cool tones will suit you far better.",
+    "Denim in a cooler, greyer wash is your best friend - it works with almost everything in your palette.",
     "Lavender, lilac and soft violet are unexpected but stunning on Summer colouring.",
-    "Avoid orange-based bronzers — a cool-toned highlighter gives you a more natural glow.",
-    "Your best whites are soft white and cool white — pure bright white can clash with your soft colouring.",
-    "Charcoal and deep navy are your versions of black — more harmonious and just as versatile.",
+    "Avoid orange-based bronzers - a cool-toned highlighter gives you a more natural glow.",
+    "Your best whites are soft white and cool white - pure bright white can clash with your soft colouring.",
+    "Charcoal and deep navy are your versions of black - more harmonious and just as versatile.",
     "Muted teal and dusty aqua are beautiful accent colours that work with your cool palette.",
     "Cool rose-brown hair tones complement your natural colouring more than warm caramel.",
-    "Layering similar tones together — like soft blue with greige — is a very Summer way to dress.",
-    "Your colouring has a natural softness — lean into it rather than fighting it with harsh contrasts.",
-    "Cool raspberry and deep rose are your power reds — avoid warm coral or tomato red.",
+    "Layering similar tones together - like soft blue with greige - is a very Summer way to dress.",
+    "Your colouring has a natural softness - lean into it rather than fighting it with harsh contrasts.",
+    "Cool raspberry and deep rose are your power reds - avoid warm coral or tomato red.",
     "Soft sage and cool mint are surprisingly wearable everyday colours for your season.",
     "A cool-toned soft plum or mulberry lip is more flattering than a warm nude on you.",
-    "Your eyes often have cool or grey undertones — enhance them with soft lavender or taupe shadow.",
-    "Avoid highly saturated colours — the softer, dustier version of any colour will suit you better.",
+    "Your eyes often have cool or grey undertones - enhance them with soft lavender or taupe shadow.",
+    "Avoid highly saturated colours - the softer, dustier version of any colour will suit you better.",
     "Pearl and moonstone jewellery suit your soft, cool colouring beautifully.",
     "Soft, cool florals in lavender, dusty pink and blue are made for your palette.",
-    "Your season is associated with elegance and refinement — your palette reflects that naturally.",
+    "Your season is associated with elegance and refinement - your palette reflects that naturally.",
     "Cool-toned mauve or dusty pink nails are more harmonious than warm coral or orange.",
-    "Misty morning light captures your colouring at its best — soft, cool and luminous.",
+    "Misty morning light captures your colouring at its best - soft, cool and luminous.",
     "When in doubt, choose the cooler, softer version of any colour and you'll always be right.",
   ],
   Autumn: [
-    "Rich terracotta and burnt orange are your signature colours — wear them near your face.",
-    "Your best neutrals are warm camel, chocolate brown and olive — endlessly versatile for you.",
-    "Gold jewellery was made for Autumns — it enhances your warmth and depth beautifully.",
-    "Avoid black — try deep chocolate, espresso or dark olive for the same impact with more harmony.",
-    "Earthy, muted tones are your foundation — they ground your look without overwhelming it.",
-    "Warm brick red is your red — cool blue-red or cherry red will clash with your undertone.",
-    "Olive green is one of your most powerful and wearable colours — don't underestimate it.",
-    "Your colouring is rich and warm — embrace depth and saturation in your palette.",
+    "Rich terracotta and burnt orange are your signature colours - wear them near your face.",
+    "Your best neutrals are warm camel, chocolate brown and olive - endlessly versatile for you.",
+    "Gold jewellery was made for Autumns - it enhances your warmth and depth beautifully.",
+    "Avoid black - try deep chocolate, espresso or dark olive for the same impact with more harmony.",
+    "Earthy, muted tones are your foundation - they ground your look without overwhelming it.",
+    "Warm brick red is your red - cool blue-red or cherry red will clash with your undertone.",
+    "Olive green is one of your most powerful and wearable colours - don't underestimate it.",
+    "Your colouring is rich and warm - embrace depth and saturation in your palette.",
     "Amber, cognac and warm toffee tones in accessories will pull any outfit together.",
-    "Avoid icy or cool pastels — they fight against your warm, earthy colouring.",
-    "Deep mustard yellow is one of the most flattering colours you can wear — try it today.",
+    "Avoid icy or cool pastels - they fight against your warm, earthy colouring.",
+    "Deep mustard yellow is one of the most flattering colours you can wear - try it today.",
     "Warm auburn and copper hair tones align beautifully with your natural colouring.",
     "Bronze and antique gold accessories give you a richness that silver cannot match.",
     "Warm brown-toned eyeshadow enhances your eyes far more than cool grey or taupe.",
-    "Layering warm tones — terracotta with camel, burgundy with olive — is quintessentially Autumn.",
-    "Your skin has a warmth and depth that glows in autumn light — lean into it.",
-    "Rust, burnt sienna and ochre are your accent colours — powerful and deeply personal.",
+    "Layering warm tones - terracotta with camel, burgundy with olive - is quintessentially Autumn.",
+    "Your skin has a warmth and depth that glows in autumn light - lean into it.",
+    "Rust, burnt sienna and ochre are your accent colours - powerful and deeply personal.",
     "Warm, earthy florals in burnt orange, deep red and golden yellow are made for you.",
     "Your best lipstick shades are warm brick, terracotta, deep coral and warm berry.",
-    "Avoid bright, clear colours — muted, earthy versions of the same hues will always suit you better.",
+    "Avoid bright, clear colours - muted, earthy versions of the same hues will always suit you better.",
     "Warm tortoiseshell, leather and wood accessories harmonise naturally with your palette.",
-    "Deep teal and forest green are your cool-leaning colours — still warm enough to work beautifully.",
-    "Your colouring carries weight and richness — avoid anything too light or pastel near your face.",
+    "Deep teal and forest green are your cool-leaning colours - still warm enough to work beautifully.",
+    "Your colouring carries weight and richness - avoid anything too light or pastel near your face.",
     "A warm bronze highlighter will give you a natural glow that cool highlighters can't replicate.",
-    "Camel and warm tan coats are your neutrals done right — they work with your entire wardrobe.",
-    "Autumn colouring was designed for textures — linen, suede, leather and wool all look outstanding on you.",
-    "Your season is the most grounded and earthy — your palette reflects strength and warmth.",
-    "Deep burgundy and wine are your evening colours — rich, warm and completely your own.",
-    "Avoid white — try warm ivory, cream or soft sand for a fresher, more harmonious look.",
-    "When in doubt, reach for something earthy and warm — you cannot go wrong.",
+    "Camel and warm tan coats are your neutrals done right - they work with your entire wardrobe.",
+    "Autumn colouring was designed for textures - linen, suede, leather and wool all look outstanding on you.",
+    "Your season is the most grounded and earthy - your palette reflects strength and warmth.",
+    "Deep burgundy and wine are your evening colours - rich, warm and completely your own.",
+    "Avoid white - try warm ivory, cream or soft sand for a fresher, more harmonious look.",
+    "When in doubt, reach for something earthy and warm - you cannot go wrong.",
   ],
   Winter: [
-    "High contrast is your superpower — don't be afraid of bold colour pairings.",
-    "True black is one of your best colours — it enhances your natural contrast and depth.",
-    "Bright white and pure black are your neutrals — avoid warm beige or cream near your face.",
-    "Cool jewel tones — sapphire, emerald, ruby — are made for your colouring.",
+    "High contrast is your superpower - don't be afraid of bold colour pairings.",
+    "True black is one of your best colours - it enhances your natural contrast and depth.",
+    "Bright white and pure black are your neutrals - avoid warm beige or cream near your face.",
+    "Cool jewel tones - sapphire, emerald, ruby - are made for your colouring.",
     "Silver and platinum jewellery harmonises perfectly with your cool undertone.",
-    "Avoid warm, muted or earthy tones — they dull your natural intensity.",
+    "Avoid warm, muted or earthy tones - they dull your natural intensity.",
     "A bold red lip in a cool, blue-toned red is one of the most flattering looks you can wear.",
-    "Your colouring thrives in sharp contrasts — don't blend everything into the same tonal range.",
-    "Icy pastels — ice blue, pale lavender, mint — are surprisingly powerful on Winter colouring.",
-    "Avoid warm browns and camel tones — they clash with your cool, high-contrast nature.",
-    "Deep navy is your alternative to black — equally strong and slightly softer.",
+    "Your colouring thrives in sharp contrasts - don't blend everything into the same tonal range.",
+    "Icy pastels - ice blue, pale lavender, mint - are surprisingly powerful on Winter colouring.",
+    "Avoid warm browns and camel tones - they clash with your cool, high-contrast nature.",
+    "Deep navy is your alternative to black - equally strong and slightly softer.",
     "Cool plum and deep berry are your most flattering lip colours after red.",
-    "Your eyes likely have cool undertones — enhance them with charcoal, navy or cool taupe shadow.",
-    "Avoid muted or dusty colours — you need clarity and saturation for your palette to sing.",
+    "Your eyes likely have cool undertones - enhance them with charcoal, navy or cool taupe shadow.",
+    "Avoid muted or dusty colours - you need clarity and saturation for your palette to sing.",
     "Bright fuchsia and cool magenta are bold but deeply flattering on Winter colouring.",
-    "White gold and silver accessories always over gold — warmth doesn't serve your undertone.",
+    "White gold and silver accessories always over gold - warmth doesn't serve your undertone.",
     "Cool-toned highlighters give you a luminous, icy glow that suits your season perfectly.",
-    "Deep emerald green is one of your strongest colours — wear it confidently.",
-    "Avoid orange-based tones at all costs — they are among the least flattering for your colouring.",
+    "Deep emerald green is one of your strongest colours - wear it confidently.",
+    "Avoid orange-based tones at all costs - they are among the least flattering for your colouring.",
     "Crisp, clean lines and minimal styling reflect your season's natural aesthetic.",
-    "Cool charcoal grey is a powerful neutral for you — more harmonious than warm grey or taupe.",
+    "Cool charcoal grey is a powerful neutral for you - more harmonious than warm grey or taupe.",
     "Bright cobalt blue worn near your face will make your features more striking instantly.",
-    "Your colouring has a natural drama — lean into it rather than softening it unnecessarily.",
-    "Deep burgundy and wine are your reds for eveningwear — rich and perfectly cool-toned.",
-    "Avoid anything yellow-based in your makeup — cool pink and mauve tones will always serve you better.",
-    "Monochrome dressing in black and white is a Winter signature — own it.",
-    "Your season is the most dramatic of the four — your palette should reflect that confidence.",
+    "Your colouring has a natural drama - lean into it rather than softening it unnecessarily.",
+    "Deep burgundy and wine are your reds for eveningwear - rich and perfectly cool-toned.",
+    "Avoid anything yellow-based in your makeup - cool pink and mauve tones will always serve you better.",
+    "Monochrome dressing in black and white is a Winter signature - own it.",
+    "Your season is the most dramatic of the four - your palette should reflect that confidence.",
     "Cool mint and icy aqua are unexpected but beautiful accent colours for your wardrobe.",
-    "Avoid warm lighting when possible — cool, natural light is where your colouring looks its best.",
-    "When in doubt, go cooler, deeper and more saturated — that is always the Winter direction.",
+    "Avoid warm lighting when possible - cool, natural light is where your colouring looks its best.",
+    "When in doubt, go cooler, deeper and more saturated - that is always the Winter direction.",
   ],
 };
 
@@ -1287,21 +1287,21 @@ const SEASONAL_MOOD: Record<string, string[]> = {
   Spring: [
     "A day to lead with warmth. Someone needs your energy today more than you know.",
     "Your instinct to brighten things is right today. Follow it.",
-    "A good day to wear something that makes you feel alive — the world responds to your light.",
+    "A good day to wear something that makes you feel alive - the world responds to your light.",
     "Today favours bold moves. Your colouring was built for visibility.",
     "You may feel pulled toward comfort today. Let your palette meet you there.",
     "A day for connection. Your warmth opens doors that logic cannot.",
     "Something small and joyful is available today if you look for it.",
     "Today is a good day to be seen. Wear the colour you've been saving.",
     "Your energy is high today. Match it with something vivid and warm.",
-    "A day for new beginnings. Your colouring carries optimism naturally — use it.",
+    "A day for new beginnings. Your colouring carries optimism naturally - use it.",
   ],
   Summer: [
     "A quieter day. Your instinct for stillness is an asset today, not a limitation.",
     "Someone will notice how considered you are today. Let them.",
     "A day for depth over noise. Your palette was built for exactly this kind of day.",
     "Today favours listening. You'll gather something important if you stay soft.",
-    "You may feel the pull of beauty today — in objects, in light, in people. Trust it.",
+    "You may feel the pull of beauty today - in objects, in light, in people. Trust it.",
     "A day to wear something that feels like you at your most yourself.",
     "Your calm is contagious today. More people need it than you realise.",
     "A thoughtful day. The right words will come if you don't rush them.",
@@ -1311,26 +1311,26 @@ const SEASONAL_MOOD: Record<string, string[]> = {
   Autumn: [
     "A grounded day. Your steadiness will be exactly what someone needs.",
     "Today favours depth and patience. You have both naturally.",
-    "A good day to create something — your hands know what your mind is still working out.",
+    "A good day to create something - your hands know what your mind is still working out.",
     "You may feel more yourself today than you have in a while. Lean into it.",
     "Someone will trust you with something today. You already know what to do with it.",
     "A day for warmth and honesty. Your colouring carries both.",
-    "Today is unhurried. That's not stagnation — that's groundedness.",
+    "Today is unhurried. That's not stagnation - that's groundedness.",
     "Your eye for beauty is sharp today. Something you see will stay with you.",
     "A day to wear something rich and earthy. Let your palette carry the weight of the day.",
     "You are more striking today than you feel. Wear the colour that proves it.",
   ],
   Winter: [
     "A high-contrast day. Your precision will cut through where others are vague.",
-    "Today favours clarity. You see things as they are — that's rare and valuable.",
+    "Today favours clarity. You see things as they are - that's rare and valuable.",
     "Something that has been unclear is becoming sharper. Trust the sharpening.",
-    "A day for decisiveness. Your instincts are correct — act on them.",
+    "A day for decisiveness. Your instincts are correct - act on them.",
     "You may feel more intense than usual today. That intensity is information.",
     "Today favours presence over warmth. You have exactly the right kind.",
     "Someone will mistake your cool for distance today. Let your presence correct them.",
     "A day to be exactly as certain as you actually are. No softening needed.",
     "Your clarity is a gift today, even when it's uncomfortable for others.",
-    "Wear something that matches the day — sharp, considered, completely yours.",
+    "Wear something that matches the day - sharp, considered, completely yours.",
   ],
 };
 
@@ -1345,26 +1345,26 @@ const getSeasonalMood = (season: string): string => {
 
 const SEASON_IDENTITY: Record<string, string[]> = {
   Spring: [
-    "You carry warmth into every room before you say a word. That's not charm — it's colouring.",
+    "You carry warmth into every room before you say a word. That's not charm - it's colouring.",
     "Springs are the people others describe as 'glowing'. You always have been.",
     "Your energy is light, clear and infectious. Your palette was built to match it.",
-    "You look best in the colours of late afternoon sun — warm, golden, alive.",
+    "You look best in the colours of late afternoon sun - warm, golden, alive.",
     "There's a brightness to you that cool, heavy colours have always fought against. Now you know why.",
     "People feel more optimistic around Springs. Your colouring is part of that.",
-    "You were made for colour. Not loud colour — warm, clear, joyful colour.",
+    "You were made for colour. Not loud colour - warm, clear, joyful colour.",
     "Your best self has always been your warmest self. Your palette makes that visible.",
     "Springs are rare. Most people spend years wearing colours that dull them. You don't have to.",
     "There's nothing soft or washed-out about you. Your palette reflects exactly that.",
   ],
   Summer: [
-    "You have a softness people trust immediately. That's not weakness — it's your power.",
+    "You have a softness people trust immediately. That's not weakness - it's your power.",
     "Summers are the people who make a room feel safe. Your palette reflects exactly that.",
     "You carry elegance without effort. Cool, muted tones are simply the truth of you.",
     "People remember how you made them feel. Your colouring is part of why.",
-    "You look best in the colours of early morning — soft, cool, before the world gets loud.",
+    "You look best in the colours of early morning - soft, cool, before the world gets loud.",
     "There is a quietness to your beauty that loud colours have always fought against.",
     "Summers are underestimated. Then suddenly, undeniable.",
-    "Your palette is not subtle — it's precise. There's a difference.",
+    "Your palette is not subtle - it's precise. There's a difference.",
     "You were never meant to wear black. You were made for something far more interesting.",
     "The best version of you has always lived in soft, cool, considered tones. Now you have the words for it.",
   ],
@@ -1372,9 +1372,9 @@ const SEASON_IDENTITY: Record<string, string[]> = {
     "You have a groundedness that people lean on without realising it. Your palette is built from the same place.",
     "Autumns are the people others describe as 'real'. Warm, deep, unhurried.",
     "There's a richness to you that pastels and icy tones have always diminished. Now you know why.",
-    "You look best in the colours of October — deep, warm, alive with texture.",
+    "You look best in the colours of October - deep, warm, alive with texture.",
     "People trust Autumns. There's something in your warmth that reads as safe.",
-    "You were made for depth. Terracotta, rust, forest, gold — these aren't just colours, they're you.",
+    "You were made for depth. Terracotta, rust, forest, gold - these aren't just colours, they're you.",
     "Your colouring has always had a quiet authority. The right palette makes it visible.",
     "Autumn colouring ages beautifully. The depth that suits you now will suit you always.",
     "You carry warmth that cool, bright colours have spent years trying to cool down. They were wrong to try.",
@@ -1384,10 +1384,10 @@ const SEASON_IDENTITY: Record<string, string[]> = {
     "You have a presence that enters a room before you do. Your palette was built for exactly that.",
     "Winters are the people you don't forget. High contrast, high impact, unforgettable.",
     "There's a clarity to you that muted, warm tones have always blurred. Now you know why.",
-    "You look best in colours that match your intensity — deep, cool, uncompromising.",
-    "People notice Winters. Not because you try — because your colouring demands it.",
-    "You were made for contrast. Black, white, jewel tones — these aren't bold choices for you, they're natural ones.",
-    "Your colouring has always had an edge. The right palette doesn't soften it — it sharpens it.",
+    "You look best in colours that match your intensity - deep, cool, uncompromising.",
+    "People notice Winters. Not because you try - because your colouring demands it.",
+    "You were made for contrast. Black, white, jewel tones - these aren't bold choices for you, they're natural ones.",
+    "Your colouring has always had an edge. The right palette doesn't soften it - it sharpens it.",
     "Winters don't need to try hard. The palette does the work.",
     "You carry a cool precision that warm, earthy colours have spent years trying to soften. They were wrong to try.",
     "There is an intensity to you that is genuinely rare. Your palette finally matches it.",
@@ -1463,7 +1463,7 @@ useEffect(() => {
     const wardrobeCount = parseInt(localStorage.getItem(`solla_wardrobe_count_${user.id}`) || "0");
     if (wardrobeCount === 0) {
       selectedNudge = {
-        message: "Your outfit engine is empty — add your first items and wake up knowing what to wear.",
+        message: "Your outfit engine is empty - add your first items and wake up knowing what to wear.",
         action: "Add items",
         onAction: () => onTabChange("wardrobe"),
       };
@@ -1476,7 +1476,7 @@ useEffect(() => {
     };
   } else if (plan === "free") {
     selectedNudge = {
-      message: `Your makeup guide is ready — see exactly which foundation and lip colours suit your ${seasonData.season} colouring.`,
+      message: `Your makeup guide is ready - see exactly which foundation and lip colours suit your ${seasonData.season} colouring.`,
       action: "Unlock now",
       onAction: () => onUpgrade(),
     };
@@ -1715,7 +1715,7 @@ const loadExtendedPalette = async () => {
           Style with AI →
         </button>
         {outfitFeedback ? (
-          <p style={{ margin: "6px 0 0", fontSize: 12, color: DS.colors.textFaint }}>{outfitFeedback === "up" ? "👍 Glad it works!" : "👎 Noted — we'll do better tomorrow."}</p>
+          <p style={{ margin: "6px 0 0", fontSize: 12, color: DS.colors.textFaint }}>{outfitFeedback === "up" ? "👍 Glad it works!" : "👎 Noted - we'll do better tomorrow."}</p>
         ) : (
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
             <span style={{ fontSize: 12, color: DS.colors.textFaint }}>How's this?</span>
@@ -1755,7 +1755,7 @@ const loadExtendedPalette = async () => {
 )}
         </div>
       )}
-      {/* See your week link — shows if plan exists */}
+      {/* See your week link - shows if plan exists */}
       {plan !== "free" && (() => {
         try {
           const saved = localStorage.getItem(`solla_weekly_plan_${user?.id}`);
@@ -1831,7 +1831,7 @@ const loadExtendedPalette = async () => {
             </div>
           )}
 
-          {/* Extended palette — Luxe only */}
+          {/* Extended palette - Luxe only */}
           {plan === "luxe" && (
             <div style={{ paddingTop: 14, borderTop: `1px solid ${DS.colors.border}`, marginBottom: 16 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
@@ -2121,7 +2121,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
       <Icon name="lock" size={28} color={DS.colors.accent} />
     </div>
     <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 10, textAlign: "center" }}>Colour Checker</h2>
-    <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 24 }}>Photograph any item, outfit or swatches and get an instant verdict against your season — unlock with Glow.</p>
+    <p style={{ fontSize: 15, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, maxWidth: 260, marginBottom: 24 }}>Photograph any item, outfit or swatches and get an instant verdict against your season - unlock with Glow.</p>
     <button onClick={onUpgrade} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Unlock Checker</button>
   </div>
 );
@@ -2148,7 +2148,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
         {/* Makeup mode */}
         {mode === "makeup" && (
           <div>
-            <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 16 }}>Check any makeup product against your colour season — at Sephora, online or at home. Enter the name for the most accurate result.</p>
+            <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 16 }}>Check any makeup product against your colour season - at Sephora, online or at home. Enter the name for the most accurate result.</p>
 
             {/* Check mode toggle */}
             <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.md, padding: 3, gap: 3, marginBottom: 14 }}>
@@ -2174,7 +2174,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
             ) : (
               <>
                 <div style={{ background: DS.colors.surface, borderRadius: DS.radius.md, padding: "10px 12px", marginBottom: 10 }}>
-                  <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>For any product with a known shade name — use "Enter name" instead. Photo checking is best for unknown shades swatched on your inner arm in natural daylight.</p>
+                  <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>For any product with a known shade name - use "Enter name" instead. Photo checking is best for unknown shades swatched on your inner arm in natural daylight.</p>
                 </div>
                 <div onClick={() => !makeupPreview && makeupFileRef.current?.click()} style={{ borderRadius: DS.radius.lg, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, height: 120, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: makeupPreview ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 12 }}>
                   {makeupPreview ? (
@@ -2270,7 +2270,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                           {item.verdict_v2 === "yes" ? "✓ Suits your season" : item.verdict_v2 === "neutral" ? "~ Works with care" : "✗ Doesn't suit your season"}
                         </span>
                         <span style={{ fontSize: 10, color: DS.colors.textFaint, background: DS.colors.surface, padding: "1px 6px", borderRadius: DS.radius.full, display: "block", marginTop: 3 }}>
-                          {makeupCheckMode === "upload" ? "Photo check — result may vary with lighting" : "Name check — high confidence"}
+                          {makeupCheckMode === "upload" ? "Photo check - result may vary with lighting" : "Name check - high confidence"}
                         </span>
                       </div>
                     </div>
@@ -2355,18 +2355,18 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
           </div>
         )}
 
-        {/* Mode description — single/outfit only */}
+        {/* Mode description - single/outfit only */}
         {mode !== "makeup" && <p style={{ fontSize: 13, color: DS.colors.textFaint, marginBottom: 16, lineHeight: 1.5 }}>
           {mode === "single" && (
             <div style={{ marginBottom: 8 }}>
-              <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, margin: "0 0 6px" }}>Upload one item or multiple items at once — Solla checks each colour separately. Photograph your actual garment in natural light against a plain background for the most accurate result. You can also upload multiple items in one go.</p>
-              <p style={{ fontSize: 12, color: DS.colors.textMuted, margin: 0, lineHeight: 1.5 }}>Avoid website or sales photos — they're often colour-corrected and will give a less accurate reading than your own photo.</p>
+              <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, margin: "0 0 6px" }}>Upload one item or multiple items at once - Solla checks each colour separately. Photograph your actual garment in natural light against a plain background for the most accurate result. You can also upload multiple items in one go.</p>
+              <p style={{ fontSize: 12, color: DS.colors.textMuted, margin: 0, lineHeight: 1.5 }}>Avoid website or sales photos - they're often colour-corrected and will give a less accurate reading than your own photo.</p>
             </div>
           )}
           {mode === "outfit" && "Upload a full outfit photo for an overall verdict and per-piece breakdown. Photograph in natural light for the most accurate colour reading."}
         </p>}
 
-        {/* Upload area — single/outfit only */}
+        {/* Upload area - single/outfit only */}
         {mode !== "makeup" && results.length === 0 && (
           <div
             onClick={() => previews.length === 0 && fileRef.current?.click()}
@@ -2397,7 +2397,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
 
         {mode !== "makeup" && <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={e => { if (e.target.files?.length) handleFiles(e.target.files); }} />}
 
-        {/* CTA — single/outfit only */}
+        {/* CTA - single/outfit only */}
         {mode !== "makeup" && previews.length > 0 && results.length === 0 && (
           <button onClick={handleCheck} disabled={loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: loading ? DS.colors.textFaint : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
             {loading ? (checkingIndex !== null && previews.length > 1 ? `Checking ${checkingIndex + 1} of ${previews.length}...` : "Checking...") : "Check this"}
@@ -2513,7 +2513,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
 {user?.plan === "glow" && (
   <button onClick={onUpgrade} style={{ marginTop: 8, padding: "8px 14px", borderRadius: DS.radius.full, background: "#FFF7ED", border: `1px solid #C26B3A`, display: "flex", alignItems: "center", gap: 6 }}>
     <Icon name="lock" size={12} color="#C26B3A" strokeWidth={2} />
-    <span style={{ fontSize: 12, color: "#C26B3A", fontWeight: 600 }}>Save to wardrobe — unlock with Luxe</span>
+    <span style={{ fontSize: 12, color: "#C26B3A", fontWeight: 600 }}>Save to wardrobe - unlock with Luxe</span>
   </button>
 )}
                 </div>
@@ -2650,9 +2650,9 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
                 {plan !== "free" && <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
                   {[
                     { label: "Undertone", value: seasonData.colour_profile.undertone, description: `Your undertone is ${seasonData.colour_profile.undertone.toLowerCase()} - ${seasonData.colour_profile.undertone === "Warm" ? "meaning your skin has golden or yellow hints beneath the surface. Warm undertones harmonise best with earthy, golden and rich colour families. Gold jewellery, camel, terracotta and olive will all work beautifully with your natural colouring." : seasonData.colour_profile.undertone === "Cool" ? "meaning your skin has pink or blue hints beneath the surface. Cool undertones harmonise best with jewel tones, icy shades and blue-based colours. Silver jewellery, navy, berry and soft whites will all complement your natural colouring." : "meaning your skin has a balance of both warm and cool hints. Neutral undertones are versatile - you can wear both warm and cool colours, making you one of the more flexible seasonal types to dress."}` },
-                    { label: "Depth", value: seasonData.colour_profile.depth, description: `Your depth is ${seasonData.colour_profile.depth.toLowerCase()} — ${seasonData.colour_profile.depth === "Light" ? "meaning your overall colouring is soft and delicate. You look most radiant in lighter, softer shades that don't overpower your natural features. Heavy, very dark colours worn near your face can overwhelm your complexion." : seasonData.colour_profile.depth === "Deep" ? "meaning your overall colouring is rich and striking. You can carry deep, saturated colours that lighter colouring cannot - dark navy, rich chocolate, and bold jewel tones will enhance your natural intensity." : "meaning your colouring sits between light and deep. You have the most flexibility with depth - you can wear both medium-toned and moderately deep colours without being overwhelmed or washed out."}` },
-                    { label: "Chroma", value: seasonData.colour_profile.chroma, description: `Your chroma is ${seasonData.colour_profile.chroma.toLowerCase()} — ${seasonData.colour_profile.chroma === "Bright" ? "meaning your features are vivid and clear. You come alive in bold, saturated colours that match your natural vibrancy. Muted or dusty shades can make you look flat - you need clarity and intensity in your palette." : seasonData.colour_profile.chroma === "Muted" || seasonData.colour_profile.chroma === "Soft" ? "meaning your features have a gentle, blended quality. You look most harmonious in toned-down, less saturated shades. Very bright or highly saturated colours can look jarring against your naturally soft colouring - choose dusty, earthy or muted versions of colours instead." : "meaning your colouring has a balanced level of saturation. You suit colours that are neither extremely bright nor heavily muted - look for colours with a natural, grounded quality."}` },
-                    { label: "Contrast", value: seasonData.colour_profile.contrast, description: `Your contrast is ${seasonData.colour_profile.contrast.toLowerCase()} — ${seasonData.colour_profile.contrast === "High" ? "meaning there is a strong difference between your hair, skin and eye colour. You look striking in bold colour combinations and strong patterns. Tonal, blended outfits can make you look washed out - you need some contrast between your pieces to match your natural intensity." : seasonData.colour_profile.contrast === "Low" ? "meaning your hair, skin and eyes are similar in tone. You look most harmonious in tonal, blended outfits where pieces are close in value. Very high contrast combinations like stark black and white can overpower your naturally soft, blended colouring." : "meaning your features have a moderate level of contrast. You suit both tonal combinations and moderately contrasting outfits - you have more flexibility than very high or very low contrast types."}` },
+                    { label: "Depth", value: seasonData.colour_profile.depth, description: `Your depth is ${seasonData.colour_profile.depth.toLowerCase()} - ${seasonData.colour_profile.depth === "Light" ? "meaning your overall colouring is soft and delicate. You look most radiant in lighter, softer shades that don't overpower your natural features. Heavy, very dark colours worn near your face can overwhelm your complexion." : seasonData.colour_profile.depth === "Deep" ? "meaning your overall colouring is rich and striking. You can carry deep, saturated colours that lighter colouring cannot - dark navy, rich chocolate, and bold jewel tones will enhance your natural intensity." : "meaning your colouring sits between light and deep. You have the most flexibility with depth - you can wear both medium-toned and moderately deep colours without being overwhelmed or washed out."}` },
+                    { label: "Chroma", value: seasonData.colour_profile.chroma, description: `Your chroma is ${seasonData.colour_profile.chroma.toLowerCase()} - ${seasonData.colour_profile.chroma === "Bright" ? "meaning your features are vivid and clear. You come alive in bold, saturated colours that match your natural vibrancy. Muted or dusty shades can make you look flat - you need clarity and intensity in your palette." : seasonData.colour_profile.chroma === "Muted" || seasonData.colour_profile.chroma === "Soft" ? "meaning your features have a gentle, blended quality. You look most harmonious in toned-down, less saturated shades. Very bright or highly saturated colours can look jarring against your naturally soft colouring - choose dusty, earthy or muted versions of colours instead." : "meaning your colouring has a balanced level of saturation. You suit colours that are neither extremely bright nor heavily muted - look for colours with a natural, grounded quality."}` },
+                    { label: "Contrast", value: seasonData.colour_profile.contrast, description: `Your contrast is ${seasonData.colour_profile.contrast.toLowerCase()} - ${seasonData.colour_profile.contrast === "High" ? "meaning there is a strong difference between your hair, skin and eye colour. You look striking in bold colour combinations and strong patterns. Tonal, blended outfits can make you look washed out - you need some contrast between your pieces to match your natural intensity." : seasonData.colour_profile.contrast === "Low" ? "meaning your hair, skin and eyes are similar in tone. You look most harmonious in tonal, blended outfits where pieces are close in value. Very high contrast combinations like stark black and white can overpower your naturally soft, blended colouring." : "meaning your features have a moderate level of contrast. You suit both tonal combinations and moderately contrasting outfits - you have more flexibility than very high or very low contrast types."}` },
                   ].map(item => (
                     <button key={item.label} onClick={() => setActivePill(item)} style={{ padding: "3px 10px", background: DS.colors.accentLight, borderRadius: DS.radius.full, display: "flex", alignItems: "center", gap: 4 }}>
                       <span style={{ fontSize: 11, color: DS.colors.accentDark, fontWeight: 500 }}>{item.label}: {item.value}</span>
@@ -2781,7 +2781,7 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
           const data = await res.json();
           if (data.error) throw new Error(data.error);
           setShowCancelConfirm(false);
-          alert("Your subscription has been paused for one month. We'll resume it automatically after that — you can cancel anytime.");
+          alert("Your subscription has been paused for one month. We'll resume it automatically after that - you can cancel anytime.");
         } catch {
           alert("Something went wrong pausing your subscription. Please email hello@solla.com.au for help.");
         } finally { setCancelling(false); }
@@ -3370,7 +3370,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             <div style={{ textAlign: "center", padding: "40px 0" }}>
               <Icon name="hanger" size={40} color={DS.colors.border} />
               <p style={{ fontSize: 15, fontWeight: 600, color: DS.colors.textMuted, marginTop: 12 }}>Your wardrobe is empty</p>
-              <p style={{ fontSize: 13, color: DS.colors.textFaint, marginTop: 4, lineHeight: 1.6, maxWidth: 260, margin: "8px auto 0" }}>Add your clothes and your daily outfit suggestions get smarter — Solla learns what you own, what suits your season, and what you love wearing.</p>
+              <p style={{ fontSize: 13, color: DS.colors.textFaint, marginTop: 4, lineHeight: 1.6, maxWidth: 260, margin: "8px auto 0" }}>Add your clothes and your daily outfit suggestions get smarter - Solla learns what you own, what suits your season, and what you love wearing.</p>
             </div>
           ) : gridView ? (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 80 }}>
@@ -3434,7 +3434,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           {/* Add item button */}
          {!isGuest && <button onClick={() => {
             if (!seasonData) {
-              alert("Complete your colour analysis first — tap the Season tab to get started.");
+              alert("Complete your colour analysis first - tap the Season tab to get started.");
               return;
             }
             if (isFreePlan && items.length >= freeItemLimit) {
@@ -3475,7 +3475,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
               {outfits.filter(o => filterOutfitCategory === "All" || o.category === filterOutfitCategory).map(outfit => {
                 const outfitItems = items.filter(i => outfit.item_ids.includes(i.id));
                 return (
-                  <div key={outfit.id} onClick={() => { setView("chat"); setChatInput(`Tell me about this outfit: ${outfit.name} — ${items.filter(i => outfit.item_ids.includes(i.id)).map(i => i.name).join(", ")}. How can I style it and what occasions does it work for?`); }} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "14px 16px", cursor: "pointer" }}>
+                  <div key={outfit.id} onClick={() => { setView("chat"); setChatInput(`Tell me about this outfit: ${outfit.name} - ${items.filter(i => outfit.item_ids.includes(i.id)).map(i => i.name).join(", ")}. How can I style it and what occasions does it work for?`); }} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "14px 16px", cursor: "pointer" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: DS.colors.text }}>{outfit.name}</p>
@@ -3659,7 +3659,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                       const data = await res.json();
                       if (Array.isArray(data)) {
                         setOutfits(prev => [data[0], ...prev]);
-                        alert(`Saved "${outfitName}" to your outfits${matchedIds.length > 0 ? ` with ${matchedIds.length} matching item${matchedIds.length !== 1 ? "s" : ""}` : " — add items in the Outfits tab"} ✓`);
+                        alert(`Saved "${outfitName}" to your outfits${matchedIds.length > 0 ? ` with ${matchedIds.length} matching item${matchedIds.length !== 1 ? "s" : ""}` : " - add items in the Outfits tab"} ✓`);
                       }
                     }} style={{ fontSize: 12, color: DS.colors.success, fontWeight: 500 }}>
                       + Save to outfits
@@ -3675,16 +3675,16 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
       {view === "makeup" && (
         <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
 
-          {/* Onboarding — first time */}
+          {/* Onboarding - first time */}
           {!makeupOnboarded && (
             <div style={{ background: DS.colors.accentLight, borderRadius: DS.radius.lg, padding: "20px", marginBottom: 16 }}>
               <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 700, color: DS.colors.text }}>Set up your makeup profile</p>
-              <p style={{ margin: "0 0 16px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>Tell us what foundation and concealer shades you currently use — even if you're not sure they suit you. The more shades you give us, the better we can triangulate your skin tone and season match.</p>
+              <p style={{ margin: "0 0 16px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6 }}>Tell us what foundation and concealer shades you currently use - even if you're not sure they suit you. The more shades you give us, the better we can triangulate your skin tone and season match.</p>
 
               {makeupOnboardingStep === 0 && (
                 <div>
                   <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 600, color: DS.colors.text }}>Foundation shades you wear</p>
-                  <p style={{ margin: "0 0 10px", fontSize: 12, color: DS.colors.textFaint }}>Include brand and shade name — e.g. "MAC Studio Fix NC15", "Fenty 130N". Add multiple if you use more than one or have tried a few.</p>
+                  <p style={{ margin: "0 0 10px", fontSize: 12, color: DS.colors.textFaint }}>Include brand and shade name - e.g. "MAC Studio Fix NC15", "Fenty 130N". Add multiple if you use more than one or have tried a few.</p>
                   {makeupFoundationShades.map((shade, i) => (
                     <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
                       <input
@@ -3742,7 +3742,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     const token = localStorage.getItem("solla_token");
                     const allFoundations = makeupFoundationShades.filter(s => s.trim());
                     const allConcealers = makeupConcealerShades.filter(s => s.trim());
-                    // Save as calibration data — no verdict, these inform future checks
+                    // Save as calibration data - no verdict, these inform future checks
                     const products = [
                       ...allFoundations.map(s => ({ name: s, category: "Foundation" })),
                       ...allConcealers.map(s => ({ name: s, category: "Concealer" })),
@@ -3761,7 +3761,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                             hex: "#C4A882",
                             verdict_v2: "neutral",
                             verdict: true,
-                            tip: "Added as calibration — check this product to get your season verdict.",
+                            tip: "Added as calibration - check this product to get your season verdict.",
                             starred: false,
                           }),
                         });
@@ -3793,7 +3793,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
               ))}
             </div>
 
-            {/* Product category selector — always visible */}
+            {/* Product category selector - always visible */}
             <p style={{ margin: "0 0 8px", fontSize: 12, fontWeight: 600, color: DS.colors.textMuted }}>Product type</p>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
               {["Lip", "Blush", "Foundation", "Concealer", "Bronzer", "Eye", "Highlighter", "Other"].map(cat => (
@@ -3807,11 +3807,11 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
               <>
                 <div style={{ background: DS.colors.surface, borderRadius: DS.radius.md, padding: "10px 12px", marginBottom: 10 }}>
                   <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 600, color: DS.colors.textMuted }}>For best results:</p>
-                  <p style={{ margin: "0 0 2px", fontSize: 12, color: DS.colors.textFaint }}>· Swatch on inner arm in natural light — best for lip, blush and eye</p>
+                  <p style={{ margin: "0 0 2px", fontSize: 12, color: DS.colors.textFaint }}>· Swatch on inner arm in natural light - best for lip, blush and eye</p>
                   <p style={{ margin: "0 0 2px", fontSize: 12, color: DS.colors.textFaint }}>· Photograph your actual garment, not a product image from a website</p>
-                  <p style={{ margin: "0 0 2px", fontSize: 12, color: DS.colors.textFaint }}>· Natural light only — no flash, no filters, no artificial lighting</p>
+                  <p style={{ margin: "0 0 2px", fontSize: 12, color: DS.colors.textFaint }}>· Natural light only - no flash, no filters, no artificial lighting</p>
                   <p style={{ margin: "0 0 6px", fontSize: 12, color: DS.colors.textFaint }}>· White or neutral background where possible</p>
-                  <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>For any product with a known shade name — always use "Enter name". Photo checking is best for unknown shades swatched directly on your inner arm in natural daylight. Product photos and packaging shots will give unreliable colour readings.</p>
+                  <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>For any product with a known shade name - always use "Enter name". Photo checking is best for unknown shades swatched directly on your inner arm in natural daylight. Product photos and packaging shots will give unreliable colour readings.</p>
                 </div>
                 <div onClick={() => !makeupPreview && makeupFileRef.current?.click()} style={{ borderRadius: DS.radius.lg, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, height: 120, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: makeupPreview ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 10 }}>
                   {makeupPreview ? (
@@ -3920,7 +3920,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                           {item.verdict_v2 === "yes" ? "✓ Suits your season" : item.verdict_v2 === "neutral" ? "~ Works with care" : "✗ Doesn't suit your season"}
                         </span>
                         <span style={{ fontSize: 10, color: DS.colors.textFaint, background: DS.colors.surface, padding: "1px 6px", borderRadius: DS.radius.full, display: "block", marginTop: 3 }}>
-                          {makeupCheckMode === "upload" ? "Photo check — result may vary with lighting" : "Name check — high confidence"}
+                          {makeupCheckMode === "upload" ? "Photo check - result may vary with lighting" : "Name check - high confidence"}
                         </span>
                       </div>
                     </div>
@@ -3957,7 +3957,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                 </div>
               ) : (
                 <div style={{ padding: "10px 12px", background: "#F0FDF4", borderRadius: DS.radius.md, marginBottom: 12 }}>
-                  <p style={{ margin: 0, fontSize: 12, color: DS.colors.success, fontWeight: 500 }}>✓ Full kit — all essential categories covered</p>
+                  <p style={{ margin: 0, fontSize: 12, color: DS.colors.success, fontWeight: 500 }}>✓ Full kit - all essential categories covered</p>
                 </div>
               );
             })()}
@@ -4109,7 +4109,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
 <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: items.length > 0 ? DS.colors.accentLight : DS.colors.surface, borderRadius: DS.radius.full, marginBottom: 8 }}>
   <span style={{ fontSize: 11, color: items.length > 0 ? DS.colors.accentDark : DS.colors.textFaint, fontWeight: 500 }}>{items.length > 0 ? `${items.length} wardrobe item${items.length !== 1 ? "s" : ""} loaded` : "No wardrobe items yet"}</span>
 </div>
-                <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, maxWidth: 240, margin: "0 auto" }}>Your personal stylist is ready. The more you chat and the more clothes you add, the better Solla knows your style, preferences and lifestyle — so every suggestion gets more personal over time.</p>
+                <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, maxWidth: 240, margin: "0 auto" }}>Your personal stylist is ready. The more you chat and the more clothes you add, the better Solla knows your style, preferences and lifestyle - so every suggestion gets more personal over time.</p>
                 <button onClick={() => { setChatInput(`Analyse my wardrobe and tell me what's missing for my ${seasonData?.season || ""} season, what doesn't suit me, and what key pieces I should add.`); }} style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.lg, background: DS.colors.accentLight, fontSize: 13, color: DS.colors.accentDark, fontWeight: 600, textAlign: "left", border: `1px solid ${DS.colors.accent}30`, marginTop: 20, marginBottom: 8 }}>
   ✦ Analyse my wardrobe
 </button>
@@ -4134,7 +4134,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                 {msg.role === "assistant" && !msg.feedback && (
                   <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
                     <button onClick={() => setChatMessages(prev => prev.map((m, j) => j === i ? { ...m, feedback: "up" } : m))} style={{ padding: "3px 10px", borderRadius: DS.radius.full, background: DS.colors.surface, fontSize: 12, color: DS.colors.textMuted }}>👍</button>
-                    <button onClick={() => { setChatMessages(prev => prev.map((m, j) => j === i ? { ...m, feedback: "down" } : m)); setChatInput("That didn't quite work — "); }} style={{ padding: "3px 10px", borderRadius: DS.radius.full, background: DS.colors.surface, fontSize: 12, color: DS.colors.textMuted }}>👎</button>
+                    <button onClick={() => { setChatMessages(prev => prev.map((m, j) => j === i ? { ...m, feedback: "down" } : m)); setChatInput("That didn't quite work - "); }} style={{ padding: "3px 10px", borderRadius: DS.radius.full, background: DS.colors.surface, fontSize: 12, color: DS.colors.textMuted }}>👎</button>
                   </div>
                 )}
                 {msg.role === "assistant" && msg.feedback === "up" && (
@@ -4246,14 +4246,14 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
               </div>
               <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={e => { if (e.target.files?.length) { if (isGuest) { onSignUp?.(); return; } handleItemPhotos(e.target.files); } }}/>
 
-              {/* Results — one card per item */}
+              {/* Results - one card per item */}
               {itemResults.map((result, i) => (
                 <div key={i} style={{ marginBottom: 16, padding: "12px 14px", borderRadius: DS.radius.md, border: `1px solid ${DS.colors.border}`, background: DS.colors.bg }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                     <img src={itemPreviews[i]} style={{ width: 44, height: 44, borderRadius: DS.radius.sm, objectFit: "cover", flexShrink: 0 }} />
                     <div style={{ width: 28, height: 28, borderRadius: DS.radius.sm, background: result.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
                     <div style={{ flex: 1 }}>
-                      <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: result.verdict_v2 === "yes" ? DS.colors.success : result.verdict_v2 === "neutral" ? "#D97706" : DS.colors.danger }}>{result.verdict_v2 === "yes" ? "✓ Suits your season" : result.verdict_v2 === "neutral" ? "~ Neutral — works away from face" : "✗ Doesn't suit your season"}</p>
+                      <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: result.verdict_v2 === "yes" ? DS.colors.success : result.verdict_v2 === "neutral" ? "#D97706" : DS.colors.danger }}>{result.verdict_v2 === "yes" ? "✓ Suits your season" : result.verdict_v2 === "neutral" ? "~ Neutral - works away from face" : "✗ Doesn't suit your season"}</p>
                       <p style={{ margin: 0, fontSize: 11, color: DS.colors.textFaint }}>{result.colour_name}</p>
                     </div>
                   </div>
@@ -4373,7 +4373,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
           </div>
         </div>
       )}
-      {/* Face rule tip — shows once after first neutral/no item */}
+      {/* Face rule tip - shows once after first neutral/no item */}
       {showFaceRuleTip && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 32px" }} onClick={() => setShowFaceRuleTip(false)}>
           <div style={{ background: DS.colors.bg, borderRadius: DS.radius.xl, padding: "28px 24px", width: "100%" }} onClick={e => e.stopPropagation()}>
@@ -4381,7 +4381,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
               <span style={{ fontSize: 22 }}>💡</span>
             </div>
             <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.3px" }}>Not everything needs to suit your season</h3>
-            <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 20 }}>Colour matters most near your face — tops, jackets, scarves, earrings. Items worn lower down (trousers, shoes, bags) have much more flexibility. Use ~ and ✗ items away from your face, paired with season colours up top.</p>
+            <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 20 }}>Colour matters most near your face - tops, jackets, scarves, earrings. Items worn lower down (trousers, shoes, bags) have much more flexibility. Use ~ and ✗ items away from your face, paired with season colours up top.</p>
             <button onClick={() => setShowFaceRuleTip(false)} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 15, fontWeight: 600 }}>Got it</button>
           </div>
         </div>
@@ -4560,7 +4560,7 @@ const PlaceholderTab = ({ tab, isGuest, onSignUp }: { tab: Tab; isGuest: boolean
   );
 };
 
-// MainApp — NO SheetOverlay here, it lives at root level
+// MainApp - NO SheetOverlay here, it lives at root level
 const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, onOpenSheet, onUpgrade, onSignOut, onReanalyse }: {
   activeTab: Tab; onTabChange: (tab: Tab) => void; seasonData: SeasonData | null;
   user: User | null; isGuest: boolean; onSignUp: () => void;
@@ -4655,7 +4655,7 @@ export default function App() {
         localStorage.removeItem("solla_token");
         localStorage.removeItem("solla_refresh");
         localStorage.removeItem("solla_user");
-        // Don't clear guest season data — it will be copied when they sign in
+        // Don't clear guest season data - it will be copied when they sign in
         update({ screen: "auth" });
         window.history.replaceState({}, "", "/");
         return;
@@ -4701,7 +4701,7 @@ if (parsedUser.email && parsedSeason?.season) {
       }).catch(() => {});
     }
 
-    // Trial ending reminder — 24 hours before trial ends
+    // Trial ending reminder - 24 hours before trial ends
     if (profile.trial_end_date && !profile.trial_ending_email_sent) {
       const trialEnd = new Date(profile.trial_end_date);
       const hoursUntilEnd = (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60);
@@ -4720,7 +4720,7 @@ if (parsedUser.email && parsedSeason?.season) {
       }
     }
 
-    // Winback — 3 days after cancellation
+    // Winback - 3 days after cancellation
     if (profile.cancelled_at && !profile.winback_email_sent) {
       const cancelledAt = new Date(profile.cancelled_at);
       const daysSinceCancelled = Math.floor((Date.now() - cancelledAt.getTime()) / (1000 * 60 * 60 * 24));
@@ -4739,7 +4739,7 @@ if (parsedUser.email && parsedSeason?.season) {
       }
     }
 
-    // Wardrobe nudge — Day 5, Luxe users with no wardrobe items
+    // Wardrobe nudge - Day 5, Luxe users with no wardrobe items
     if (parsedUser.plan === "luxe" && !profile.wardrobe_nudge_sent && daysSince >= 5) {
       fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?user_id=eq.${parsedUser.id}&select=id&limit=1`, {
         headers: { ...supabaseHeaders, Authorization: `Bearer ${token}` },
@@ -4788,7 +4788,7 @@ if (parsedUser.email && parsedSeason?.season) {
         }).catch(() => {});
         const updatedUser = { ...parsedUser, plan };
         localStorage.setItem("solla_user", JSON.stringify(updatedUser));
-        // Save trial_end_date — 7 days from now
+        // Save trial_end_date - 7 days from now
         const trialEnd = new Date();
         trialEnd.setDate(trialEnd.getDate() + 7);
         fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${parsedUser.id}`, {
@@ -4856,7 +4856,7 @@ if (parsedUser.email && parsedSeason?.season) {
   return;
 }
 update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, tourStep: null });
-  } catch { update({ screen: "upload" }); alert("Something went wrong — please try again with a clear selfie in natural light."); }
+  } catch { update({ screen: "upload" }); alert("Something went wrong - please try again with a clear selfie in natural light."); }
 };
 
   const { screen, activeTab, user, isGuest, seasonData } = state;
@@ -4864,7 +4864,7 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
   return (
     <>
       <GlobalStyles />
-      {/* Root container — SheetOverlay renders here, OUTSIDE all overflow:hidden screens */}
+      {/* Root container - SheetOverlay renders here, OUTSIDE all overflow:hidden screens */}
       <div style={{ position: "relative", width: "100vw", height: "100vh", maxWidth: 430, margin: "0 auto" }}>
         {screen === "splash" && <SplashScreen onComplete={() => update({ screen: "onboarding" })} />}
         {screen === "onboarding" && <OnboardingScreen onComplete={() => update({ screen: "auth" })} />}
@@ -4913,7 +4913,7 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
             onReanalyse={handleReanalyse}
           />
         )}
-{/* SheetOverlay at root level — position:fixed works here, not clipped by any overflow:hidden */}
+{/* SheetOverlay at root level - position:fixed works here, not clipped by any overflow:hidden */}
         {state.activeSheet && state.activeSheet !== "paywall" && state.activeSheet !== "welcome" && (state.activeSheet === "faq" || state.activeSheet === "privacy" || state.activeSheet === "terms" || state.activeSheet === "cookies" || seasonData) && (
           <SheetOverlay
             activeSheet={state.activeSheet}
@@ -4937,7 +4937,7 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
         {[
           { icon: "droplet", label: "Makeup", desc: `Your exact foundation undertone, blush and lip shades as a ${state.seasonData.season}` },
           { icon: "scissors", label: "Hair colours", desc: `The exact shades that make your ${state.seasonData.season} colouring come alive` },
-          { icon: "gem", label: "Jewellery", desc: "Your metals and stones — personalised to your season" },
+          { icon: "gem", label: "Jewellery", desc: "Your metals and stones - personalised to your season" },
         ].map(item => (
           <div key={item.label} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
             <div style={{ width: 36, height: 36, borderRadius: DS.radius.md, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -4975,7 +4975,7 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
         <Icon name="sparkles" size={24} color={DS.colors.accent} />
       </div>
       <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>{state.isGuest ? "Save your colour profile 🌸" : "Your season is ready 🌸"}</h2>
-      <p style={{ fontSize: 14, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>{state.isGuest ? `Create a free account to save your colours, add wardrobe items and access your full colour guide. Your ${state.seasonData?.season || ""} analysis is saved and ready.` : "Your colour profile is ready. Now let's build your daily outfit engine — add your wardrobe, create outfits and never ask \"what do I wear?\" again."}</p>
+      <p style={{ fontSize: 14, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>{state.isGuest ? `Create a free account to save your colours, add wardrobe items and access your full colour guide. Your ${state.seasonData?.season || ""} analysis is saved and ready.` : "Your colour profile is ready. Now let's build your daily outfit engine - add your wardrobe, create outfits and never ask \"what do I wear?\" again."}</p>
       {state.isGuest ? (
         <>
           <button onClick={() => { update({ activeSheet: null, screen: "auth" }); }} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 10 }}>Create free account</button>
@@ -5004,9 +5004,9 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
                 <Icon name="sparkles" size={24} color={DS.colors.accent} />
               </div>
               <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 8, textAlign: "center" }}>You found your {state.seasonData?.season} season 🌸</h2>
-              <p style={{ fontSize: 14, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>Most {state.seasonData?.season}s tell us the makeup guide is what changes everything. Your exact foundation undertone, blush and lip shades are ready — unlock them free for 7 days.</p>
+              <p style={{ fontSize: 14, color: DS.colors.textMuted, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>Most {state.seasonData?.season}s tell us the makeup guide is what changes everything. Your exact foundation undertone, blush and lip shades are ready - unlock them free for 7 days.</p>
               <button onClick={() => update({ showDay3Prompt: false, activeSheet: "paywall" as Sheet })} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 10 }}>
-                See my makeup guide — free for 7 days
+                See my makeup guide - free for 7 days
               </button>
               <button onClick={() => update({ showDay3Prompt: false })} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Maybe later</button>
             </div>
