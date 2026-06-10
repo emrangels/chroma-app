@@ -2600,9 +2600,9 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
   };
 
   const planFeatures: Record<Plan, string[]> = {
-    free: ["Your colour season", "4 best colours to wear now", "Your season headline", "Daily colour tip"],
-    glow: ["Your subseason", "Full colour palette", "Colour profile — undertone, depth, chroma, contrast", "Makeup guide — foundation, blush, lips, eyes", "Hair colour guide", "Jewellery — metals and stones", "Colour checker"],
-    luxe: ["Everything in Glow", "Daily outfit suggestions — wake up knowing what to wear", "Weekly outfit planner — your whole week sorted", "Extended palette — 24+ colours", "Wardrobe builder — see what actually works", "Outfit creator — build looks you know will land", "AI stylist chat — ask anything, get dressed faster", "Makeup kit — build your full colour-matched kit"],
+    free: ["Your colour season", "5 best colours to wear now", "Your season headline", "Daily colour tip", "5 wardrobe items"],
+    glow: ["Your subseason", "Full colour palette", "Colour profile - undertone, depth, chroma, contrast", "Makeup guide - foundation, blush, lips, eyes", "Hair colour guide", "Jewellery - metals and stones", "Colour checker", "Daily outfit suggestion"],
+    luxe: ["Everything in Glow", "Unlimited wardrobe", "Daily outfit suggestions - wake up knowing what to wear", "Weekly outfit planner - your whole week sorted", "Extended palette - 24+ colours", "Outfit creator - build looks you know will land", "AI stylist chat - ask anything, get dressed faster", "Makeup kit - build your full colour-matched kit"],
   };
 
   return (
