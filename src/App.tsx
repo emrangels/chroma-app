@@ -611,9 +611,9 @@ const AnalysingScreen = () => {
 };
 
 const tabs: { id: Tab; icon: string; label: string }[] = [
-  { id: "home", icon: "sparkles", label: "Season" },
-  { id: "checker", icon: "image", label: "Checker" },
+  { id: "home", icon: "sparkles", label: "My Colours" },
   { id: "wardrobe", icon: "hanger", label: "Wardrobe" },
+  { id: "checker", icon: "image", label: "Checker" },
   { id: "me", icon: "user", label: "Me" },
 ];
 
@@ -1029,27 +1029,23 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Colour Theory & FAQ</h2>
           <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.5 }}>Everything you need to know about colour season analysis.</p>
           {[
-            { q: "What does Solla mean?", a: "Solla is a name with warmth woven into it from multiple directions. In Tamil it means 'to say' or 'to tell' - which felt right for an app built around revealing something true about you. In Scandinavian tradition, Solla is a given name derived from the word for sun, carrying connotations of light and warmth. In Sri Lankan slang, a solla moment is a small, simple happiness - the kind you might feel when you finally put on a colour that just works. We liked that. Solla is about knowing your colours, dressing with intention, and finding joy in the small things - like getting dressed in the morning." },
-            { q: "What is colour season analysis?", a: "Colour season analysis is a method of identifying which colours harmonise with your natural colouring - your skin tone, undertone, eye colour and hair colour. By grouping these into four seasons (Spring, Summer, Autumn, Winter) and 12 sub-seasons, we can identify the colours that make you look vibrant and alive versus those that wash you out or clash." },
-            { q: "What are the four seasons?", a: "Spring - warm, clear and bright colouring. Summer - cool, soft and muted colouring. Autumn - warm, deep and earthy colouring. Winter - cool, deep and high contrast colouring. Each season has three sub-seasons that add further nuance." },
-            { q: "What is undertone?", a: "Undertone is the subtle hue beneath your skin's surface. Warm undertones have golden or yellow hints. Cool undertones have pink or blue hints. Neutral undertones are a mix of both. It's the single most important factor in colour analysis." },
-            { q: "What is chroma?", a: "Chroma describes how clear or muted your colouring is. High chroma means vivid, saturated features - you suit bold colours. Low chroma means soft, blended features - you suit muted, toned-down shades." },
-            { q: "What is contrast?", a: "Contrast is the difference between your hair, skin and eye colour. High contrast (e.g. dark hair, light skin) suits bold colour combinations. Low contrast suits tonal, harmonious combinations." },
-            { q: "How do I use the colour checker?", a: "Go to the Checker tab and upload a photo of any clothing item, full outfit, or colour swatches. Solla will analyse the colours against your season and give you a verdict with styling tips." },
-            { q: "How do I add items to my wardrobe?", a: "Go to the Wardrobe tab and tap the + button. Upload a photo of the item - Solla will automatically identify the colour and check it against your season. Name the item, select a category, and save." },
-            { q: "How do I edit or move an item in my wardrobe?", a: "Tap the edit icon (refresh symbol) on any wardrobe item to change the name or category. To delete, tap the trash icon." },
-            { q: "Can I re-analyse my colours?", a: "Yes - go to the Me tab and tap 'Re-analyse my colours'. This clears your current results and takes you back to the upload screen. For best results use a clear, well-lit selfie in natural light with no filters." },
-            { q: "My results aren't showing - what do I do?", a: "If your colour guide isn't appearing, try re-analysing your colours. Go to the Me tab and tap 'Re-analyse my colours' to upload a new photo and get your results." },
-            { q: "What do I get on the free plan?", a: "The free plan gives you your colour season, your 5 best colours to wear now, your season headline and a daily colour tip. You can also add up to 5 items to your wardrobe and check them against your season. Upgrade to Glow or Luxe to unlock your full colour guide and daily outfit engine." },
-            { q: "What's the difference between Glow and Luxe?", a: "Glow unlocks your subseason, full colour palette, colour profile (undertone, depth, chroma and contrast), makeup guide, hair colour guide, jewellery guide, colour checker and a daily outfit suggestion. Luxe adds everything in Glow plus unlimited wardrobe, outfit creator, weekly planner, AI stylist chat, makeup kit and an extended palette of 24+ colours. If you want to stop asking 'what do I wear today?' - Luxe is built for that." },
-            { q: "How does the AI stylist work?", a: "The AI stylist lives in your Wardrobe tab and knows your colour season, lifestyle and every item you've added. Ask it what to wear today, what to wear for a specific occasion, how to style a piece you're not sure about, or to analyse your whole wardrobe for gaps. The more items you add, the smarter it gets." },
-            { q: "How do I take a good selfie for analysis?", a: "The accuracy of your entire colour profile depends on your selfie - so this matters. Stand near a window in natural daylight. No flash - flash distorts your skin tone and will affect your results. No filters or beauty modes. Face the light directly so it falls evenly on your face. Plain or neutral background is best. No heavy makeup if possible, or minimal. The AI analyses your undertone, depth and chroma from the photo - accurate light is everything." },
-            { q: "What is the daily outfit suggestion?", a: "The daily outfit suggestion on your Season tab uses your current weather and colour season to suggest a cohesive outfit each day. On Glow and Luxe, it pulls from your actual wardrobe items so suggestions are based on clothes you actually own. Allow location access for weather-based suggestions, or enter your postcode if location is unavailable." },
-            { q: "What is the colour checker?", a: "The colour checker lives in the Checker tab. Upload a photo of any clothing item or full outfit and Solla will instantly tell you whether each colour suits your season. Single mode checks one piece at a time, Outfit mode analyses every garment in a full look, and Makeup mode checks any makeup product by name or photo. Available on Glow and Luxe." },
-            { q: "Can I check makeup products in the Checker tab?", a: "Yes - go to the Checker tab and select Makeup mode. Enter the product name for the most accurate result (e.g. 'Charlotte Tilbury Pillow Talk'), or upload a photo of a swatch on your inner arm in natural light. Select the product type and tap Check. You can save results directly to your makeup kit in the Wardrobe tab." },
-            { q: "How does Solla learn my preferences?", a: "The more you use Solla and chat with your AI stylist, the better it understands your style. Your lifestyle, dress code and occasions from onboarding feed into every suggestion. Your wardrobe items - including their formality tags - help the stylist make relevant recommendations. Over time, feedback you give in the chat (thumbs up or down) helps refine suggestions to better match your taste." },
-            { q: "What formality tags can I add to wardrobe items?", a: "When adding items to your wardrobe you can tag each piece as Casual, Smart casual, Work, Formal or Active. These tags help the AI stylist suggest outfits appropriate for your occasion - so if you ask for a work outfit it won't suggest your gym gear, and if you ask for a weekend look it won't pull your formal blazer." },
-            { q: "How do I contact Solla?", a: "For any questions, feedback or support email us at hello@solla.com.au. We aim to respond within 1-2 business days." },
+            { q: "What's included in each plan?", a: "Free: your colour season, 5 best colours, season headline, daily colour tip, 5 wardrobe items. Glow ($6.99/mo or $49.99/yr): everything in Free plus your subseason, full colour palette, colour profile (undertone, depth, chroma, contrast), makeup guide, hair colour guide, jewellery guide, colour checker and daily outfit suggestion. Luxe ($14.99/mo or $99.99/yr): everything in Glow plus unlimited wardrobe, outfit creator, weekly planner, AI stylist, makeup kit and extended palette of 24+ colours. Both Glow and Luxe include a free 7-day trial." },
+            { q: "How do I take a good selfie for analysis?", a: "The accuracy of your entire colour profile depends on your selfie. Stand near a window in natural daylight - no flash, no filters, no beauty modes. Face the light directly so it falls evenly on your face. Plain or neutral background is best. No heavy makeup if possible. The AI reads your undertone, depth and chroma from the photo - accurate light is everything." },
+            { q: "My results aren't showing - what do I do?", a: "Go to the Me tab and tap 'Re-analyse my colours'. This clears your current results and takes you back to the upload screen. For best results use a clear selfie in natural light with no filters." },
+            { q: "What is colour season analysis?", a: "A method of identifying which colours harmonise with your natural colouring - your skin tone, undertone, eye colour and hair colour. By grouping these into four seasons and 12 sub-seasons, we identify the colours that make you look vibrant and alive versus those that wash you out or work against you." },
+            { q: "What are the four seasons?", a: "Spring - warm, clear and bright. Summer - cool, soft and muted. Autumn - warm, deep and earthy. Winter - cool, deep and high contrast. Each season has three sub-seasons that add further precision to your palette." },
+            { q: "What is undertone?", a: "The subtle hue beneath your skin's surface. Warm undertones have golden or yellow hints. Cool undertones have pink or blue hints. Neutral is a mix of both. It's the single most important factor in colour analysis - it determines which metals, neutrals and colour families work best for you." },
+            { q: "What is chroma?", a: "How clear or muted your colouring is. High chroma means vivid, saturated features - you suit bold colours. Low chroma means soft, blended features - you suit muted, toned-down shades. Wearing the wrong chroma is one of the most common reasons an outfit feels off." },
+            { q: "What is contrast?", a: "The difference between your hair, skin and eye colour. High contrast suits bold colour combinations and strong patterns. Low contrast suits tonal, harmonious outfits where pieces are close in value. Wearing high contrast combinations with low contrast colouring - or vice versa - creates visual imbalance." },
+            { q: "What is the colour checker?", a: "The Checker tab lets you photograph anything and get an instant verdict against your season. Single mode checks one item at a time. Outfit mode analyses every piece in a full look. Makeup mode checks any product by name or photo - enter the product name for the most accurate result. Available on Glow and Luxe." },
+            { q: "How do I add items to my wardrobe?", a: "Go to the Wardrobe tab and tap the + button. Upload a photo of the item - Solla automatically identifies the colour and checks it against your season. Name the item, select a category and formality level, and save. You can add multiple items at once." },
+            { q: "How do I edit or delete a wardrobe item?", a: "Tap the edit icon on any item to update the name, category or formality. Tap the trash icon to delete it." },
+            { q: "What is the daily outfit suggestion?", a: "On your My Colours tab, Solla suggests a weather-aware, season-approved outfit each day. On Glow and Luxe it pulls from your actual wardrobe items. Allow location access for automatic weather, or enter your postcode if location is unavailable." },
+            { q: "How does the AI stylist work?", a: "The AI stylist is in the Wardrobe tab under Stylist. It knows your colour season, lifestyle answers from onboarding and every item in your wardrobe. Ask it what to wear today, how to style a specific piece, what your wardrobe is missing, or anything else about your colours and style. The more items you add, the more personalised it gets." },
+            { q: "How does Solla learn my preferences?", a: "Your lifestyle, dress code and occasions from onboarding feed into every suggestion. Wardrobe items with formality tags help the stylist recommend appropriate outfits. Feedback you give in the AI stylist chat (thumbs up or down) refines future suggestions." },
+            { q: "Can I re-analyse my colours?", a: "Yes - go to the Me tab and tap 'Re-analyse my colours'. Your wardrobe, outfits and all other data are kept. Only your season results are cleared." },
+            { q: "How do I contact Solla?", a: "Email hello@solla.com.au. We aim to respond within 1-2 business days." },
+            { q: "What does Solla mean?", a: "In Tamil, solla means 'to say' or 'to tell' - which felt right for an app built around revealing something true about you. Once you know your colours, you can't unsee them." },
           ].map((item, i) => (
             <FaqItem key={i} question={item.q} answer={item.a} />
           ))}
@@ -1852,13 +1848,26 @@ const loadExtendedPalette = async () => {
                   ))}
                 </div>
               )}
-              {!showExtended && (
-                <div style={{ display: "flex", gap: 6 }}>
-                  {[1,2,3,4,5,6,7,8].map(i => (
-                    <div key={i} style={{ flex: 1, aspectRatio: "1", borderRadius: 8, background: DS.colors.surface, border: `1px solid ${DS.colors.border}` }} />
-                  ))}
-                </div>
-              )}
+              {!showExtended && (() => {
+                const previewColors = seasonData.season === "Summer"
+                  ? ["#B8C4D8","#C4B0C0","#A8B8C8","#D0C0CC","#98A8B8","#C8B4C4","#8898A8","#BCA8BC"]
+                  : seasonData.season === "Winter"
+                  ? ["#2C2C3C","#4C3C5C","#1C3C5C","#6C1C2C","#1C1C2C","#3C1C4C","#1C2C4C","#5C2C3C"]
+                  : seasonData.season === "Spring"
+                  ? ["#E8C8A0","#F0C0A0","#E0A870","#F8D8B0","#D0A870","#F0B890","#E8D0A8","#C89858"]
+                  : ["#8C5030","#B07040","#6C4820","#A05828","#7C5838","#904828","#A08050","#6C3818"];
+                return (
+                  <div style={{ display: "flex", gap: 6 }}>
+                    {previewColors.map((hex, i) => (
+                      <div key={i} style={{ flex: 1, aspectRatio: "1", borderRadius: 8, background: hex, opacity: 0.65, border: `1px solid ${DS.colors.border}`, position: "relative", overflow: "hidden" }}>
+                        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <Icon name="lock" size={8} color="rgba(0,0,0,0.3)" strokeWidth={2} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           )}
           {/* Avoid colours */}
@@ -4114,7 +4123,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
   ✦ Analyse my wardrobe
 </button>
 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-  {["What should I wear to a job interview?", "Build me a capsule wardrobe for my season", "What am I wearing too much of?"].map(suggestion => (
+  {["What should I wear to a job interview?", "Build me a capsule wardrobe for my season", "What colours should I never wear together?"].map(suggestion => (
                     <button key={suggestion} onClick={() => { setChatInput(suggestion); }} style={{ padding: "10px 14px", borderRadius: DS.radius.md, background: DS.colors.surface, fontSize: 13, color: DS.colors.textMuted, textAlign: "left", border: `1px solid ${DS.colors.border}` }}>
                       {suggestion}
                     </button>
