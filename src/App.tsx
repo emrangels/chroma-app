@@ -69,6 +69,17 @@ const SUPABASE_ANON_KEY = "sb_publishable_e14xp3bV8O2Wu-gdC6HiUQ_gRYU5rbp";
 const SUPABASE_JWT_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuYnBhc2FidHdhZm5seHpscHByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMTY5NjcsImV4cCI6MjA5MjU5Mjk2N30.YrBhMxN96k_OFEcWHYZ41up73ZEvEtRZWXwExo8GTxY";
 const supabaseHeaders = { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` };
 
+const trackEvent = (name: string, params?: Record<string, any>) => {
+  try {
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("event", name, params || {});
+    }
+  } catch {}
+};
+
+const AFFILIATE_ID_ICONIC = "";
+const AFFILIATE_ID_ASOS = "";
+
 const GlobalStyles = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
@@ -198,6 +209,11 @@ const slides = [
 ];
 
 const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
+  useEffect(() => {
+    const seen = localStorage.getItem("solla_onboarding_seen");
+    if (seen) { onComplete(); }
+  }, []);
+  const markSeen = () => { localStorage.setItem("solla_onboarding_seen", "true"); onComplete(); };
   const [idx, setIdx] = useState(0);
   const [dir, setDir] = useState(1);
   const goTo = (next: number) => { setDir(next > idx ? 1 : -1); setIdx(next); };
@@ -229,11 +245,11 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
         {idx < slides.length - 1 ? (
           <>
             <button onClick={() => goTo(idx + 1)} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Continue</button>
-            <button onClick={onComplete} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Skip</button>
+            <button onClick={markSeen} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Skip</button>
           </>
         ) : (
           <>
-            <button onClick={onComplete} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Discover my colours</button>
+            <button onClick={markSeen} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>Discover my colours</button>
             <p style={{ textAlign: "center", fontSize: 12, color: DS.colors.textFaint, marginTop: 4 }}>Free to start · No card required</p>
           </>
         )}
@@ -275,6 +291,12 @@ const LifestyleOnboardingScreen = ({ onComplete, userId, token }: { onComplete: 
       subtitle: "We'll focus on solving this for you.",
       options: ["Not knowing what suits me", "Getting dressed takes too long", "Everything feels boring", "I buy things I never wear", "Dressing for my body"],
     },
+    {
+      key: "budget",
+      title: "What's your typical budget per clothing item?",
+      subtitle: "This helps us suggest outfits and shops that fit your lifestyle.",
+      options: ["Under $50", "$50 to $150", "$150 to $300", "$300+", "It varies"],
+    },
   ];
   const q = questions[step];
   const selected = answers[q.key];
@@ -294,6 +316,7 @@ const LifestyleOnboardingScreen = ({ onComplete, userId, token }: { onComplete: 
             occasions: updated.occasions,
             style_personality: updated.style_personality,
             style_challenge: updated.style_challenge,
+            budget: updated.budget,
           }),
         });
       } catch {}
@@ -502,29 +525,10 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File) => void }) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [consentGiven, setConsentGiven] = useState(() => !!localStorage.getItem("solla_ai_consent"));
   const handleFile = (file: File) => setPreview(URL.createObjectURL(file));
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) handleFile(f); };
   const handleAnalyse = () => { const f = fileRef.current?.files?.[0]; if (f) onUpload(f); };
   const cameraRef = useRef<HTMLInputElement>(null);
-
-  if (!consentGiven) return (
-    <div className="screen fade-in" style={{ background: DS.colors.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 28px" }}>
-      <div style={{ width: 64, height: 64, borderRadius: DS.radius.xl, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
-        <Icon name="camera" size={28} color={DS.colors.accent} strokeWidth={1.5} />
-      </div>
-      <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 12, textAlign: "center" }}>Before your analysis</h1>
-      <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.7, marginBottom: 8, textAlign: "center", maxWidth: 300 }}>Your selfie is analysed by Anthropic's AI to determine your colour season. Your photo is processed securely and not stored permanently after analysis is complete.</p>
-      <p style={{ fontSize: 13, color: DS.colors.textFaint, lineHeight: 1.6, marginBottom: 32, textAlign: "center", maxWidth: 300 }}>By continuing you consent to your photo being sent to Anthropic's AI for colour analysis. No other use is made of your photo.</p>
-      <button onClick={() => { localStorage.setItem("solla_ai_consent", "true"); setConsentGiven(true); }} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
-        I agree - analyse my colours
-      </button>
-      <button onClick={() => window.history.back()} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>
-        Cancel
-      </button>
-      <p style={{ marginTop: 20, fontSize: 11, color: DS.colors.textFaint, textAlign: "center", lineHeight: 1.5, maxWidth: 280 }}>Powered by Anthropic Claude. See our <span style={{ color: DS.colors.accent }}>Privacy Policy</span> for full details.</p>
-    </div>
-  );
 
   return (
       <div className="screen fade-in" style={{ background: DS.colors.bg, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
@@ -739,6 +743,8 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
   const [loading, setLoading] = useState(false);
   const [userCount, setUserCount] = useState(16);
 
+  useEffect(() => { trackEvent("paywall_viewed", { plan: currentPlan }); }, []);
+
   useEffect(() => {
     fetch(`${SUPABASE_URL}/rest/v1/profiles?select=id`, {
       headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, Prefer: "count=exact" },
@@ -757,6 +763,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
   };
 
   const handleUpgrade = async (selectedPlan: "glow" | "luxe") => {
+    trackEvent("upgrade_clicked", { plan: selectedPlan, billing });
     if (isGuest && onSignUp) { onSignUp(); return; }
     setLoading(true);
     try {
@@ -852,9 +859,6 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
                 ))}
                 <button onClick={() => handleUpgrade("luxe")} disabled={loading} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: "#C26B3A", color: DS.colors.white, fontSize: 15, fontWeight: 600, marginTop: 14, opacity: loading ? 0.7 : 1 }}>
                   {loading ? "Starting trial..." : "Try Luxe free for 7 days - no charge until day 8"}
-                </button>
-                <button onClick={() => handleUpgrade("luxe")} disabled={loading} style={{ width: "100%", padding: "10px", borderRadius: DS.radius.lg, background: "transparent", border: `1px solid #C26B3A`, color: "#C26B3A", fontSize: 13, fontWeight: 500, marginTop: 8, opacity: loading ? 0.7 : 1 }}>
-                  {billing === "monthly" ? "Or buy now - $14.99/mo, no trial" : "Or buy now - $99.99/yr, no trial"}
                 </button>
               </div>
 
@@ -1076,23 +1080,16 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
       {activeSheet === "privacy" && (
         <div style={{ padding: "16px 24px" }}>
           <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Privacy Policy</h2>
-          <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 4 }}>Last updated: 11 June 2026</p>
-          <p style={{ fontSize: 12, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.5 }}>This Privacy Notice for Solla (doing business as Solla) describes how and why we might access, collect, store, use, and/or share your personal information when you use our services. Questions or concerns? Contact us at hello@solla.com.au.</p>
+          <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 24 }}>Last updated: 9 May 2026</p>
           {[
-            { q: "1. What information do we collect?", a: "We collect personal information you voluntarily provide when you register, including your name, email address, username, password, contact or authentication data, and photos uploaded for colour analysis. Selfie photos are collected solely for AI-powered colour season analysis - they are transmitted securely to Anthropic and are not stored permanently on our servers after analysis is complete. This is treated as sensitive biometric data. We also automatically collect device data, IP address, log and usage data, and geolocation information (used only for weather-based outfit suggestions). Payment data is handled entirely by Stripe - we do not store or access your card details." },
-            { q: "2. How do we process your information?", a: "We process your information to provide personalised AI-powered colour analysis and styling recommendations, facilitate account creation and authentication, deliver services, respond to enquiries, send administrative communications, request feedback, send marketing communications (opt-out available), protect our services, evaluate and improve our products, and comply with legal obligations." },
-            { q: "3. Who do we share your information with?", a: "We share data with the following third parties only as necessary to provide our services: Anthropic (AI processing - your photos and inputs are processed to generate colour analysis), Supabase (database and infrastructure), Stripe (payments), Vercel Analytics (web analytics), and Vercel (hosting). We do not sell your personal information. We may share data in connection with a business transfer or acquisition." },
-            { q: "4. Do we use cookies and tracking technologies?", a: "Yes. We use cookies and similar technologies to maintain security, prevent crashes, save preferences, and assist with basic site functions. Supabase sets cookies for authentication, Vercel sets cookies for analytics, and Stripe sets cookies on checkout pages. We also use local storage to save your session, colour analysis results and preferences - this data stays on your device. You can manage cookies through your browser settings, but blocking essential cookies may prevent login. We use Google Analytics to track and analyse service usage - you can opt out at tools.google.com/dlpage/gaoptout." },
-            { q: "5. Do we offer AI-based products?", a: "Yes. Solla is powered by artificial intelligence provided by Anthropic. Our AI products perform personalisation and image recognition/analysis to generate your colour season profile, palette, makeup guide, hair recommendations, outfit suggestions and AI stylist responses. Your input, output and personal information is shared with Anthropic as our AI Service Provider. To opt out of AI processing, delete your account from the Me tab. You must not use our AI products in any way that violates Anthropic's terms or policies." },
-            { q: "6. How long do we keep your information?", a: "We keep your personal information for as long as you have an account with us. When you request account deletion, your data is permanently removed within 30 days. You can cancel a deletion request by signing back in within that 30-day window. We may retain limited information where required by law." },
-            { q: "7. How do we keep your information safe?", a: "We use HTTPS encryption, row-level database security, and JWT authentication. However, no electronic transmission over the internet is 100% secure. We cannot guarantee that unauthorised third parties will never defeat our security measures. Access our services only within a secure environment." },
-            { q: "8. Do we collect information from minors?", a: "No. Solla is not directed at users under 18. We do not knowingly collect data from or market to children under 18. If you become aware of any data we may have collected from children under 18, please contact us at hello@solla.com.au. If we learn that personal information from a user under 18 has been collected, we will deactivate the account and delete the data." },
-            { q: "9. What are your privacy rights?", a: "You may review, change or terminate your account at any time. To update your account information, log in to your account settings. To withdraw consent for AI processing, delete your account from the Me tab. To delete your account, go to the Me tab and tap 'Delete my account' - your account will be permanently deleted after 30 days and you can cancel by signing back in within that window. To opt out of marketing emails, click unsubscribe in any email. For all other privacy requests, contact hello@solla.com.au." },
-            { q: "10. Controls for Do-Not-Track features", a: "We do not currently respond to DNT browser signals as no uniform technology standard has been finalised. If a standard is adopted in future, we will inform you in a revised version of this Privacy Notice." },
-            { q: "11. Australia - specific privacy rights", a: "We collect and process your personal information under the obligations and conditions set by Australia's Privacy Act 1988. You have the right to request access to or correction of your personal information at any time by contacting us. If you believe we are unlawfully processing your personal information, you have the right to submit a complaint to the Office of the Australian Information Commissioner at oaic.gov.au." },
-            { q: "12. Do we make updates to this notice?", a: "Yes. We may update this Privacy Notice from time to time. The updated version will be indicated by a revised date at the top. If we make material changes, we may notify you by posting a notice or sending a notification. We encourage you to review this Privacy Notice frequently." },
-            { q: "13. How can you contact us?", a: "For questions or comments about this notice, contact our Data Protection Officer at hello@solla.com.au or write to: Solla, Data Protection Officer, Parcel Locker 10127 32034, 515 Brighton Road, Brighton, South Australia 5048, Australia. You can also lodge a complaint with the Office of the Australian Information Commissioner at oaic.gov.au." },
-            { q: "14. How can you review, update or delete your data?", a: "To request to review, update or delete your personal information, contact us at hello@solla.com.au. You can also delete your account directly from the Me tab in the app, which will permanently remove all your data within 30 days." },
+            { q: "What information do we collect?", a: "We collect your name, email address, and password when you create an account. We also collect photos you upload for colour analysis, and wardrobe item photos and descriptions. We automatically collect log and usage data, and device information." },
+            { q: "How do we use your information?", a: "We use your information to provide personalised AI-powered colour season analysis and styling recommendations, manage your account, process payments, respond to support enquiries, send service communications, and improve our services." },
+            { q: "Who do we share your information with?", a: "We share data with Anthropic (AI processing), Supabase (database), Stripe (payments), and Vercel (hosting and analytics). We do not sell your personal information to third parties." },
+            { q: "How are photos handled?", a: "Photos you upload for colour analysis are transmitted securely to Anthropic for processing and are not stored permanently on our servers after analysis is complete." },
+            { q: "How long do we keep your data?", a: "We retain your personal information for as long as you have an account with us. When you close your account we will delete or anonymise your information unless required by law." },
+            { q: "What are your rights?", a: "Under the Australian Privacy Act 1988 you have the right to access, correct, or delete your personal information. Contact us at hello@solla.com.au to exercise these rights or to lodge a complaint." },
+            { q: "How do we keep your information safe?", a: "We use HTTPS encryption, row-level database security, and JWT authentication. However no method of internet transmission is 100% secure." },
+            { q: "Contact us", a: "For privacy questions contact hello@solla.com.au or write to Solla, Parcel Locker 10127 32034, 515 Brighton Road, Brighton SA 5048. You can also lodge a complaint with the Office of the Australian Information Commissioner at oaic.gov.au." },
           ].map((item, i) => (
             <FaqItem key={i} question={item.q} answer={item.a} />
           ))}
@@ -1100,25 +1097,18 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
       )}
       {activeSheet === "terms" && (
         <div style={{ padding: "16px 24px" }}>
-          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Terms of Use</h2>
-          <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 4 }}>Last updated: 11 June 2026</p>
-          <p style={{ fontSize: 12, color: DS.colors.textMuted, marginBottom: 24, lineHeight: 1.5 }}>These Legal Terms constitute a legally binding agreement between you and Solla concerning your access to and use of Solla. By accessing our services, you confirm you have read, understood and agreed to be bound by these terms. Contact: hello@solla.com.au</p>
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 6 }}>Terms of Service</h2>
+          <p style={{ fontSize: 12, color: DS.colors.textFaint, marginBottom: 24 }}>Last updated: 9 May 2026</p>
           {[
-            { q: "1. Our services", a: "Solla is an AI-powered personal colour season analysis app available at solla.com.au and as a mobile application. Solla is designed primarily for Australian users. The information provided is not intended for distribution where such use would be contrary to local law." },
-            { q: "2. Intellectual property rights", a: "All content, design, source code, databases, functionality, software, website designs, text, photographs, and graphics in Solla, as well as all trademarks and logos, are owned by Solla and protected by Australian and international copyright and trademark law. You may not copy, reproduce, republish, upload, post, transmit, distribute, sell or exploit any content for commercial purposes without our express prior written permission. Contact hello@solla.com.au for permission requests." },
-            { q: "3. Who can use Solla?", a: "You must be at least 18 years of age to use Solla. By using our services you confirm you have the legal capacity to agree to these terms, you are not a minor in your jurisdiction, and your use will not violate any applicable law. If you provide false or inaccurate information, we reserve the right to suspend or terminate your account." },
-            { q: "4. Subscriptions, trials and refunds", a: "Glow and Luxe plans include a free 7-day trial. You will not be charged until day 8. Cancel any time before day 8 and you will not be charged. Cancellations take effect at the end of the current billing period and you will keep access until then. We do not offer refunds for partial billing periods. Refunds for App Store purchases are handled per Apple App Store policy. Refunds for web purchases are handled per Stripe's refund policy. For billing assistance contact hello@solla.com.au." },
-            { q: "5. How to cancel", a: "You can cancel anytime from the Me tab - tap your plan and select Cancel subscription. You can also email hello@solla.com.au for help. Cancellations take effect at the end of your current billing period." },
-            { q: "6. AI-generated content", a: "Solla uses Anthropic's AI to generate colour analysis, styling recommendations, outfit suggestions and stylist responses. These are provided for informational and personal styling purposes only. Results may vary and should be used as guidance rather than definitive advice. We do not guarantee accuracy. You must not use our AI products in any way that violates Anthropic's terms or policies." },
-            { q: "7. Prohibited activities", a: "You agree not to use Solla for any unlawful purpose; upload photos of others without their consent; attempt to reverse engineer, decompile or disassemble the app; use automated tools, bots or scripts to access our services; share your account credentials; attempt to bypass security features; harass, harm or threaten other users or our team; use the services to compete with us or for commercial purposes not approved by us; or collect user data without authorisation." },
-            { q: "8. Your content and submissions", a: "By uploading photos and other content you grant us a limited licence to process them for the purpose of providing our services. We do not claim ownership of your photos. By submitting feedback or suggestions you agree we may use them for any purpose without compensation. You are responsible for ensuring you have the right to upload any content you provide." },
-            { q: "9. Account termination", a: "These terms remain in effect while you use Solla. We reserve the right to deny access, suspend or terminate your account at any time without notice for breach of these terms or applicable law. If your account is terminated you are prohibited from creating a new account without our permission." },
-            { q: "10. Modifications and interruptions", a: "We reserve the right to change, modify or remove content at any time without notice. We cannot guarantee the services will be available at all times. We are not liable for any loss or inconvenience caused by downtime, interruptions or discontinuance of the services." },
-            { q: "11. Disclaimer", a: "The services are provided on an as-is and as-available basis. To the fullest extent permitted by law, we disclaim all warranties, express or implied, including warranties of merchantability, fitness for a particular purpose and non-infringement. We make no warranties about the accuracy or completeness of our content. AI-generated colour analysis and styling recommendations are provided as guidance only." },
-            { q: "12. Limitation of liability", a: "To the maximum extent permitted by Australian law, Solla shall not be liable for any indirect, consequential, exemplary, incidental, special or punitive damages. Our total liability for any cause whatsoever will at all times be limited to the amount paid by you to us in the 12 months preceding the claim." },
-            { q: "13. Indemnification", a: "You agree to defend, indemnify and hold harmless Solla and her agents from any loss, damage, liability or claim arising from your use of the services, breach of these terms, violation of any third party's rights, or any harmful act toward other users." },
-            { q: "14. Governing law and disputes", a: "These Terms are governed by the laws of South Australia, Australia. You irrevocably consent to the exclusive jurisdiction of the courts of South Australia for any dispute arising from these terms. We will first attempt to resolve any dispute through informal negotiation for at least 30 days before initiating formal proceedings. Contact hello@solla.com.au to initiate a dispute." },
-            { q: "15. Contact us", a: "For questions about these terms, to resolve a complaint, or for further information about use of the services, contact us at hello@solla.com.au or write to: Solla, Parcel Locker 10127 32034, 515 Brighton Road, Brighton, South Australia 5048, Australia." },
+            { q: "Who can use Solla?", a: "You must be at least 18 years of age to use Solla. By using our services you confirm that you meet this requirement." },
+            { q: "How do I cancel?", a: "You can cancel anytime from the Me tab - tap your plan and select Cancel subscription. Cancellations take effect at the end of the current billing period. You will keep access until then. We do not offer refunds for partial periods. You can also email hello@solla.com.au for help." },
+            { q: "AI-generated content", a: "Solla uses AI to generate colour analysis and styling recommendations. These are provided for informational and personal styling purposes only. Results may vary and should be used as guidance rather than definitive advice. We do not guarantee accuracy." },
+            { q: "Acceptable use", a: "You agree not to use Solla for unlawful purposes, upload photos of others without consent, attempt to reverse engineer the app, use automated tools to access our services, or share your account credentials." },
+            { q: "Intellectual property", a: "All content, design, code, and branding within Solla is owned by Emma Nagel (trading as Solla) and protected by Australian and international copyright law." },
+            { q: "Your content", a: "By uploading photos you grant us a limited licence to process them for providing our services. We do not claim ownership of your photos." },
+            { q: "Limitation of liability", a: "To the maximum extent permitted by Australian law, Solla shall not be liable for any indirect or consequential damages. Our total liability shall not exceed the amount you paid us in the 12 months preceding the claim." },
+            { q: "Governing law", a: "These Terms are governed by the laws of South Australia, Australia. Disputes are subject to the exclusive jurisdiction of the courts of South Australia." },
+            { q: "Contact us", a: "For questions about these terms contact hello@solla.com.au or write to Solla, Parcel Locker 10127 32034, 515 Brighton Road, Brighton SA 5048." },
           ].map((item, i) => (
             <FaqItem key={i} question={item.q} answer={item.a} />
           ))}
@@ -1467,13 +1457,21 @@ const incrementStreak = (userId: string): number => {
 const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade, onReanalyse, onTabChange }: { seasonData: SeasonData | null; user: User | null; onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void; onReanalyse: () => void; onTabChange: (tab: Tab) => void; }) => {
   const plan = user?.plan || "free"; const [showShare, setShowShare] = useState(false); const [selectedColour, setSelectedColour] = useState<PaletteColour | null>(null);
   const [streak, setStreak] = useState(0);
+  const [streakIsNew, setStreakIsNew] = useState(false);
   const [outfitFeedback, setOutfitFeedback] = useState<"up" | "down" | null>(() => {
     const today = new Date().toDateString();
     const key = `solla_outfit_feedback_${user?.id || "guest"}_${today}`;
     const val = localStorage.getItem(key);
     return val === "up" || val === "down" ? val : null;
   });
-  useEffect(() => { if (user?.id) setStreak(incrementStreak(user.id)); }, [user?.id]);
+  useEffect(() => {
+    if (user?.id) {
+      const prev = getStreak(user.id);
+      const newStreak = incrementStreak(user.id);
+      setStreak(newStreak);
+      if (newStreak === 1 && prev === 0) setStreakIsNew(true);
+    }
+  }, [user?.id]);
 const [extendedPalette, setExtendedPalette] = useState<PaletteColour[]>([]);
 const [loadingExtended, setLoadingExtended] = useState(false);
 const [showExtended, setShowExtended] = useState(false);
@@ -1678,6 +1676,7 @@ const loadExtendedPalette = async () => {
         <p style={{ margin: "0 0 8px", fontSize: 14, color: DS.colors.text, lineHeight: 1.6, fontWeight: 500 }}>{getSeasonalMood(seasonData.season)}</p>
         <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5, paddingTop: 8, borderTop: `1px solid ${DS.colors.border}` }}>{getDailyTip(seasonData.season, seasonData.daily_tip)}</p>
       </div>
+      {streak > 0 && [3, 7, 14, 30].includes(streak) && (() => { trackEvent("streak_milestone", { days: streak }); return null; })()}
       {streak > 0 && [3, 7, 14, 30].includes(streak) && (
         <div style={{ margin: "0 16px 4px", padding: "12px 14px", background: `${accentColor}15`, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 20 }}>🔥</span>
@@ -1688,6 +1687,15 @@ const loadExtendedPalette = async () => {
             <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted }}>
               {streak === 3 ? "Your eye is starting to train." : streak === 7 ? "You're dressing differently now." : streak === 14 ? "This is becoming instinct." : "You know your colours completely."}
             </p>
+          </div>
+        </div>
+      )}
+      {streakIsNew && streak === 1 && (
+        <div style={{ margin: "0 16px 4px", padding: "12px 14px", background: DS.colors.accentLight, borderRadius: DS.radius.lg, display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 20 }}>🌸</span>
+          <div>
+            <p style={{ margin: "0 0 2px", fontSize: 13, fontWeight: 700, color: DS.colors.text }}>Day 1 - your journey starts today</p>
+            <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted }}>Come back tomorrow to start your streak.</p>
           </div>
         </div>
       )}
@@ -2149,6 +2157,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
         allResults.push(data);
       }
       setResults(allResults);
+      trackEvent("checker_used", { mode, items: allResults.length });
     } catch (e) { setError(e instanceof Error ? e.message : "Something went wrong."); }
     finally { setLoading(false); setCheckingIndex(null); }
   };
@@ -2790,6 +2799,29 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
             <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.text }}>Re-analyse my colours</span>
             <span style={{ marginLeft: "auto" }}><Icon name="chevronRight" size={16} color={DS.colors.textFaint} /></span>
           </button>
+          <button onClick={() => window.location.href = "mailto:hello@solla.com.au?subject=Report an issue with Solla"} style={{ width: "100%", padding: "16px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${DS.colors.border}` }}>
+            <Icon name="bell" size={18} color={DS.colors.text} />
+            <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.text }}>Report an issue</span>
+            <span style={{ marginLeft: "auto" }}><Icon name="chevronRight" size={16} color={DS.colors.textFaint} /></span>
+          </button>
+          <button onClick={async () => {
+            if (!window.confirm("Delete your account? Your data will be permanently deleted after 30 days. You can cancel by signing back in within that time.")) return;
+            const token = localStorage.getItem("solla_token");
+            if (!user?.id || !token) return;
+            try {
+              await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}`, {
+                method: "PATCH",
+                headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
+                body: JSON.stringify({ pending_deletion: true, deletion_requested_at: new Date().toISOString() }),
+              });
+              alert("Your account is scheduled for deletion in 30 days. Sign back in to cancel.");
+              onSignOut();
+            } catch { alert("Something went wrong. Please email hello@solla.com.au to delete your account."); }
+          }} style={{ width: "100%", padding: "16px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${DS.colors.border}` }}>
+            <Icon name="trash" size={18} color={DS.colors.danger} />
+            <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.danger }}>Delete my account</span>
+            <span style={{ marginLeft: "auto" }}><Icon name="chevronRight" size={16} color={DS.colors.textFaint} /></span>
+          </button>
           <button onClick={onSignOut} style={{ width: "100%", padding: "16px", display: "flex", alignItems: "center", gap: 12 }}>
             <Icon name="logout" size={18} color={DS.colors.danger} />
             <span style={{ fontSize: 14, fontWeight: 500, color: DS.colors.danger }}>Sign out</span>
@@ -2857,7 +2889,7 @@ const MeTab = ({ user, seasonData, onSignOut, onReanalyse, onUpgrade, onOpenFaq 
 const WardrobeTab = ({ user, seasonData, onUpgrade, onSignUp, isGuest }: { user: User | null; seasonData: SeasonData | null; onUpgrade: () => void; onSignUp?: () => void; isGuest?: boolean; }) => {
   const plan = user?.plan || "free";
   const canAccess = true;
-  const freeItemLimit = 3;
+  const freeItemLimit = 5;
   const isFreePlan = plan === "free";
 
   const [view, setView] = useState<"items" | "outfits" | "plan" | "makeup" | "chat">("items");
@@ -3108,7 +3140,7 @@ const [planGenerated, setPlanGenerated] = useState(() => {
           verdict_v2: result.verdict_v2 || (result.verdict ? "yes" : "no"),
           tip: result.tip,
           starred: false,
-          price: null,
+          price: itemPrice ? parseFloat(itemPrice) : null,
           image_url,
         };
         const res = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items`, {
@@ -3120,6 +3152,7 @@ const [planGenerated, setPlanGenerated] = useState(() => {
         if (Array.isArray(data)) setItems(prev => [data[0], ...prev]);
       }
       setShowAddItem(false);
+      trackEvent("wardrobe_item_added", { count: itemResults.length });
       setItemPreviews([]); setItemResults([]); setItemNames([]); setItemCategories([]);
       setItemPrice("");
       if (fileRef.current) fileRef.current.value = "";
@@ -3459,6 +3492,11 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                         <span style={{ fontSize: 11, color: DS.colors.textFaint }}>·</span>
                         <span style={{ fontSize: 11, color: DS.colors.textFaint }}>{item.colour_name}</span>
                         {item.formality && <><span style={{ fontSize: 11, color: DS.colors.textFaint }}>·</span><span style={{ fontSize: 11, color: DS.colors.textFaint }}>{item.formality}</span></>}
+                        {item.price && item.price > 0 && (() => {
+                          const wearCount = Math.max(1, Math.floor((Date.now() - new Date(item.created_at).getTime()) / (1000 * 60 * 60 * 24 * 7)));
+                          const cpw = (item.price / wearCount).toFixed(2);
+                          return <><span style={{ fontSize: 11, color: DS.colors.textFaint }}>·</span><span style={{ fontSize: 11, color: DS.colors.success, fontWeight: 500 }}>${cpw}/wear</span></>;
+                        })()}
                       </div>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -3621,33 +3659,36 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {(() => {
                         const selectedItems = items.filter(item => (day.item_ids || []).includes(item.id));
-                        return selectedItems.length > 0 ? (
-                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                            {selectedItems.map(item => (
-                              <div key={item.id} style={{ textAlign: "center" }}>
-                                {item.image_url ? (
-                                  <img src={item.image_url} style={{ width: 56, height: 56, borderRadius: DS.radius.md, objectFit: "cover", border: `1px solid ${DS.colors.border}` }} />
-                                ) : (
-                                  <div style={{ width: 56, height: 56, borderRadius: DS.radius.md, background: item.hex, border: `1px solid ${DS.colors.border}` }} />
-                                )}
-                                <p style={{ margin: "3px 0 0", fontSize: 9, color: DS.colors.textFaint, maxWidth: 56, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</p>
+                        return (
+                          <>
+                            {selectedItems.length > 0 && (
+                              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                {selectedItems.map(item => (
+                                  <div key={item.id} style={{ textAlign: "center" }}>
+                                    {item.image_url ? (
+                                      <img src={item.image_url} style={{ width: 56, height: 56, borderRadius: DS.radius.md, objectFit: "cover", border: `1px solid ${DS.colors.border}` }} />
+                                    ) : (
+                                      <div style={{ width: 56, height: 56, borderRadius: DS.radius.md, background: item.hex, border: `1px solid ${DS.colors.border}` }} />
+                                    )}
+                                    <p style={{ margin: "3px 0 0", fontSize: 9, color: DS.colors.textFaint, maxWidth: 56, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</p>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                            {[
-                              { label: "Coat", value: day.coat },
-                              { label: "Base", value: day.base },
-                              { label: "Shoes", value: day.shoes },
-                              { label: "Accessories", value: day.accessories },
-                            ].filter(f => f.value && f.value !== "null").map(field => (
-                              <div key={field.label} style={{ display: "flex", gap: 8 }}>
-                                <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.textFaint, minWidth: 80 }}>{field.label}</span>
-                                <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{field.value}</span>
-                              </div>
-                            ))}
-                          </div>
+                            )}
+                            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                              {[
+                                { label: "Coat", value: day.coat },
+                                { label: "Base", value: day.base },
+                                { label: "Shoes", value: day.shoes },
+                                { label: "Accessories", value: day.accessories },
+                              ].filter(f => f.value && f.value !== "null").map(field => (
+                                <div key={field.label} style={{ display: "flex", gap: 8 }}>
+                                  <span style={{ fontSize: 11, fontWeight: 600, color: DS.colors.textFaint, minWidth: 80 }}>{field.label}</span>
+                                  <span style={{ fontSize: 13, color: DS.colors.textMuted }}>{field.value}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </>
                         );
                       })()}
                     </div>
@@ -3678,7 +3719,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                   )}
                   <div style={{ display: "flex", gap: 12, marginTop: 10, flexWrap: "wrap" }}>
                     {!day.locked && (
-                      <button onClick={() => { setPendingPlanItemIds([...(day.item_ids || [])]); setPlanItemSelector(day.day); }} style={{ fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>
+                      <button onClick={() => { setPendingPlanItemIds(day.item_ids || []); setPlanItemSelector(day.day); }} style={{ fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>
                         + Select items
                       </button>
                     )}
@@ -4159,19 +4200,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
   ✦ Analyse my wardrobe
 </button>
 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-  {(items.length >= 5 ? [
-    "What am I wearing too much of?",
-    "Build me a capsule wardrobe from what I have",
-    "What colours should I never wear together?",
-  ] : items.length > 0 ? [
-    `What else should I add for my ${seasonData?.season || ""} season?`,
-    "What should I wear to a job interview?",
-    "What colours should I never wear together?",
-  ] : [
-    "What should I wear to a job interview?",
-    `What are the key pieces for a ${seasonData?.season || ""} wardrobe?`,
-    "What colours should I never wear together?",
-  ]).map(suggestion => (
+  {["What should I wear to a job interview?", "Build me a capsule wardrobe for my season", "What colours should I never wear together?"].map(suggestion => (
                     <button key={suggestion} onClick={() => { setChatInput(suggestion); }} style={{ padding: "10px 14px", borderRadius: DS.radius.md, background: DS.colors.surface, fontSize: 13, color: DS.colors.textMuted, textAlign: "left", border: `1px solid ${DS.colors.border}` }}>
                       {suggestion}
                     </button>
@@ -4333,6 +4362,9 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                 </div>
               ))}
 
+              {itemResults.length > 0 && (
+                <input value={itemPrice} onChange={e => setItemPrice(e.target.value)} placeholder="Price paid (optional, e.g. 89.99)" inputMode="decimal" style={{ width: "100%", padding: "10px 12px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 13, color: DS.colors.text, background: DS.colors.surface, outline: "none", marginBottom: 12, fontFamily: DS.font }} />
+              )}
               <button onClick={handleAddItems} disabled={!itemResults.length || loading} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: !itemResults.length ? DS.colors.border : DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600 }}>
                 {loading ? "Adding..." : itemResults.length > 1 ? `Add ${itemResults.length} items to wardrobe` : "Add to wardrobe"}
               </button>
@@ -4886,6 +4918,7 @@ if (parsedUser.email && parsedSeason?.season) {
     });
 
   const handleUpload = async (file: File) => {
+  trackEvent("analysis_started");
   update({ screen: "analysing" });
   try {
     const base64 = await resizeAndEncode(file);
@@ -4898,6 +4931,7 @@ if (parsedUser.email && parsedSeason?.season) {
     if (data.error) throw new Error(data.error);
     localStorage.setItem(`solla_season_${state.user?.id || "guest"}`, JSON.stringify(data));
     localStorage.setItem(`solla_analysed_${state.user?.id || "guest"}`, new Date().toISOString());
+    trackEvent("analysis_completed", { season: data.season });
     // Save to Supabase if logged in
     const token = localStorage.getItem("solla_token");
     if (token && state.user?.id) {
