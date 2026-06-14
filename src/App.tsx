@@ -14,7 +14,7 @@ const DS = {
   shadow: { sm: "0 1px 3px rgba(0,0,0,0.06)", md: "0 4px 16px rgba(0,0,0,0.08)", lg: "0 8px 32px rgba(0,0,0,0.12)" },
 };
 
-type Screen = "splash" | "onboarding" | "auth" | "upload" | "analysing" | "lifestyle-onboarding" | "main";
+type Screen = "splash" | "onboarding" | "auth" | "ai-consent" | "upload" | "analysing" | "lifestyle-onboarding" | "main";
 type Tab = "home" | "checker" | "wardrobe" | "me";
 type Sheet = "palette" | "makeup" | "hair" | "jewellery" | "style" | "paywall" | "faq" | "privacy" | "terms" | "cookies" | "welcome" | "preview" | null;
 type Plan = "free" | "glow" | "luxe";
@@ -129,6 +129,7 @@ const Icon = ({ name, size = 24, color = "currentColor", strokeWidth = 1.5 }: { 
     info: <><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></>,
     list: <><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></>,
     grid: <><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></>,
+    shield: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></>,
   };
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={{ display: "block", flexShrink: 0 }}>
@@ -136,6 +137,44 @@ const Icon = ({ name, size = 24, color = "currentColor", strokeWidth = 1.5 }: { 
     </svg>
   );
 };
+
+const AIConsentScreen = ({ onAccept, onDecline, onOpenPrivacy }: { onAccept: () => void; onDecline: () => void; onOpenPrivacy: () => void }) => (
+  <div className="screen fade-in" style={{ background: DS.colors.bg, overflowY: "auto" }}>
+    <div style={{ padding: "60px 28px 48px", display: "flex", flexDirection: "column" }}>
+      <div style={{ width: 72, height: 72, borderRadius: DS.radius.xl, background: DS.colors.accentLight, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
+        <Icon name="shield" size={32} color={DS.colors.accent} strokeWidth={1.5} />
+      </div>
+      <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 12, color: DS.colors.text }}>Before we analyse your photo</h1>
+      <p style={{ fontSize: 15, color: DS.colors.textMuted, lineHeight: 1.7, marginBottom: 24 }}>Solla uses AI to analyse your selfie and determine your personal colour season. Here is how your photo is handled.</p>
+      <div style={{ background: DS.colors.surface, borderRadius: DS.radius.lg, padding: "16px", marginBottom: 24, display: "flex", flexDirection: "column", gap: 12 }}>
+        {[
+          "Your photo is sent securely to Anthropic for AI processing",
+          "Photos are not stored permanently after analysis completes",
+          "Your colour results are saved to your Solla account only",
+          "You can delete your account and all data at any time from the Me tab",
+        ].map(point => (
+          <div key={point} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+            <div style={{ width: 20, height: 20, borderRadius: DS.radius.full, background: "#F0FDF4", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
+              <Icon name="check" size={12} color={DS.colors.success} strokeWidth={2.5} />
+            </div>
+            <span style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{point}</span>
+          </div>
+        ))}
+      </div>
+      <p style={{ fontSize: 12, color: DS.colors.textFaint, lineHeight: 1.6, marginBottom: 32 }}>
+        By continuing you consent to AI processing of your photo for colour analysis purposes. Read our{" "}
+        <span onClick={onOpenPrivacy} style={{ color: DS.colors.accent, textDecoration: "underline", cursor: "pointer" }}>Privacy Policy</span>
+        {" "}for full details.
+      </p>
+      <button onClick={onAccept} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
+        I understand - continue
+      </button>
+      <button onClick={onDecline} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>
+        Go back
+      </button>
+    </div>
+  </div>
+);
 
 const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
   useEffect(() => { const t = setTimeout(onComplete, 2800); return () => clearTimeout(t); }, [onComplete]);
@@ -860,6 +899,9 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
                 <button onClick={() => handleUpgrade("luxe")} disabled={loading} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: "#C26B3A", color: DS.colors.white, fontSize: 15, fontWeight: 600, marginTop: 14, opacity: loading ? 0.7 : 1 }}>
                   {loading ? "Starting trial..." : "Try Luxe free for 7 days - no charge until day 8"}
                 </button>
+                <button onClick={() => handleUpgrade("luxe")} disabled={loading} style={{ width: "100%", padding: "10px", borderRadius: DS.radius.lg, background: "transparent", color: "#C26B3A", fontSize: 13, fontWeight: 500, marginTop: 8, opacity: loading ? 0.7 : 1 }}>
+                  Or buy now without trial
+                </button>
               </div>
 
               {/* Glow option - secondary */}
@@ -879,6 +921,9 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
                 ))}
                 <button onClick={() => handleUpgrade("glow")} disabled={loading} style={{ width: "100%", padding: "12px", borderRadius: DS.radius.lg, background: DS.colors.accentLight, color: DS.colors.accentDark, fontSize: 14, fontWeight: 600, marginTop: 12, opacity: loading ? 0.7 : 1 }}>
                   {loading ? "Starting trial..." : "Start free trial - Glow"}
+                </button>
+                <button onClick={() => handleUpgrade("glow")} disabled={loading} style={{ width: "100%", padding: "8px", borderRadius: DS.radius.lg, background: "transparent", color: DS.colors.textMuted, fontSize: 12, fontWeight: 500, marginTop: 6, opacity: loading ? 0.7 : 1 }}>
+                  Or buy now without trial
                 </button>
               </div>
 
@@ -4684,6 +4729,9 @@ export default function App() {
   const [showInstallBanner, setShowInstallBanner] = useState(false);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isCapacitor = !!(window as any).Capacitor;
+    if (isCapacitor) return;
     const handler = (e: any) => { e.preventDefault(); setInstallPrompt(e); };
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
@@ -4982,12 +5030,19 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
       const parsedSeason = JSON.parse(cachedSeason);
       update({ user: u, screen: "main", seasonData: parsedSeason, isGuest: false });
     } catch {
-      update({ user: u, screen: "upload", isGuest: false });
+      update({ user: u, screen: "ai-consent", isGuest: false });
     }
   } else {
-    update({ user: u, screen: "upload", isGuest: false });
+    update({ user: u, screen: "ai-consent", isGuest: false });
   }
-}} onGuest={() => update({ isGuest: true, screen: "upload" })} />}
+}} onGuest={() => update({ isGuest: true, screen: "ai-consent" })} />}
+        {screen === "ai-consent" && (
+          <AIConsentScreen
+            onAccept={() => { localStorage.setItem("solla_ai_consent", "true"); update({ screen: "upload" }); }}
+            onDecline={() => update({ screen: "auth" })}
+            onOpenPrivacy={() => update({ activeSheet: "privacy" })}
+          />
+        )}
         {screen === "upload" && <UploadScreen onUpload={handleUpload} />}
         {screen === "analysing" && <AnalysingScreen />}
         {screen === "main" && (
