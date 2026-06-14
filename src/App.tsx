@@ -4563,6 +4563,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
 const ShareCard = ({ seasonData, streak = 0, onClose }: { seasonData: SeasonData; streak?: number; onClose: () => void }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [generating, setGenerating] = useState(false);
+  const [shareError, setShareError] = useState("");
   const gradient = seasonGradients[seasonData.season] || seasonGradients.Summer;
   const textColor = seasonTextColors[seasonData.season] || "#1a2a4a";
   const accentColor = seasonAccentColors[seasonData.season] || "#4A6FD4";
@@ -4570,18 +4571,56 @@ const ShareCard = ({ seasonData, streak = 0, onClose }: { seasonData: SeasonData
   const handleShare = async () => {
     if (!cardRef.current) return;
     setGenerating(true);
+    setShareError("");
     try {
-      const canvas = await html2canvas(cardRef.current, {
+      // Temporarily move card to body to avoid fixed/overflow clipping issues
+      const card = cardRef.current;
+      const originalParent = card.parentElement;
+      const originalStyle = card.getAttribute("style") || "";
+      card.style.position = "fixed";
+      card.style.top = "-9999px";
+      card.style.left = "0";
+      document.body.appendChild(card);
+
+      const canvas = await html2canvas(card, {
         scale: 3,
         useCORS: true,
+        allowTaint: true,
         backgroundColor: null,
         logging: false,
+        foreignObjectRendering: false,
+        windowWidth: card.offsetWidth,
+        windowHeight: card.offsetHeight,
+        ignoreElements: (el) => el.tagName === "svg",
       });
+
+      // Restore card to original position
+      if (originalParent) originalParent.appendChild(card);
+      card.setAttribute("style", originalStyle);
+
       const imageUrl = canvas.toDataURL("image/png");
-      if (navigator.share) {
-        const blob = await (await fetch(imageUrl)).blob();
-        const file = new File([blob], "my-solla-season.png", { type: "image/png" });
-        await navigator.share({ files: [file], title: `My colour season is ${seasonData.season}` });
+      if (navigator.share && navigator.canShare) {
+        try {
+          const blob = await (await fetch(imageUrl)).blob();
+          const file = new File([blob], "my-solla-season.png", { type: "image/png" });
+          const shareData = { files: [file], title: `My colour season is ${seasonData.season}` };
+          if (navigator.canShare(shareData)) {
+            await navigator.share(shareData);
+          } else {
+            // Fall back to download if share with files not supported
+            const link = document.createElement("a");
+            link.download = "my-solla-season.png";
+            link.href = imageUrl;
+            link.click();
+          }
+        } catch (shareErr: any) {
+          if (shareErr?.name !== "AbortError") {
+            const link = document.createElement("a");
+            link.download = "my-solla-season.png";
+            link.href = imageUrl;
+            link.click();
+          }
+        }
       } else {
         const link = document.createElement("a");
         link.download = "my-solla-season.png";
@@ -4589,7 +4628,8 @@ const ShareCard = ({ seasonData, streak = 0, onClose }: { seasonData: SeasonData
         link.click();
       }
     } catch (e) {
-      console.error(e);
+      console.error("ShareCard error:", e);
+      setShareError("Couldn't generate image. Try taking a screenshot instead.");
     }
     finally { setGenerating(false); }
   };
@@ -4648,9 +4688,12 @@ const ShareCard = ({ seasonData, streak = 0, onClose }: { seasonData: SeasonData
 
       {/* Buttons */}
       <div style={{ display: "flex", flexDirection: "column", gap: 10, width: 320, marginTop: 20 }}>
-        <button onClick={handleShare} disabled={generating} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.white, color: DS.colors.text, fontSize: 16, fontWeight: 600 }}>
+        <button onClick={handleShare} disabled={generating} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.white, color: DS.colors.text, fontSize: 16, fontWeight: 600, opacity: generating ? 0.7 : 1 }}>
           {generating ? "Generating..." : "Save & Share"}
         </button>
+        {shareError && (
+          <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.7)", textAlign: "center", lineHeight: 1.5 }}>{shareError}</p>
+        )}
         <button onClick={onClose} style={{ width: "100%", padding: "14px", fontSize: 14, color: "rgba(255,255,255,0.6)", fontWeight: 500 }}>
           Close
         </button>
