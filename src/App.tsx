@@ -4563,107 +4563,50 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
 const ShareCard = ({ seasonData, streak = 0, onClose }: { seasonData: SeasonData; streak?: number; onClose: () => void }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [generating, setGenerating] = useState(false);
-  const [shareError, setShareError] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const gradient = seasonGradients[seasonData.season] || seasonGradients.Summer;
   const textColor = seasonTextColors[seasonData.season] || "#1a2a4a";
   const accentColor = seasonAccentColors[seasonData.season] || "#4A6FD4";
 
-  const generateImage = async (): Promise<{ blob: Blob; imageUrl: string } | null> => {
-    if (!cardRef.current) return null;
-    const card = cardRef.current;
-    // Move card to body temporarily to avoid fixed/overflow clipping
-    const originalParent = card.parentElement;
-    const clone = card.cloneNode(true) as HTMLElement;
-    clone.style.position = "fixed";
-    clone.style.top = "-9999px";
-    clone.style.left = "0";
-    clone.style.width = "320px";
-    clone.style.zIndex = "-1";
-    document.body.appendChild(clone);
-    try {
-      const canvas = await html2canvas(clone, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: null,
-        logging: false,
-        foreignObjectRendering: false,
-        width: 320,
-        windowWidth: 320,
-      });
-      const imageUrl = canvas.toDataURL("image/png");
-      const blob = await (await fetch(imageUrl)).blob();
-      return { blob, imageUrl };
-    } finally {
-      document.body.removeChild(clone);
-    }
-  };
-
-  // Save to camera roll / photos via native share sheet
   const handleSave = async () => {
+    if (!cardRef.current) return;
     setGenerating(true);
-    setShareError("");
+    setSaved(false);
+    setSaveError("");
     try {
-      const result = await generateImage();
-      if (!result) return;
-      const { blob, imageUrl } = result;
-      const file = new File([blob], "my-solla-season.png", { type: "image/png" });
-      // Try native share first (iOS shows "Save to Photos" option in share sheet)
-      if (typeof navigator.share === "function") {
-        try {
-          await navigator.share({ files: [file], title: `My colour season is ${seasonData.season}` });
-          return;
-        } catch (e: any) {
-          if (e?.name === "AbortError") return; // user cancelled, not an error
-          // fall through to download
-        }
+      // Clone card to body to avoid fixed/overflow capture issues
+      const clone = cardRef.current.cloneNode(true) as HTMLElement;
+      clone.style.cssText = "position:fixed;top:-9999px;left:0;width:320px;z-index:-1;border-radius:24px;overflow:hidden;";
+      document.body.appendChild(clone);
+      let canvas: HTMLCanvasElement;
+      try {
+        canvas = await html2canvas(clone, {
+          scale: 3,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null,
+          logging: false,
+          foreignObjectRendering: false,
+          width: 320,
+        });
+      } finally {
+        document.body.removeChild(clone);
       }
-      // Fallback: direct download
+      const imageUrl = canvas.toDataURL("image/png");
+      // Always download -- this is the reliable cross-browser approach
+      // On iPhone: file lands in Downloads, user can move to Photos from there
+      // On Android: file lands in Downloads/Gallery
       const link = document.createElement("a");
-      link.download = "my-solla-season.png";
+      link.download = `solla-${seasonData.season.toLowerCase()}-season.png`;
       link.href = imageUrl;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      setSaved(true);
     } catch (e) {
       console.error("Save error:", e);
-      setShareError("Couldn't save image. Try taking a screenshot instead.");
-    } finally {
-      setGenerating(false);
-    }
-  };
-
-  // Share to apps (Instagram, WhatsApp, Messages etc)
-  const handleShareApps = async () => {
-    setGenerating(true);
-    setShareError("");
-    try {
-      const result = await generateImage();
-      if (!result) return;
-      const { blob, imageUrl } = result;
-      const file = new File([blob], "my-solla-season.png", { type: "image/png" });
-      if (typeof navigator.share === "function") {
-        try {
-          await navigator.share({
-            files: [file],
-            title: `I'm a ${seasonData.season}`,
-            text: `Just discovered my colour season with Solla. I'm a ${seasonData.season}! Find yours free at solla.com.au`,
-          });
-          return;
-        } catch (e: any) {
-          if (e?.name === "AbortError") return;
-        }
-      }
-      // Fallback download if Web Share not available
-      const link = document.createElement("a");
-      link.download = "my-solla-season.png";
-      link.href = imageUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (e) {
-      console.error("Share error:", e);
-      setShareError("Couldn't open share sheet. Try saving the image first.");
+      setSaveError("Couldn't generate image. Try taking a screenshot instead.");
     } finally {
       setGenerating(false);
     }
@@ -4723,14 +4666,18 @@ const ShareCard = ({ seasonData, streak = 0, onClose }: { seasonData: SeasonData
 
       {/* Buttons */}
       <div style={{ display: "flex", flexDirection: "column", gap: 10, width: 320, marginTop: 20 }}>
-        <button onClick={handleSave} disabled={generating} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.white, color: DS.colors.text, fontSize: 16, fontWeight: 600, opacity: generating ? 0.7 : 1 }}>
-          {generating ? "Generating..." : "Save to photos"}
-        </button>
-        <button onClick={handleShareApps} disabled={generating} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: "rgba(255,255,255,0.15)", color: DS.colors.white, fontSize: 15, fontWeight: 600, opacity: generating ? 0.7 : 1 }}>
-          Share to apps
-        </button>
-        {shareError && (
-          <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.7)", textAlign: "center", lineHeight: 1.5 }}>{shareError}</p>
+        {!saved ? (
+          <button onClick={handleSave} disabled={generating} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.white, color: DS.colors.text, fontSize: 16, fontWeight: 600, opacity: generating ? 0.7 : 1 }}>
+            {generating ? "Generating..." : "Save image"}
+          </button>
+        ) : (
+          <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: DS.radius.lg, padding: "16px", textAlign: "center" }}>
+            <p style={{ margin: "0 0 6px", fontSize: 15, fontWeight: 700, color: DS.colors.white }}>Image saved to Downloads</p>
+            <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: 1.5 }}>Open your Files or Photos app to find it, then share to Instagram, TikTok or wherever you like.</p>
+          </div>
+        )}
+        {saveError && (
+          <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.7)", textAlign: "center", lineHeight: 1.5 }}>{saveError}</p>
         )}
         <button onClick={onClose} style={{ width: "100%", padding: "12px", fontSize: 14, color: "rgba(255,255,255,0.5)", fontWeight: 500 }}>
           Close
