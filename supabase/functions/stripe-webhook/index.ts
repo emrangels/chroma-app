@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
     const event = JSON.parse(body);
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
-      const userId = session.metadata?.user_id;
+      const userId = session.metadata?.user_id || session.metadata?.supabase_user_id;
       const plan = session.metadata?.plan;
       const billing = session.metadata?.billing;
       if (userId && plan) {

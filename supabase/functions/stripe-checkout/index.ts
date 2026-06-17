@@ -17,6 +17,17 @@ const PRICE_IDS: Record<string, string> = {
   luxe_annual: "price_1TSqGOLI9o0IfbutZQ9jiLKb",
 };
 
+async function getSubscriptionId(stripeCustomerId: string): Promise<string | null> {
+  for (const status of ["active", "trialing"]) {
+    const res = await fetch(`https://api.stripe.com/v1/subscriptions?customer=${stripeCustomerId}&status=${status}&limit=1`, {
+      headers: { "Authorization": `Bearer ${stripeKey}` },
+    });
+    const data = await res.json();
+    if (data?.data?.[0]?.id) return data.data[0].id;
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -24,7 +35,7 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { type, plan, billing, user_id, email, return_url } = body;
+    const { type, plan, billing, no_trial, user_id, email, return_url } = body;
 
     if (type === "create_checkout") {
       if (!plan || !billing || !user_id || !email || !return_url) {
@@ -56,25 +67,45 @@ Deno.serve(async (req) => {
         });
       }
 
+      // Save customer ID immediately so cancel/pause works
+      await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user_id}`, {
+        method: "PATCH",
+        headers: {
+          "apikey": SUPABASE_SERVICE_KEY,
+          "Authorization": `Bearer ${SUPABASE_SERVICE_KEY}`,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal",
+        },
+        body: JSON.stringify({ stripe_customer_id: customer.id }),
+      });
+
+      const sessionParams: Record<string, string> = {
+        customer: customer.id,
+        mode: "subscription",
+        "line_items[0][price]": priceId,
+        "line_items[0][quantity]": "1",
+        "subscription_data[metadata][supabase_user_id]": user_id,
+        "subscription_data[metadata][plan]": plan,
+        "subscription_data[metadata][billing]": billing,
+        "metadata[user_id]": user_id,
+        "metadata[plan]": plan,
+        "metadata[billing]": billing,
+        success_url: `${return_url}?checkout=success&plan=${plan}&billing=${billing}`,
+        cancel_url: `${return_url}?checkout=cancelled`,
+        allow_promotion_codes: "true",
+      };
+
+      if (!no_trial) {
+        sessionParams["subscription_data[trial_period_days]"] = "7";
+      }
+
       const sessionRes = await fetch("https://api.stripe.com/v1/checkout/sessions", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${stripeKey}`,
           "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: new URLSearchParams({
-          customer: customer.id,
-          mode: "subscription",
-          "line_items[0][price]": priceId,
-          "line_items[0][quantity]": "1",
-          "subscription_data[trial_period_days]": "7",
-          "subscription_data[metadata][supabase_user_id]": user_id,
-          "subscription_data[metadata][plan]": plan,
-          "subscription_data[metadata][billing]": billing,
-          success_url: `${return_url}?checkout=success&plan=${plan}&billing=${billing}`,
-          cancel_url: `${return_url}?checkout=cancelled`,
-          allow_promotion_codes: "true",
-        }).toString(),
+        body: new URLSearchParams(sessionParams).toString(),
       });
       const session = await sessionRes.json();
 
@@ -97,10 +128,7 @@ Deno.serve(async (req) => {
       }
 
       const profileRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user_id}&select=stripe_customer_id`, {
-        headers: {
-          "apikey": SUPABASE_SERVICE_KEY,
-          "Authorization": `Bearer ${SUPABASE_SERVICE_KEY}`,
-        },
+        headers: { "apikey": SUPABASE_SERVICE_KEY, "Authorization": `Bearer ${SUPABASE_SERVICE_KEY}` },
       });
       const profiles = await profileRes.json();
       const stripeCustomerId = profiles?.[0]?.stripe_customer_id;
@@ -111,20 +139,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      const subsRes = await fetch(`https://api.stripe.com/v1/subscriptions?customer=${stripeCustomerId}&status=active`, {
-        headers: { "Authorization": `Bearer ${stripeKey}` },
-      });
-      const subs = await subsRes.json();
-      let subscriptionId = subs?.data?.[0]?.id;
-
-      if (!subscriptionId) {
-        const trialRes = await fetch(`https://api.stripe.com/v1/subscriptions?customer=${stripeCustomerId}&status=trialing`, {
-          headers: { "Authorization": `Bearer ${stripeKey}` },
-        });
-        const trialSubs = await trialRes.json();
-        subscriptionId = trialSubs?.data?.[0]?.id;
-      }
-
+      const subscriptionId = await getSubscriptionId(stripeCustomerId);
       if (!subscriptionId) {
         return new Response(JSON.stringify({ error: "No active subscription found." }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -146,6 +161,58 @@ Deno.serve(async (req) => {
           "Prefer": "return=minimal",
         },
         body: JSON.stringify({ stripe_status: "cancelled" }),
+      });
+
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (type === "pause_subscription") {
+      if (!user_id) {
+        return new Response(JSON.stringify({ error: "Missing user_id" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const profileRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user_id}&select=stripe_customer_id`, {
+        headers: { "apikey": SUPABASE_SERVICE_KEY, "Authorization": `Bearer ${SUPABASE_SERVICE_KEY}` },
+      });
+      const profiles = await profileRes.json();
+      const stripeCustomerId = profiles?.[0]?.stripe_customer_id;
+
+      if (!stripeCustomerId) {
+        return new Response(JSON.stringify({ error: "No subscription found. Please email hello@solla.com.au for help." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const subscriptionId = await getSubscriptionId(stripeCustomerId);
+      if (!subscriptionId) {
+        return new Response(JSON.stringify({ error: "No active subscription found." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const resumesAt = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
+      await fetch(`https://api.stripe.com/v1/subscriptions/${subscriptionId}`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${stripeKey}`, "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          "pause_collection[behavior]": "void",
+          "pause_collection[resumes_at]": resumesAt.toString(),
+        }).toString(),
+      });
+
+      await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user_id}`, {
+        method: "PATCH",
+        headers: {
+          "apikey": SUPABASE_SERVICE_KEY,
+          "Authorization": `Bearer ${SUPABASE_SERVICE_KEY}`,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal",
+        },
+        body: JSON.stringify({ stripe_status: "paused" }),
       });
 
       return new Response(JSON.stringify({ success: true }), {
