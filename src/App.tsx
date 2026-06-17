@@ -801,8 +801,8 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
     luxe: { monthly: "$14.99", annual: "$99.99", monthlyEquiv: "$8.33/mo" },
   };
 
-  const handleUpgrade = async (selectedPlan: "glow" | "luxe") => {
-    trackEvent("upgrade_clicked", { plan: selectedPlan, billing });
+  const handleUpgrade = async (selectedPlan: "glow" | "luxe", noTrial = false) => {
+    trackEvent("upgrade_clicked", { plan: selectedPlan, billing, no_trial: noTrial });
     if (isGuest && onSignUp) { onSignUp(); return; }
     setLoading(true);
     try {
@@ -817,6 +817,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
           type: "create_checkout",
           plan: selectedPlan,
           billing,
+          no_trial: noTrial,
           user_id: user.id,
           email: user.email,
           return_url: "https://solla.com.au",
@@ -899,9 +900,10 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
                 <button onClick={() => handleUpgrade("luxe")} disabled={loading} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: "#C26B3A", color: DS.colors.white, fontSize: 15, fontWeight: 600, marginTop: 14, opacity: loading ? 0.7 : 1 }}>
                   {loading ? "Starting trial..." : "Try Luxe free for 7 days - no charge until day 8"}
                 </button>
-                <button onClick={() => handleUpgrade("luxe")} disabled={loading} style={{ width: "100%", padding: "10px", borderRadius: DS.radius.lg, background: "transparent", color: "#C26B3A", fontSize: 13, fontWeight: 500, marginTop: 8, opacity: loading ? 0.7 : 1 }}>
-                  Or buy now without trial
+                <button onClick={() => handleUpgrade("luxe", true)} disabled={loading} style={{ width: "100%", padding: "10px", borderRadius: DS.radius.lg, background: "transparent", color: "#C26B3A", fontSize: 13, fontWeight: 500, marginTop: 8, opacity: loading ? 0.7 : 1 }}>
+                  Or subscribe now without trial
                 </button>
+                <p style={{ margin: "4px 0 0", fontSize: 11, color: DS.colors.textFaint, textAlign: "center" }}>Skip the trial and start your Luxe subscription immediately.</p>
               </div>
 
               {/* Glow option - secondary */}
@@ -922,9 +924,10 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
                 <button onClick={() => handleUpgrade("glow")} disabled={loading} style={{ width: "100%", padding: "12px", borderRadius: DS.radius.lg, background: DS.colors.accentLight, color: DS.colors.accentDark, fontSize: 14, fontWeight: 600, marginTop: 12, opacity: loading ? 0.7 : 1 }}>
                   {loading ? "Starting trial..." : "Start free trial - Glow"}
                 </button>
-                <button onClick={() => handleUpgrade("glow")} disabled={loading} style={{ width: "100%", padding: "8px", borderRadius: DS.radius.lg, background: "transparent", color: DS.colors.textMuted, fontSize: 12, fontWeight: 500, marginTop: 6, opacity: loading ? 0.7 : 1 }}>
-                  Or buy now without trial
+                <button onClick={() => handleUpgrade("glow", true)} disabled={loading} style={{ width: "100%", padding: "8px", borderRadius: DS.radius.lg, background: "transparent", color: DS.colors.textMuted, fontSize: 12, fontWeight: 500, marginTop: 6, opacity: loading ? 0.7 : 1 }}>
+                  Or subscribe now without trial
                 </button>
+                <p style={{ margin: "4px 0 0", fontSize: 11, color: DS.colors.textFaint, textAlign: "center" }}>Skip the trial and start your Glow subscription immediately.</p>
               </div>
 
               <p style={{ textAlign: "center", fontSize: 11, color: DS.colors.textFaint, marginBottom: 12, lineHeight: 1.5 }}>Cancel anytime before day 8 and you will not be charged a thing.
@@ -1499,7 +1502,7 @@ const incrementStreak = (userId: string): number => {
 };
 
 
-const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade, onReanalyse, onTabChange }: { seasonData: SeasonData | null; user: User | null; onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void; onReanalyse: () => void; onTabChange: (tab: Tab) => void; }) => {
+const HomeTab = ({ seasonData, user, onOpenSheet, onUpgrade, onReanalyse, onTabChange, isGuest, onSignUp }: { seasonData: SeasonData | null; user: User | null; onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void; onReanalyse: () => void; onTabChange: (tab: Tab) => void; isGuest?: boolean; onSignUp?: () => void; }) => {
   const plan = user?.plan || "free"; const [showShare, setShowShare] = useState(false); const [selectedColour, setSelectedColour] = useState<PaletteColour | null>(null);
   const [streak, setStreak] = useState(0);
   const [streakIsNew, setStreakIsNew] = useState(false);
@@ -1696,7 +1699,7 @@ const loadExtendedPalette = async () => {
         <p style={{ margin: "10px 0 0", fontSize: 13, color: textColor, lineHeight: 1.6, fontStyle: "italic", opacity: 0.8, maxWidth: 300 }}>{getIdentityStatement(seasonData.season)}</p>
 
         <div style={{ marginTop: 14 }}>
-          <button onClick={() => setShowShare(true)} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(255,255,255,0.3)", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 600, color: textColor, border: `1px solid rgba(255,255,255,0.4)` }}>
+          <button onClick={() => { if (isGuest) { onSignUp?.(); return; } setShowShare(true); }} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(255,255,255,0.3)", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 600, color: textColor, border: `1px solid rgba(255,255,255,0.4)` }}>
             <Icon name="share" size={14} color={textColor} strokeWidth={2} />
             Share my season
           </button>
@@ -4731,7 +4734,7 @@ const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, 
   <div className="screen fade-in" style={{ background: DS.colors.bg, height: "100dvh" }}>
     <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
       {activeTab === "home" ? (
-        <HomeTab seasonData={seasonData} user={user} onOpenSheet={onOpenSheet} onUpgrade={onUpgrade} onReanalyse={onReanalyse} onTabChange={onTabChange} />
+        <HomeTab seasonData={seasonData} user={user} onOpenSheet={onOpenSheet} onUpgrade={onUpgrade} onReanalyse={onReanalyse} onTabChange={onTabChange} isGuest={isGuest} onSignUp={onSignUp} />
       ) : activeTab === "checker" ? (
         <CheckerTab seasonData={seasonData} user={user} onUpgrade={onUpgrade} />
       ) : activeTab === "me" ? (
@@ -5095,22 +5098,27 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
             onClose={() => update({ activeSheet: null })}
           />
         )}
-        {state.activeSheet === "preview" && state.seasonData && (
-  <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={() => update({ activeSheet: "welcome" as Sheet })}>
+        {(state.activeSheet as any) === "share-trigger" && state.seasonData && (
+          <ShareCard seasonData={state.seasonData} streak={state.user?.id ? getStreak(state.user.id) : 0} onClose={() => update({ activeSheet: null })} />
+        )}
+        {state.activeSheet === "preview" && state.seasonData && (() => {
+  const sd = state.seasonData!;
+  return (
+  <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={() => update({ activeSheet: null })}>
     <div style={{ width: "100%", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
       <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
         <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
       </div>
       <div style={{ padding: "20px 24px 0" }}>
-        <div style={{ background: seasonGradients[state.seasonData.season] || seasonGradients.Summer, borderRadius: DS.radius.lg, padding: "20px", marginBottom: 20 }}>
-          <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 600, color: seasonAccentColors[state.seasonData.season] || "#4A6FD4", letterSpacing: "0.08em", textTransform: "uppercase" }}>Your colour season</p>
-          <h2 style={{ margin: "0 0 4px", fontSize: 36, fontWeight: 700, color: seasonTextColors[state.seasonData.season] || "#1a2a4a", letterSpacing: "-1px" }}>{state.seasonData.season}</h2>
-          <p style={{ margin: 0, fontSize: 13, color: seasonTextColors[state.seasonData.season] || "#1a2a4a", opacity: 0.8 }}>{state.seasonData.headline}</p>
+        <div style={{ background: seasonGradients[sd.season] || seasonGradients.Summer, borderRadius: DS.radius.lg, padding: "20px", marginBottom: 20 }}>
+          <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 600, color: seasonAccentColors[sd.season] || "#4A6FD4", letterSpacing: "0.08em", textTransform: "uppercase" }}>Your colour season</p>
+          <h2 style={{ margin: "0 0 4px", fontSize: 36, fontWeight: 700, color: seasonTextColors[sd.season] || "#1a2a4a", letterSpacing: "-1px" }}>{sd.season}</h2>
+          <p style={{ margin: 0, fontSize: 13, color: seasonTextColors[sd.season] || "#1a2a4a", opacity: 0.8 }}>{sd.headline}</p>
         </div>
         <p style={{ margin: "0 0 16px", fontSize: 14, fontWeight: 600, color: DS.colors.text }}>Your full guide includes:</p>
         {[
-          { icon: "droplet", label: "Makeup", desc: `Your exact foundation undertone, blush and lip shades as a ${state.seasonData.season}` },
-          { icon: "scissors", label: "Hair colours", desc: `The exact shades that make your ${state.seasonData.season} colouring come alive` },
+          { icon: "droplet", label: "Makeup", desc: `Your exact foundation undertone, blush and lip shades as a ${sd.season}` },
+          { icon: "scissors", label: "Hair colours", desc: `The exact shades that make your ${sd.season} colouring come alive` },
           { icon: "gem", label: "Jewellery", desc: "Your metals and stones - personalised to your season" },
         ].map(item => (
           <div key={item.label} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
@@ -5131,17 +5139,18 @@ update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, to
           <span style={{ fontSize: 11, color: DS.colors.textFaint, fontWeight: 500 }}>or</span>
           <div style={{ flex: 1, height: 1, background: DS.colors.border }} />
         </div>
-        <button onClick={() => { update({ activeSheet: null }); setTimeout(() => { const shareBtn = document.querySelector('[data-share-trigger]') as HTMLElement; if (shareBtn) shareBtn.click(); }, 100); }} style={{ width: "100%", padding: "12px", borderRadius: DS.radius.lg, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, fontWeight: 500, marginTop: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+        <button onClick={() => { update({ activeSheet: null, activeTab: "home" }); setTimeout(() => update({ activeSheet: "share-trigger" as any }), 150); }} style={{ width: "100%", padding: "12px", borderRadius: DS.radius.lg, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, fontWeight: 500, marginTop: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
           <Icon name="share" size={16} color={DS.colors.text} />
-          Share my {state.seasonData?.season} season
+          Share my {sd.season} season
         </button>
-        <button onClick={() => update({ activeSheet: "welcome" as Sheet })} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500, marginTop: 4 }}>
+        <button onClick={() => update({ activeSheet: null })} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500, marginTop: 4 }}>
           Maybe later
         </button>
       </div>
     </div>
   </div>
-)}
+  );
+})()}
         {state.activeSheet === "welcome" && (
   <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 32px" }} onClick={() => update({ activeSheet: null })}>
     <div style={{ background: DS.colors.bg, borderRadius: DS.radius.xl, padding: "32px 24px", width: "100%" }} onClick={e => e.stopPropagation()}>
