@@ -1699,7 +1699,7 @@ const loadExtendedPalette = async () => {
         <p style={{ margin: "10px 0 0", fontSize: 13, color: textColor, lineHeight: 1.6, fontStyle: "italic", opacity: 0.8, maxWidth: 300 }}>{getIdentityStatement(seasonData.season)}</p>
 
         <div style={{ marginTop: 14 }}>
-          <button onClick={() => { if (isGuest) { onSignUp?.(); return; } setShowShare(true); }} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(255,255,255,0.3)", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 600, color: textColor, border: `1px solid rgba(255,255,255,0.4)` }}>
+          <button onClick={() => setShowShare(true)} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(255,255,255,0.3)", borderRadius: DS.radius.full, fontSize: 13, fontWeight: 600, color: textColor, border: `1px solid rgba(255,255,255,0.4)` }}>
             <Icon name="share" size={14} color={textColor} strokeWidth={2} />
             Share my season
           </button>
@@ -5025,7 +5025,7 @@ if (parsedUser.email && parsedSeason?.season) {
   alert("Analysis incomplete - please try again with a clearer photo in natural light.");
   return;
 }
-update({ seasonData: data, screen: "lifestyle-onboarding", activeSheet: null, tourStep: null });
+update({ seasonData: data, screen: state.isGuest ? "main" : "lifestyle-onboarding", activeSheet: state.isGuest ? "preview" as Sheet : null, tourStep: null });
   } catch { update({ screen: "upload" }); alert("Something went wrong - please try again with a clear selfie in natural light."); }
 };
 
