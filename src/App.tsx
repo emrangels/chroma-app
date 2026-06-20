@@ -3374,6 +3374,10 @@ const handleEditOutfit = async () => {
     history: chatMessages.map(m => ({ role: m.role, content: m.content })),
     season: seasonData.season,
     subseason: seasonData.subseason,
+    undertone: seasonData.colour_profile?.undertone,
+    depth: seasonData.colour_profile?.depth,
+    chroma: seasonData.colour_profile?.chroma,
+    foundation: localStorage.getItem(`solla_foundation_shades_${user?.id}`) || undefined,
     wardrobe: [
       ...items.map(i => `${i.name} (${i.category}, ${i.formality || "casual"}, ${i.colour_name}, ${i.verdict ? "suits season" : "doesn't suit season"})`),
       ...outfits.map(o => `Saved outfit: "${o.name}" (${items.filter(i => o.item_ids.includes(i.id)).map(i => i.name).join(", ")})`)
@@ -4248,7 +4252,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
   ✦ Analyse my wardrobe
 </button>
 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-  {["What should I wear to a job interview?", "Build me a capsule wardrobe for my season", "What colours should I never wear together?"].map(suggestion => (
+  {["What shade should I get in NARS Sheer Glow?", "What should I wear to a job interview?", "Build me a capsule wardrobe for my season"].map(suggestion => (
                     <button key={suggestion} onClick={() => { setChatInput(suggestion); }} style={{ padding: "10px 14px", borderRadius: DS.radius.md, background: DS.colors.surface, fontSize: 13, color: DS.colors.textMuted, textAlign: "left", border: `1px solid ${DS.colors.border}` }}>
                       {suggestion}
                     </button>
