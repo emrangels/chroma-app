@@ -2050,6 +2050,7 @@ interface CheckResult {
     verdict_v2?: "yes" | "neutral" | "no";
     reason: string;
     tip: string;
+    confidence?: "high" | "estimated";
   }[];
 }
 
@@ -2348,7 +2349,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                 if (makeupCheckMode === "upload") {
                   setMakeupResult(data);
                 } else if (data.results) {
-                  setMakeupResult({ mode: "single", items: data.results.map((r: any) => ({ colour_name: r.shade || r.name, hex: r.hex || "#C4A882", verdict: r.verdict !== false, verdict_v2: r.verdict_v2 || "yes", reason: r.reason || "", tip: r.tip || "" })) });
+                  setMakeupResult({ mode: "single", items: data.results.map((r: any) => ({ colour_name: r.shade || r.name, hex: r.hex || "#C4A882", verdict: r.verdict !== false, verdict_v2: r.verdict_v2 || "yes", reason: r.reason || "", tip: r.tip || "", confidence: r.confidence || "estimated" })) });
                 }
               } catch {}
               finally { setMakeupChecking(false); }
@@ -2372,7 +2373,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                           {item.verdict_v2 === "yes" ? "✓ Suits your season" : item.verdict_v2 === "neutral" ? "~ Works with care" : "✗ Doesn't suit your season"}
                         </span>
                         <span style={{ fontSize: 10, color: DS.colors.textFaint, background: DS.colors.surface, padding: "1px 6px", borderRadius: DS.radius.full, display: "block", marginTop: 3 }}>
-                          {makeupCheckMode === "upload" ? "Photo check - result may vary with lighting" : "Name check - high confidence"}
+                          {makeupCheckMode === "upload" ? "Photo check - result may vary with lighting" : item.confidence === "high" ? "Known shade - high confidence" : "Estimated shade - check colour in person"}
                         </span>
                       </div>
                     </div>
@@ -4034,7 +4035,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                 if (makeupCheckMode === "upload") {
                   setMakeupCheckResult(data);
                 } else if (data.results) {
-                  setMakeupCheckResult({ mode: "single", items: data.results.map((r: any) => ({ colour_name: r.shade || r.name, hex: r.hex || "#C4A882", verdict: r.verdict !== false, verdict_v2: r.verdict_v2 || "yes", reason: r.reason || "", tip: r.tip || "" })) });
+                  setMakeupCheckResult({ mode: "single", items: data.results.map((r: any) => ({ colour_name: r.shade || r.name, hex: r.hex || "#C4A882", verdict: r.verdict !== false, verdict_v2: r.verdict_v2 || "yes", reason: r.reason || "", tip: r.tip || "", confidence: r.confidence || "estimated" })) });
                 }
               } catch {}
               finally { setMakeupChecking(false); }
@@ -4058,7 +4059,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                           {item.verdict_v2 === "yes" ? "✓ Suits your season" : item.verdict_v2 === "neutral" ? "~ Works with care" : "✗ Doesn't suit your season"}
                         </span>
                         <span style={{ fontSize: 10, color: DS.colors.textFaint, background: DS.colors.surface, padding: "1px 6px", borderRadius: DS.radius.full, display: "block", marginTop: 3 }}>
-                          {makeupCheckMode === "upload" ? "Photo check - result may vary with lighting" : "Name check - high confidence"}
+                          {makeupCheckMode === "upload" ? "Photo check - result may vary with lighting" : item.confidence === "high" ? "Known shade - high confidence" : "Estimated shade - check colour in person"}
                         </span>
                       </div>
                     </div>
