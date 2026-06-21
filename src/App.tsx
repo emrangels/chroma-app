@@ -2045,12 +2045,12 @@ interface CheckResult {
     piece?: string;
     category?: string;
     colour_name: string;
-    hex: string;
+    hex: string | null;
     verdict: boolean;
     verdict_v2?: "yes" | "neutral" | "no";
     reason: string;
     tip: string;
-    confidence?: "high" | "estimated";
+    confidence?: "high" | "estimated" | "unknown";
     text_detected?: boolean;
     detected_text?: string | null;
   }[];
@@ -2161,7 +2161,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
           category: saveCategory,
           formality: saveFormality,
           colour_name: saveSheet.item.colour_name,
-          hex: saveSheet.item.hex,
+          hex: saveSheet.item.hex || "#C4A882",
           verdict: saveSheet.item.verdict,
           verdict_v2: saveSheet.item.verdict_v2 || (saveSheet.item.verdict ? "yes" : "no"),
           tip: saveSheet.item.tip,
@@ -2362,26 +2362,29 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
             {/* Makeup results */}
             {makeupResult && (
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
-                <button onClick={() => { setMakeupResult(null); setMakeupPreview(null); setMakeupProductName(""); if (makeupFileRef.current) makeupFileRef.current.value = ""; }} style={{ padding: "8px 16px", borderRadius: DS.radius.full, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, fontSize: 12, color: DS.colors.textMuted, fontWeight: 500, alignSelf: "flex-start" }}>
-                  ← Check another
+                <button onClick={() => { setMakeupResult(null); setMakeupPreview(null); setMakeupProductName(""); if (makeupFileRef.current) makeupFileRef.current.value = ""; }} style={{ padding: "10px 18px", borderRadius: DS.radius.full, background: "#C2185B", fontSize: 13, color: DS.colors.white, fontWeight: 600, alignSelf: "flex-start", display: "flex", alignItems: "center", gap: 6 }}>
+                  <Icon name="refresh" size={13} color={DS.colors.white} strokeWidth={2.5} />
+                  Check another product
                 </button>
                 {makeupResult.items.map((item, i) => (
                   <div key={i} style={{ padding: "14px", borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, background: DS.colors.bg }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                      <div style={{ width: 36, height: 36, borderRadius: DS.radius.full, background: item.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
+                      <div style={{ width: 36, height: 36, borderRadius: DS.radius.full, background: item.hex || DS.colors.surface, flexShrink: 0, border: item.hex ? "1px solid rgba(0,0,0,0.08)" : `1.5px dashed ${DS.colors.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        {!item.hex && <span style={{ fontSize: 14, color: DS.colors.textFaint, fontWeight: 600 }}>?</span>}
+                      </div>
                       <div style={{ flex: 1 }}>
                         <p style={{ margin: "0 0 2px", fontSize: 14, fontWeight: 600, color: DS.colors.text }}>{item.colour_name}</p>
                         <span style={{ fontSize: 12, fontWeight: 600, color: item.verdict_v2 === "yes" ? DS.colors.success : item.verdict_v2 === "neutral" ? "#D97706" : DS.colors.danger }}>
-                          {item.verdict_v2 === "yes" ? "✓ Suits your season" : item.verdict_v2 === "neutral" ? "~ Works with care" : "✗ Doesn't suit your season"}
+                          {item.confidence === "unknown" ? "? Couldn't identify" : item.verdict_v2 === "yes" ? "✓ Suits your season" : item.verdict_v2 === "neutral" ? "~ Works with care" : "✗ Doesn't suit your season"}
                         </span>
                         <span style={{ fontSize: 10, color: DS.colors.textFaint, background: DS.colors.surface, padding: "1px 6px", borderRadius: DS.radius.full, display: "block", marginTop: 3 }}>
-                          {makeupCheckMode === "upload" ? (item.text_detected && item.detected_text ? `Read "${item.detected_text}" from image - ${item.confidence === "high" ? "high confidence" : "estimated colour"}` : "Photo check - no text detected, result may vary with lighting") : item.confidence === "high" ? "Known shade - high confidence" : "Estimated shade - check colour in person"}
+                          {item.confidence === "unknown" ? "Couldn't identify this product - try a clearer photo or type the name" : makeupCheckMode === "upload" ? (item.text_detected && item.detected_text ? `Read "${item.detected_text}" from image - ${item.confidence === "high" ? "high confidence" : "estimated colour"}` : "Photo check - no text detected, result may vary with lighting") : item.confidence === "high" ? "Known shade - high confidence" : "Estimated shade - check colour in person"}
                         </span>
                       </div>
                     </div>
                     <p style={{ margin: "0 0 4px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{item.reason}</p>
                     <p style={{ margin: "0 0 12px", fontSize: 13, color: DS.colors.accent, fontWeight: 500, lineHeight: 1.5 }}>{item.tip}</p>
-                    {user && user.plan !== "free" && (
+                    {user && user.plan !== "free" && item.hex && (
                       <button onClick={() => {
                         setSaveMakeupSheet({ item, previewSrc: makeupPreview || undefined });
                         setSaveMakeupName(makeupCheckMode === "name" ? makeupProductName : item.colour_name);
@@ -2407,7 +2410,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                   <div style={{ padding: "16px 24px" }}>
                     <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Save to my kit</h2>
                     <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14, padding: "10px 14px", borderRadius: DS.radius.md, background: DS.colors.surface }}>
-                      <div style={{ width: 32, height: 32, borderRadius: DS.radius.full, background: saveMakeupSheet.item.hex, flexShrink: 0 }} />
+                      <div style={{ width: 32, height: 32, borderRadius: DS.radius.full, background: saveMakeupSheet.item.hex || DS.colors.surface, flexShrink: 0 }} />
                       <p style={{ margin: 0, fontSize: 13, color: DS.colors.text }}>{saveMakeupSheet.item.colour_name}</p>
                     </div>
                     <input value={saveMakeupName} onChange={e => setSaveMakeupName(e.target.value)} placeholder="Product name" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 10, fontFamily: DS.font }} />
@@ -2445,7 +2448,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                         body: JSON.stringify({
                           user_id: user.id, name: saveMakeupName.trim(), brand: saveMakeupBrand.trim() || null,
                           category: saveMakeupCategory, shade_name: saveMakeupShade.trim() || null,
-                          hex: saveMakeupSheet.item.hex, verdict_v2: saveMakeupSheet.item.verdict_v2 || "yes",
+                          hex: saveMakeupSheet.item.hex || "#C4A882", verdict_v2: saveMakeupSheet.item.verdict_v2 || "yes",
                           verdict: saveMakeupSheet.item.verdict, tip: saveMakeupSheet.item.tip, image_url, starred: false,
                         }),
                       });
@@ -2521,7 +2524,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
               <div style={{ padding: "16px 24px" }}>
                 <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Save to wardrobe</h2>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, padding: "10px 14px", borderRadius: DS.radius.md, background: saveSheet.item.verdict ? "#F0FDF4" : "#FEF2F2" }}>
-                  <div style={{ width: 36, height: 36, borderRadius: DS.radius.sm, background: saveSheet.item.hex, flexShrink: 0 }} />
+                  <div style={{ width: 36, height: 36, borderRadius: DS.radius.sm, background: saveSheet.item.hex || DS.colors.surface, flexShrink: 0 }} />
                   <div>
                     <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>{saveSheet.item.colour_name}</p>
                     <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted }}>{saveSheet.item.verdict ? "✓ Suits your season" : "✗ Doesn't suit your season"}</p>
@@ -2596,7 +2599,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
               {result.items.map((item, i) => (
                 <div key={i} style={{ background: DS.colors.bg, borderRadius: DS.radius.lg, border: `1px solid ${DS.colors.border}`, padding: "14px 16px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: DS.radius.md, background: item.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
+                    <div style={{ width: 36, height: 36, borderRadius: DS.radius.md, background: item.hex || DS.colors.surface, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                         {item.piece && <span style={{ fontSize: 11, color: DS.colors.textFaint, fontWeight: 500 }}>{item.piece} · </span>}
@@ -4051,25 +4054,29 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             {/* Check results */}
             {makeupCheckResult && (
               <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-                <button onClick={() => { setMakeupCheckResult(null); setMakeupPreview(null); setMakeupProductName(""); if (makeupFileRef.current) makeupFileRef.current.value = ""; }} style={{ padding: "8px 16px", borderRadius: DS.radius.full, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, fontSize: 12, color: DS.colors.textMuted, fontWeight: 500, alignSelf: "flex-start" }}>
-                  ← Check another
+                <button onClick={() => { setMakeupCheckResult(null); setMakeupPreview(null); setMakeupProductName(""); if (makeupFileRef.current) makeupFileRef.current.value = ""; }} style={{ padding: "10px 18px", borderRadius: DS.radius.full, background: "#C2185B", fontSize: 13, color: DS.colors.white, fontWeight: 600, alignSelf: "flex-start", display: "flex", alignItems: "center", gap: 6 }}>
+                  <Icon name="refresh" size={13} color={DS.colors.white} strokeWidth={2.5} />
+                  Check another product
                 </button>
                 {makeupCheckResult.items.map((item, i) => (
                   <div key={i} style={{ padding: "12px 14px", borderRadius: DS.radius.md, border: `1px solid ${DS.colors.border}`, background: DS.colors.bg }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: DS.radius.full, background: item.hex, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)" }} />
+                      <div style={{ width: 32, height: 32, borderRadius: DS.radius.full, background: item.hex || DS.colors.surface, flexShrink: 0, border: item.hex ? "1px solid rgba(0,0,0,0.08)" : `1.5px dashed ${DS.colors.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        {!item.hex && <span style={{ fontSize: 13, color: DS.colors.textFaint, fontWeight: 600 }}>?</span>}
+                      </div>
                       <div style={{ flex: 1 }}>
                         <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: DS.colors.text }}>{item.colour_name}</p>
                         <span style={{ fontSize: 11, fontWeight: 600, color: item.verdict_v2 === "yes" ? DS.colors.success : item.verdict_v2 === "neutral" ? "#D97706" : DS.colors.danger }}>
-                          {item.verdict_v2 === "yes" ? "✓ Suits your season" : item.verdict_v2 === "neutral" ? "~ Works with care" : "✗ Doesn't suit your season"}
+                          {item.confidence === "unknown" ? "? Couldn't identify" : item.verdict_v2 === "yes" ? "✓ Suits your season" : item.verdict_v2 === "neutral" ? "~ Works with care" : "✗ Doesn't suit your season"}
                         </span>
                         <span style={{ fontSize: 10, color: DS.colors.textFaint, background: DS.colors.surface, padding: "1px 6px", borderRadius: DS.radius.full, display: "block", marginTop: 3 }}>
-                          {makeupCheckMode === "upload" ? (item.text_detected && item.detected_text ? `Read "${item.detected_text}" from image - ${item.confidence === "high" ? "high confidence" : "estimated colour"}` : "Photo check - no text detected, result may vary with lighting") : item.confidence === "high" ? "Known shade - high confidence" : "Estimated shade - check colour in person"}
+                          {item.confidence === "unknown" ? "Couldn't identify this product - try a clearer photo or type the name" : makeupCheckMode === "upload" ? (item.text_detected && item.detected_text ? `Read "${item.detected_text}" from image - ${item.confidence === "high" ? "high confidence" : "estimated colour"}` : "Photo check - no text detected, result may vary with lighting") : item.confidence === "high" ? "Known shade - high confidence" : "Estimated shade - check colour in person"}
                         </span>
                       </div>
                     </div>
                     <p style={{ margin: "0 0 4px", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{item.reason}</p>
                     <p style={{ margin: "0 0 10px", fontSize: 13, color: DS.colors.accent, fontWeight: 500 }}>{item.tip}</p>
+                    {item.hex && (
                     <button onClick={() => {
                       setSaveMakeupSheet({ item, previewSrc: makeupPreview || undefined });
                       setSaveMakeupName(makeupCheckMode === "name" ? makeupProductName : item.colour_name);
@@ -4079,6 +4086,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     }} style={{ padding: "6px 14px", borderRadius: DS.radius.full, background: "#FFF0F5", fontSize: 12, color: "#C2185B", fontWeight: 500 }}>
                       + Save to my kit
                     </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -4178,7 +4186,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                 <div style={{ padding: "16px 24px" }}>
                   <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Save to my kit</h2>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14, padding: "10px 14px", borderRadius: DS.radius.md, background: DS.colors.surface }}>
-                    <div style={{ width: 32, height: 32, borderRadius: DS.radius.full, background: saveMakeupSheet.item.hex, flexShrink: 0 }} />
+                    <div style={{ width: 32, height: 32, borderRadius: DS.radius.full, background: saveMakeupSheet.item.hex || DS.colors.surface, flexShrink: 0 }} />
                     <p style={{ margin: 0, fontSize: 13, color: DS.colors.text }}>{saveMakeupSheet.item.colour_name}</p>
                   </div>
                   <input value={saveMakeupName} onChange={e => setSaveMakeupName(e.target.value)} placeholder="Product name" style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 14, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 10, fontFamily: DS.font }} />
@@ -4219,7 +4227,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                         brand: saveMakeupBrand.trim() || null,
                         category: saveMakeupCategory,
                         shade_name: saveMakeupShade.trim() || null,
-                        hex: saveMakeupSheet.item.hex,
+                        hex: saveMakeupSheet.item.hex || "#C4A882",
                         verdict_v2: saveMakeupSheet.item.verdict_v2 || "yes",
                         verdict: saveMakeupSheet.item.verdict,
                         tip: saveMakeupSheet.item.tip,
