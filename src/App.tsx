@@ -2051,6 +2051,8 @@ interface CheckResult {
     reason: string;
     tip: string;
     confidence?: "high" | "estimated";
+    text_detected?: boolean;
+    detected_text?: string | null;
   }[];
 }
 
@@ -2327,7 +2329,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                     img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Load error")); };
                     img.src = url;
                   });
-                  body = { type: "check_item", image: base64, season: seasonData.season, mode: "single" };
+                  body = { type: "check_item", image: base64, season: seasonData.season, subseason: seasonData.subseason, undertone: seasonData.colour_profile?.undertone, depth: seasonData.colour_profile?.depth, mode: "makeup_photo" };
                 } else {
                   const savedFoundations = localStorage.getItem(`solla_foundation_shades_${user?.id}`) || "";
                   body = {
@@ -2373,7 +2375,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                           {item.verdict_v2 === "yes" ? "✓ Suits your season" : item.verdict_v2 === "neutral" ? "~ Works with care" : "✗ Doesn't suit your season"}
                         </span>
                         <span style={{ fontSize: 10, color: DS.colors.textFaint, background: DS.colors.surface, padding: "1px 6px", borderRadius: DS.radius.full, display: "block", marginTop: 3 }}>
-                          {makeupCheckMode === "upload" ? "Photo check - result may vary with lighting" : item.confidence === "high" ? "Known shade - high confidence" : "Estimated shade - check colour in person"}
+                          {makeupCheckMode === "upload" ? (item.text_detected && item.detected_text ? `Read "${item.detected_text}" from image - ${item.confidence === "high" ? "high confidence" : "estimated colour"}` : "Photo check - no text detected, result may vary with lighting") : item.confidence === "high" ? "Known shade - high confidence" : "Estimated shade - check colour in person"}
                         </span>
                       </div>
                     </div>
@@ -4012,7 +4014,10 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     type: "check_item",
                     image: base64,
                     season: seasonData.season,
-                    mode: "single",
+                    subseason: seasonData.subseason,
+                    undertone: seasonData.colour_profile?.undertone,
+                    depth: seasonData.colour_profile?.depth,
+                    mode: "makeup_photo",
                   };
                 } else {
                   const savedFoundations = localStorage.getItem(`solla_foundation_shades_${user?.id}`) || "";
@@ -4059,7 +4064,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                           {item.verdict_v2 === "yes" ? "✓ Suits your season" : item.verdict_v2 === "neutral" ? "~ Works with care" : "✗ Doesn't suit your season"}
                         </span>
                         <span style={{ fontSize: 10, color: DS.colors.textFaint, background: DS.colors.surface, padding: "1px 6px", borderRadius: DS.radius.full, display: "block", marginTop: 3 }}>
-                          {makeupCheckMode === "upload" ? "Photo check - result may vary with lighting" : item.confidence === "high" ? "Known shade - high confidence" : "Estimated shade - check colour in person"}
+                          {makeupCheckMode === "upload" ? (item.text_detected && item.detected_text ? `Read "${item.detected_text}" from image - ${item.confidence === "high" ? "high confidence" : "estimated colour"}` : "Photo check - no text detected, result may vary with lighting") : item.confidence === "high" ? "Known shade - high confidence" : "Estimated shade - check colour in person"}
                         </span>
                       </div>
                     </div>
