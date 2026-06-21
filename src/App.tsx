@@ -2074,6 +2074,8 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
   const [makeupProductName, setMakeupProductName] = useState("");
   const [makeupProductCategory, setMakeupProductCategory] = useState("Lip");
   const [makeupPreview, setMakeupPreview] = useState<string | null>(null);
+  const [makeupPreviews, setMakeupPreviews] = useState<string[]>([]);
+  const [makeupShadeHint, setMakeupShadeHint] = useState("");
   const [makeupChecking, setMakeupChecking] = useState(false);
   const [makeupResult, setMakeupResult] = useState<CheckResult | null>(null);
   const [saveMakeupSheet, setSaveMakeupSheet] = useState<{ item: CheckResult["items"][0]; previewSrc?: string } | null>(null);
@@ -2244,7 +2246,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
         {/* Mode switcher */}
         <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, marginBottom: 20, gap: 4 }}>
           {(["single", "outfit", "makeup"] as const).map(m => (
-            <button key={m} onClick={() => { setMode(m); reset(); setMakeupResult(null); setMakeupPreview(null); setMakeupProductName(""); }} style={{ flex: 1, padding: "8px 4px", borderRadius: DS.radius.md, fontSize: 13, fontWeight: mode === m ? 600 : 400, color: mode === m ? DS.colors.white : DS.colors.textMuted, background: mode === m ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
+            <button key={m} onClick={() => { setMode(m); reset(); setMakeupResult(null); setMakeupPreview(null); setMakeupPreviews([]); setMakeupShadeHint(""); setMakeupProductName(""); }} style={{ flex: 1, padding: "8px 4px", borderRadius: DS.radius.md, fontSize: 13, fontWeight: mode === m ? 600 : 400, color: mode === m ? DS.colors.white : DS.colors.textMuted, background: mode === m ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
               {m === "single" ? "Single" : m === "outfit" ? "Outfit" : "Makeup"}
             </button>
           ))}
@@ -2258,7 +2260,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
             {/* Check mode toggle */}
             <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.md, padding: 3, gap: 3, marginBottom: 14 }}>
               {(["name", "upload"] as const).map(m => (
-                <button key={m} onClick={() => { setMakeupCheckMode(m); setMakeupResult(null); setMakeupPreview(null); }} style={{ flex: 1, padding: "7px", borderRadius: DS.radius.sm, fontSize: 12, fontWeight: makeupCheckMode === m ? 600 : 400, color: makeupCheckMode === m ? DS.colors.white : DS.colors.textMuted, background: makeupCheckMode === m ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
+                <button key={m} onClick={() => { setMakeupCheckMode(m); setMakeupResult(null); setMakeupPreview(null); setMakeupPreviews([]); setMakeupShadeHint(""); }} style={{ flex: 1, padding: "7px", borderRadius: DS.radius.sm, fontSize: 12, fontWeight: makeupCheckMode === m ? 600 : 400, color: makeupCheckMode === m ? DS.colors.white : DS.colors.textMuted, background: makeupCheckMode === m ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
                   {m === "name" ? "Enter name" : "Upload photo"}
                 </button>
               ))}
@@ -2279,40 +2281,47 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
             ) : (
               <>
                 <div style={{ background: DS.colors.surface, borderRadius: DS.radius.md, padding: "10px 12px", marginBottom: 10 }}>
-                  <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>For any product with a known shade name - use "Enter name" instead. Photo checking is best for unknown shades swatched on your inner arm in natural daylight.</p>
+                  <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>Best for unknown shades. Add up to 3 photos if the shade name and the actual colour aren't in the same shot - e.g. the packaging with the shade code, plus a swatch on your inner arm.</p>
                 </div>
-                <div onClick={() => !makeupPreview && makeupFileRef.current?.click()} style={{ borderRadius: DS.radius.lg, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, height: 120, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: makeupPreview ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 12 }}>
-                  {makeupPreview ? (
-                    <>
-                      <img src={makeupPreview} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      <button onClick={e => { e.stopPropagation(); setMakeupPreview(null); setMakeupResult(null); if (makeupFileRef.current) makeupFileRef.current.value = ""; }} style={{ position: "absolute", top: 8, right: 8, width: 28, height: 28, borderRadius: DS.radius.full, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <Icon name="x" size={14} color={DS.colors.white} />
+                <input value={makeupShadeHint} onChange={e => setMakeupShadeHint(e.target.value)} placeholder="Shade name or code, if you know it (optional)" style={{ width: "100%", padding: "10px 12px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 13, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 10, fontFamily: DS.font }} />
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+                  {makeupPreviews.map((src, i) => (
+                    <div key={i} style={{ width: 84, height: 84, borderRadius: DS.radius.lg, overflow: "hidden", position: "relative", border: `1.5px solid ${DS.colors.border}` }}>
+                      <img src={src} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <button onClick={() => setMakeupPreviews(prev => prev.filter((_, idx) => idx !== i))} style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: DS.radius.full, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Icon name="x" size={11} color={DS.colors.white} />
                       </button>
-                    </>
-                  ) : (
-                    <>
-                      <Icon name="camera" size={20} color={DS.colors.accent} />
-                      <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 6 }}>Tap to upload swatch</p>
-                    </>
+                    </div>
+                  ))}
+                  {makeupPreviews.length < 3 && (
+                    <div onClick={() => makeupFileRef.current?.click()} style={{ width: 84, height: 84, borderRadius: DS.radius.lg, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                      <Icon name="camera" size={18} color={DS.colors.accent} />
+                      <p style={{ fontSize: 10, color: DS.colors.textMuted, marginTop: 4 }}>{makeupPreviews.length === 0 ? "Add photo" : "Add more"}</p>
+                    </div>
                   )}
                 </div>
-                <input ref={makeupFileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) setMakeupPreview(URL.createObjectURL(f)); }} />
+                <input ref={makeupFileRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={e => {
+                  const files = e.target.files;
+                  if (!files) return;
+                  const newUrls = Array.from(files).slice(0, 3 - makeupPreviews.length).map(f => URL.createObjectURL(f));
+                  setMakeupPreviews(prev => [...prev, ...newUrls].slice(0, 3));
+                  setMakeupPreview(prev => prev || newUrls[0] || null);
+                }} />
               </>
             )}
 
             <button onClick={async () => {
               if (!seasonData) return;
               if (makeupCheckMode === "name" && !makeupProductName.trim()) return;
-              if (makeupCheckMode === "upload" && !makeupPreview) return;
+              if (makeupCheckMode === "upload" && makeupPreviews.length === 0) return;
               setMakeupChecking(true); setMakeupResult(null);
               try {
                 let body: any;
                 if (makeupCheckMode === "upload") {
-                  const file = makeupFileRef.current?.files?.[0];
-                  if (!file) return;
-                  const img = new Image();
-                  const url = URL.createObjectURL(file);
-                  const base64 = await new Promise<string>((resolve, reject) => {
+                  const files = Array.from(makeupFileRef.current?.files || []);
+                  const encodeFile = (file: File): Promise<string> => new Promise((resolve, reject) => {
+                    const img = new Image();
+                    const url = URL.createObjectURL(file);
                     img.onload = () => {
                       URL.revokeObjectURL(url);
                       let { width, height } = img;
@@ -2329,7 +2338,8 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                     img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Load error")); };
                     img.src = url;
                   });
-                  body = { type: "check_item", image: base64, season: seasonData.season, subseason: seasonData.subseason, undertone: seasonData.colour_profile?.undertone, depth: seasonData.colour_profile?.depth, mode: "makeup_photo" };
+                  const images = await Promise.all(files.slice(0, 3).map(encodeFile));
+                  body = { type: "check_item", image: images[0], images, season: seasonData.season, subseason: seasonData.subseason, undertone: seasonData.colour_profile?.undertone, depth: seasonData.colour_profile?.depth, shadeHint: makeupShadeHint.trim() || undefined, mode: "makeup_photo" };
                 } else {
                   const savedFoundations = localStorage.getItem(`solla_foundation_shades_${user?.id}`) || "";
                   body = {
@@ -2355,14 +2365,14 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
                 }
               } catch {}
               finally { setMakeupChecking(false); }
-            }} disabled={makeupChecking || (makeupCheckMode === "name" ? !makeupProductName.trim() : !makeupPreview)} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: makeupChecking || (makeupCheckMode === "name" ? !makeupProductName.trim() : !makeupPreview) ? DS.colors.border : "#C2185B", color: DS.colors.white, fontSize: 15, fontWeight: 600, marginBottom: 16 }}>
+            }} disabled={makeupChecking || (makeupCheckMode === "name" ? !makeupProductName.trim() : makeupPreviews.length === 0)} style={{ width: "100%", padding: "14px", borderRadius: DS.radius.lg, background: makeupChecking || (makeupCheckMode === "name" ? !makeupProductName.trim() : makeupPreviews.length === 0) ? DS.colors.border : "#C2185B", color: DS.colors.white, fontSize: 15, fontWeight: 600, marginBottom: 16 }}>
               {makeupChecking ? "Checking..." : "Check this product"}
             </button>
 
             {/* Makeup results */}
             {makeupResult && (
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
-                <button onClick={() => { setMakeupResult(null); setMakeupPreview(null); setMakeupProductName(""); if (makeupFileRef.current) makeupFileRef.current.value = ""; }} style={{ padding: "10px 18px", borderRadius: DS.radius.full, background: "#C2185B", fontSize: 13, color: DS.colors.white, fontWeight: 600, alignSelf: "flex-start", display: "flex", alignItems: "center", gap: 6 }}>
+                <button onClick={() => { setMakeupResult(null); setMakeupPreview(null); setMakeupPreviews([]); setMakeupShadeHint(""); setMakeupProductName(""); if (makeupFileRef.current) makeupFileRef.current.value = ""; }} style={{ padding: "10px 18px", borderRadius: DS.radius.full, background: "#C2185B", fontSize: 13, color: DS.colors.white, fontWeight: 600, alignSelf: "flex-start", display: "flex", alignItems: "center", gap: 6 }}>
                   <Icon name="refresh" size={13} color={DS.colors.white} strokeWidth={2.5} />
                   Check another product
                 </button>
@@ -2994,6 +3004,8 @@ const [planGenerated, setPlanGenerated] = useState(() => {
   const [makeupCheckResult, setMakeupCheckResult] = useState<CheckResult | null>(null);
   const [makeupChecking, setMakeupChecking] = useState(false);
   const [makeupPreview, setMakeupPreview] = useState<string | null>(null);
+  const [makeupPreviews, setMakeupPreviews] = useState<string[]>([]);
+  const [makeupShadeHint, setMakeupShadeHint] = useState("");
   const [saveMakeupSheet, setSaveMakeupSheet] = useState<{ item: CheckResult["items"][0]; previewSrc?: string } | null>(null);
   const [saveMakeupName, setSaveMakeupName] = useState("");
   const [saveMakeupBrand, setSaveMakeupBrand] = useState("");
@@ -3384,6 +3396,7 @@ const handleEditOutfit = async () => {
     depth: seasonData.colour_profile?.depth,
     chroma: seasonData.colour_profile?.chroma,
     foundation: localStorage.getItem(`solla_foundation_shades_${user?.id}`) || undefined,
+    makeupKit: makeupItems.length > 0 ? makeupItems.map(m => `${m.brand ? m.brand + " " : ""}${m.name}${m.shade_name ? ` (${m.shade_name})` : ""} - ${m.category} - ${m.verdict_v2 === "yes" ? "confirmed suits their season" : m.verdict_v2 === "neutral" ? "works with care" : "doesn't suit their season"}`).join(", ") : undefined,
     wardrobe: [
       ...items.map(i => `${i.name} (${i.category}, ${i.formality || "casual"}, ${i.colour_name}, ${i.verdict ? "suits season" : "doesn't suit season"})`),
       ...outfits.map(o => `Saved outfit: "${o.name}" (${items.filter(i => o.item_ids.includes(i.id)).map(i => i.name).join(", ")})`)
@@ -3931,7 +3944,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
             <p style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 600, color: DS.colors.text }}>Check a product</p>
             <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.md, padding: 3, gap: 3, marginBottom: 12 }}>
               {(["upload", "name"] as const).map(m => (
-                <button key={m} onClick={() => { setMakeupCheckMode(m); setMakeupCheckResult(null); setMakeupPreview(null); }} style={{ flex: 1, padding: "7px", borderRadius: DS.radius.sm, fontSize: 12, fontWeight: makeupCheckMode === m ? 600 : 400, color: makeupCheckMode === m ? DS.colors.white : DS.colors.textMuted, background: makeupCheckMode === m ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
+                <button key={m} onClick={() => { setMakeupCheckMode(m); setMakeupCheckResult(null); setMakeupPreview(null); setMakeupPreviews([]); setMakeupShadeHint(""); }} style={{ flex: 1, padding: "7px", borderRadius: DS.radius.sm, fontSize: 12, fontWeight: makeupCheckMode === m ? 600 : 400, color: makeupCheckMode === m ? DS.colors.white : DS.colors.textMuted, background: makeupCheckMode === m ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
                   {m === "upload" ? "Upload photo" : "Enter name"}
                 </button>
               ))}
@@ -3952,29 +3965,33 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                 <div style={{ background: DS.colors.surface, borderRadius: DS.radius.md, padding: "10px 12px", marginBottom: 10 }}>
                   <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 600, color: DS.colors.textMuted }}>For best results:</p>
                   <p style={{ margin: "0 0 2px", fontSize: 12, color: DS.colors.textFaint }}>· Swatch on inner arm in natural light - best for lip, blush and eye</p>
-                  <p style={{ margin: "0 0 2px", fontSize: 12, color: DS.colors.textFaint }}>· Photograph your actual garment, not a product image from a website</p>
                   <p style={{ margin: "0 0 2px", fontSize: 12, color: DS.colors.textFaint }}>· Natural light only - no flash, no filters, no artificial lighting</p>
-                  <p style={{ margin: "0 0 6px", fontSize: 12, color: DS.colors.textFaint }}>· White or neutral background where possible</p>
-                  <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>For any product with a known shade name - always use "Enter name". Photo checking is best for unknown shades swatched directly on your inner arm in natural daylight. Product photos and packaging shots will give unreliable colour readings.</p>
+                  <p style={{ margin: "0 0 6px", fontSize: 12, color: DS.colors.textFaint }}>· If the shade name is on the packaging and not in the same shot as the swatch, add a second photo or type the shade name below</p>
+                  <p style={{ margin: 0, fontSize: 12, color: DS.colors.textMuted, fontWeight: 500 }}>For any product with a known shade name - "Enter name" is most reliable. Add up to 3 photos here if you need to show both the packaging and the actual swatch.</p>
                 </div>
-                <div onClick={() => !makeupPreview && makeupFileRef.current?.click()} style={{ borderRadius: DS.radius.lg, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, height: 120, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: makeupPreview ? "default" : "pointer", overflow: "hidden", position: "relative", marginBottom: 10 }}>
-                  {makeupPreview ? (
-                    <>
-                      <img src={makeupPreview} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      <button onClick={e => { e.stopPropagation(); setMakeupPreview(null); setMakeupCheckResult(null); if (makeupFileRef.current) makeupFileRef.current.value = ""; }} style={{ position: "absolute", top: 8, right: 8, width: 28, height: 28, borderRadius: DS.radius.full, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <Icon name="x" size={14} color={DS.colors.white} />
+                <input value={makeupShadeHint} onChange={e => setMakeupShadeHint(e.target.value)} placeholder="Shade name or code, if you know it (optional)" style={{ width: "100%", padding: "10px 12px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 13, color: DS.colors.text, background: DS.colors.bg, outline: "none", marginBottom: 10, fontFamily: DS.font }} />
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
+                  {makeupPreviews.map((src, i) => (
+                    <div key={i} style={{ width: 76, height: 76, borderRadius: DS.radius.lg, overflow: "hidden", position: "relative", border: `1.5px solid ${DS.colors.border}` }}>
+                      <img src={src} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <button onClick={() => setMakeupPreviews(prev => prev.filter((_, idx) => idx !== i))} style={{ position: "absolute", top: 4, right: 4, width: 20, height: 20, borderRadius: DS.radius.full, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Icon name="x" size={10} color={DS.colors.white} />
                       </button>
-                    </>
-                  ) : (
-                    <>
-                      <Icon name="camera" size={20} color={DS.colors.accent} />
-                      <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 6 }}>Tap to upload</p>
-                    </>
+                    </div>
+                  ))}
+                  {makeupPreviews.length < 3 && (
+                    <div onClick={() => makeupFileRef.current?.click()} style={{ width: 76, height: 76, borderRadius: DS.radius.lg, border: `2px dashed ${DS.colors.border}`, background: DS.colors.surface, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                      <Icon name="camera" size={16} color={DS.colors.accent} />
+                      <p style={{ fontSize: 9, color: DS.colors.textMuted, marginTop: 4 }}>{makeupPreviews.length === 0 ? "Add photo" : "Add more"}</p>
+                    </div>
                   )}
                 </div>
-                <input ref={makeupFileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => {
-                  const f = e.target.files?.[0];
-                  if (f) setMakeupPreview(URL.createObjectURL(f));
+                <input ref={makeupFileRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={e => {
+                  const files = e.target.files;
+                  if (!files) return;
+                  const newUrls = Array.from(files).slice(0, 3 - makeupPreviews.length).map(f => URL.createObjectURL(f));
+                  setMakeupPreviews(prev => [...prev, ...newUrls].slice(0, 3));
+                  setMakeupPreview(prev => prev || newUrls[0] || null);
                 }} />
               </>
             )}
@@ -3985,18 +4002,17 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
 
             <button onClick={async () => {
               if (!seasonData) return;
-              if (makeupCheckMode === "upload" && !makeupPreview) return;
+              if (makeupCheckMode === "upload" && makeupPreviews.length === 0) return;
               if (makeupCheckMode === "name" && !makeupProductName.trim()) return;
               setMakeupChecking(true);
               setMakeupCheckResult(null);
               try {
                 let body: any;
                 if (makeupCheckMode === "upload") {
-                  const file = makeupFileRef.current?.files?.[0];
-                  if (!file) return;
-                  const img = new Image();
-                  const url = URL.createObjectURL(file);
-                  const base64 = await new Promise<string>((resolve, reject) => {
+                  const files = Array.from(makeupFileRef.current?.files || []);
+                  const encodeFile = (file: File): Promise<string> => new Promise((resolve, reject) => {
+                    const img = new Image();
+                    const url = URL.createObjectURL(file);
                     img.onload = () => {
                       URL.revokeObjectURL(url);
                       let { width, height } = img;
@@ -4013,13 +4029,16 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                     img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Load error")); };
                     img.src = url;
                   });
+                  const images = await Promise.all(files.slice(0, 3).map(encodeFile));
                   body = {
                     type: "check_item",
-                    image: base64,
+                    image: images[0],
+                    images,
                     season: seasonData.season,
                     subseason: seasonData.subseason,
                     undertone: seasonData.colour_profile?.undertone,
                     depth: seasonData.colour_profile?.depth,
+                    shadeHint: makeupShadeHint.trim() || undefined,
                     mode: "makeup_photo",
                   };
                 } else {
@@ -4047,14 +4066,14 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                 }
               } catch {}
               finally { setMakeupChecking(false); }
-            }} disabled={makeupChecking || (makeupCheckMode === "upload" ? !makeupPreview : !makeupProductName.trim())} style={{ width: "100%", padding: "12px", borderRadius: DS.radius.lg, background: makeupChecking || (makeupCheckMode === "upload" ? !makeupPreview : !makeupProductName.trim()) ? DS.colors.border : "#C2185B", color: DS.colors.white, fontSize: 14, fontWeight: 600 }}>
+            }} disabled={makeupChecking || (makeupCheckMode === "upload" ? makeupPreviews.length === 0 : !makeupProductName.trim())} style={{ width: "100%", padding: "12px", borderRadius: DS.radius.lg, background: makeupChecking || (makeupCheckMode === "upload" ? makeupPreviews.length === 0 : !makeupProductName.trim()) ? DS.colors.border : "#C2185B", color: DS.colors.white, fontSize: 14, fontWeight: 600 }}>
               {makeupChecking ? "Checking..." : "Check this product"}
             </button>
 
             {/* Check results */}
             {makeupCheckResult && (
               <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-                <button onClick={() => { setMakeupCheckResult(null); setMakeupPreview(null); setMakeupProductName(""); if (makeupFileRef.current) makeupFileRef.current.value = ""; }} style={{ padding: "10px 18px", borderRadius: DS.radius.full, background: "#C2185B", fontSize: 13, color: DS.colors.white, fontWeight: 600, alignSelf: "flex-start", display: "flex", alignItems: "center", gap: 6 }}>
+                <button onClick={() => { setMakeupCheckResult(null); setMakeupPreview(null); setMakeupPreviews([]); setMakeupShadeHint(""); setMakeupProductName(""); if (makeupFileRef.current) makeupFileRef.current.value = ""; }} style={{ padding: "10px 18px", borderRadius: DS.radius.full, background: "#C2185B", fontSize: 13, color: DS.colors.white, fontWeight: 600, alignSelf: "flex-start", display: "flex", alignItems: "center", gap: 6 }}>
                   <Icon name="refresh" size={13} color={DS.colors.white} strokeWidth={2.5} />
                   Check another product
                 </button>
@@ -4258,12 +4277,20 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
                   <Icon name="sparkles" size={24} color={DS.colors.accent} />
                 </div>
                 <p style={{ fontSize: 15, fontWeight: 600, color: DS.colors.text, marginBottom: 8 }}>Your AI Stylist</p>
-<div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: items.length > 0 ? DS.colors.accentLight : DS.colors.surface, borderRadius: DS.radius.full, marginBottom: 8 }}>
-  <span style={{ fontSize: 11, color: items.length > 0 ? DS.colors.accentDark : DS.colors.textFaint, fontWeight: 500 }}>{items.length > 0 ? `${items.length} wardrobe item${items.length !== 1 ? "s" : ""} loaded` : "No wardrobe items yet"}</span>
+<div style={{ display: "flex", gap: 6, justifyContent: "center", marginBottom: 8, flexWrap: "wrap" }}>
+  <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: items.length > 0 ? DS.colors.accentLight : DS.colors.surface, borderRadius: DS.radius.full }}>
+    <span style={{ fontSize: 11, color: items.length > 0 ? DS.colors.accentDark : DS.colors.textFaint, fontWeight: 500 }}>{items.length > 0 ? `${items.length} wardrobe item${items.length !== 1 ? "s" : ""} loaded` : "No wardrobe items yet"}</span>
+  </div>
+  <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: makeupItems.length > 0 ? "#FFF0F5" : DS.colors.surface, borderRadius: DS.radius.full }}>
+    <span style={{ fontSize: 11, color: makeupItems.length > 0 ? "#C2185B" : DS.colors.textFaint, fontWeight: 500 }}>{makeupItems.length > 0 ? `${makeupItems.length} makeup item${makeupItems.length !== 1 ? "s" : ""} loaded` : "No makeup kit yet"}</span>
+  </div>
 </div>
-                <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, maxWidth: 240, margin: "0 auto" }}>Your personal stylist is ready. The more you chat and the more clothes you add, the better Solla knows your style, preferences and lifestyle - so every suggestion gets more personal over time.</p>
+                <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.6, maxWidth: 240, margin: "0 auto" }}>Your personal stylist knows your wardrobe and your makeup kit. Ask what to wear, which shade to buy, or anything about your colours - the more you add, the more personal it gets.</p>
                 <button onClick={() => { setChatInput(`Analyse my wardrobe and tell me what's missing for my ${seasonData?.season || ""} season, what doesn't suit me, and what key pieces I should add.`); }} style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.lg, background: DS.colors.accentLight, fontSize: 13, color: DS.colors.accentDark, fontWeight: 600, textAlign: "left", border: `1px solid ${DS.colors.accent}30`, marginTop: 20, marginBottom: 8 }}>
   ✦ Analyse my wardrobe
+</button>
+<button onClick={() => { setChatInput(`Look at my makeup kit and tell me what's missing, what doesn't suit my ${seasonData?.season || ""} season, and what shades you'd recommend I try next.`); }} style={{ width: "100%", padding: "12px 14px", borderRadius: DS.radius.lg, background: "#FFF0F5", fontSize: 13, color: "#C2185B", fontWeight: 600, textAlign: "left", border: "1px solid #C2185B30", marginBottom: 8 }}>
+  ✦ Analyse my makeup kit
 </button>
 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
   {["What shade should I get in NARS Sheer Glow?", "What should I wear to a job interview?", "Build me a capsule wardrobe for my season"].map(suggestion => (
