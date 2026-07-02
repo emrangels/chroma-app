@@ -394,7 +394,7 @@ const LifestyleOnboardingScreen = ({ onComplete, userId, token }: { onComplete: 
           ))}
         </div>
       </div>
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 430, margin: "0 auto", padding: "12px 28px 32px", background: DS.colors.bg }}>
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 430, margin: "0 auto", padding: "12px 28px calc(32px + env(safe-area-inset-bottom))", background: DS.colors.bg }}>
         <button onClick={onComplete} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>
           Skip for now
         </button>
@@ -706,7 +706,7 @@ const TourTooltip = ({ step, total, onNext, onSkip, activeTab, onTabChange }: { 
   );
 };
 const BottomNav = ({ activeTab, onTabChange }: { activeTab: Tab; onTabChange: (tab: Tab) => void; }) => (
-  <div style={{ height: 80, borderTop: `1px solid ${DS.colors.border}`, background: DS.colors.bg, display: "flex", paddingBottom: 16 }}>
+  <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 430, margin: "0 auto", height: 64, borderTop: `1px solid ${DS.colors.border}`, background: DS.colors.bg, display: "flex", paddingBottom: "calc(16px + env(safe-area-inset-bottom))", zIndex: 500 }}>
     {tabs.map(tab => {
       const active = tab.id === activeTab;
       return (
@@ -4776,8 +4776,8 @@ const MainApp = ({ activeTab, onTabChange, seasonData, user, isGuest, onSignUp, 
   user: User | null; isGuest: boolean; onSignUp: () => void;
   onOpenSheet: (sheet: Sheet) => void; onUpgrade: () => void; onSignOut: () => void; onReanalyse: () => void;
 }) => (
-  <div className="screen fade-in" style={{ background: DS.colors.bg, height: "100dvh" }}>
-    <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+  <div className="screen fade-in" style={{ background: DS.colors.bg, height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", paddingBottom: "calc(80px + env(safe-area-inset-bottom))" }}>
       {activeTab === "home" ? (
         <HomeTab seasonData={seasonData} user={user} onOpenSheet={onOpenSheet} onUpgrade={onUpgrade} onReanalyse={onReanalyse} onTabChange={onTabChange} isGuest={isGuest} onSignUp={onSignUp} />
       ) : activeTab === "checker" ? (
