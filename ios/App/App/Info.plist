@@ -45,5 +45,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Solla needs camera access to analyze your colours and check items against your palette.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Solla needs photo library access so you can upload photos for colour analysis.</string>
 </dict>
 </plist>
