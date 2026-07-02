@@ -12,7 +12,7 @@ workflows:
       vars:
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
-      node: 18.20.8
+        CI: "false"
     scripts:
       - name: Install npm dependencies
         script: |
