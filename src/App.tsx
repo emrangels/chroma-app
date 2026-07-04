@@ -1739,7 +1739,7 @@ const loadExtendedPalette = async () => {
           </div>
         </div>
         <p style={{ margin: "0 0 8px", fontSize: 14, color: DS.colors.text, lineHeight: 1.6, fontWeight: 500 }}>{getSeasonalMood(seasonData.season)}</p>
-        <p style={{ margin: 0, fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5, paddingTop: 8, borderTop: `1px solid ${DS.colors.border}` }}>{getDailyTip(seasonData.season, seasonData.daily_tip)}</p>
+        <p style={{ margin: "8px 0 0", fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{getDailyTip(seasonData.season, seasonData.daily_tip)}</p>
       </div>
       {streak > 0 && [3, 7, 14, 30].includes(streak) && (() => { trackEvent("streak_milestone", { days: streak }); return null; })()}
       {streak > 0 && [3, 7, 14, 30].includes(streak) && (
