@@ -255,6 +255,23 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
   const markSeen = () => { localStorage.setItem("solla_onboarding_seen", "true"); onComplete(); };
   const [idx, setIdx] = useState(0);
   const [dir, setDir] = useState(1);
+  const [touchStart, setTouchStart] = useState(0);
+const [touchEnd, setTouchEnd] = useState(0);
+
+const handleTouchStart = (e: React.TouchEvent) => setTouchStart(e.touches[0].clientX);
+const handleTouchMove = (e: React.TouchEvent) => setTouchEnd(e.touches[0].clientX);
+const handleTouchEnd = () => {
+  if (!touchStart || !touchEnd) return;
+  const distance = touchStart - touchEnd;
+  const minSwipeDistance = 50;
+  if (distance > minSwipeDistance && idx < slides.length - 1) {
+    goTo(idx + 1);
+  } else if (distance < -minSwipeDistance && idx > 0) {
+    goTo(idx - 1);
+  }
+  setTouchStart(0);
+  setTouchEnd(0);
+};
   const goTo = (next: number) => { setDir(next > idx ? 1 : -1); setIdx(next); };
   const slide = slides[idx];
   return (
@@ -265,7 +282,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
         .slide-right{animation:slideInRight 0.35s ease both}
         .slide-left{animation:slideInLeft 0.35s ease both}
       `}</style>
-      <div key={idx} className={dir > 0 ? "slide-right" : "slide-left"} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 32px", minHeight: 0 }}>
+      <div key={idx} className={dir > 0 ? "slide-right" : "slide-left"} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 32px", minHeight: 0 }}>
         <div style={{ width: 80, height: 80, borderRadius: DS.radius.xl, background: slide.bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24, flexShrink: 0 }}>
           <Icon name={slide.icon} size={34} color={slide.accent} strokeWidth={1.5} />
         </div>
