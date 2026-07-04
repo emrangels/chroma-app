@@ -723,7 +723,7 @@ const TourTooltip = ({ step, total, onNext, onSkip, activeTab, onTabChange }: { 
   );
 };
 const BottomNav = ({ activeTab, onTabChange }: { activeTab: Tab; onTabChange: (tab: Tab) => void; }) => (
-  <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 430, margin: "0 auto", height: 64, borderTop: `1px solid ${DS.colors.border}`, background: DS.colors.bg, display: "flex", paddingBottom: "calc(16px + env(safe-area-inset-bottom))", zIndex: 500 }}>
+  <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 430, margin: "0 auto", minHeight: 64, borderTop: `1px solid ${DS.colors.border}`, background: DS.colors.bg, display: "flex", paddingTop: 10, paddingBottom: "calc(10px + env(safe-area-inset-bottom))", zIndex: 500 }}>
     {tabs.map(tab => {
       const active = tab.id === activeTab;
       return (
