@@ -554,7 +554,7 @@ const UploadScreen = ({ onUpload }: { onUpload: (file: File) => void }) => {
   const [isDragging, setIsDragging] = useState(false);
   const handleFile = (file: File) => setPreview(URL.createObjectURL(file));
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) handleFile(f); };
-  const handleAnalyse = () => { const f = fileRef.current?.files?.[0]; if (f) onUpload(f); };
+  const handleAnalyse = () => { const f = fileRef.current?.files?.[0] || cameraRef.current?.files?.[0]; if (f) onUpload(f); };
   const cameraRef = useRef<HTMLInputElement>(null);
 
   return (
