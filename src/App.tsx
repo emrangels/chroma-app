@@ -427,35 +427,20 @@ const AuthScreen = ({ onSignIn, onGuest, onOpenTerms }: { onSignIn: (user: User)
   const [loading, setLoading] = useState(false); const [error, setError] = useState("");
   const inputStyle: React.CSSProperties = { width: "100%", padding: "14px 16px", borderRadius: DS.radius.md, border: `1.5px solid ${DS.colors.border}`, fontSize: 15, color: DS.colors.text, background: DS.colors.bg, outline: "none", transition: "border-color 0.2s" };
   const generateReferralCode = (u: string) => (u.replace(/[^a-zA-Z]/g, "").toUpperCase().slice(0, 6) || "USER") + Math.floor(1000 + Math.random() * 9000);
-  const saveProfile = async (userId: string, userName: string, userEmail: string, token: string, refCode: string, enteredCode: string) => {
-    const guestSeason = localStorage.getItem("solla_season_guest");
-    let seasonData = null;
-    if (guestSeason) {
-      try { seasonData = JSON.parse(guestSeason); } catch {}
-    }
-    try {
-      await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
-        method: "POST",
-        headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
-        body: JSON.stringify({
-          id: userId, name: userName, user_plan: "free",
-          referral_code: refCode,
-          referred_by: enteredCode ? enteredCode.toUpperCase() : null,
-          referral_count: 0,
-          ...(seasonData ? { season_data: seasonData } : {}),
-        }),
-      });
-    } catch {}
-  };
   const handleAuth = async () => {
     if (mode === "signup" && !agreedToTerms) { setError("Please agree to the Terms & Privacy Policy to continue."); return; }
     setLoading(true); setError("");
     try {
-      const endpoint = mode === "signup" ? `${SUPABASE_URL}/auth/v1/signup` : `${SUPABASE_URL}/auth/v1/token?grant_type=password`;
-      const body = mode === "signup" ? { email, password, data: { name } } : { email, password };
-      const res = await fetch(endpoint, { method: "POST", headers: { ...supabaseHeaders, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const endpoint = mode === "signup" ? `${SUPABASE_URL}/functions/v1/send-email` : `${SUPABASE_URL}/auth/v1/token?grant_type=password`;
+      const guestSeasonRaw = localStorage.getItem("solla_season_guest"); let guestSeasonParsed = null; try { guestSeasonParsed = guestSeasonRaw ? JSON.parse(guestSeasonRaw) : null; } catch {} const body = mode === "signup" ? { type: "signup", email, password, name, refCode: generateReferralCode(name || email.split("@")[0]), enteredCode: referralCode, seasonData: guestSeasonParsed } : { email, password };
+      const authHeader = mode === "signup" ? `Bearer ${SUPABASE_JWT_KEY}` : `Bearer ${SUPABASE_ANON_KEY}`; const res = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: authHeader }, body: JSON.stringify(body) });
       const data = await res.json();
       if (data.error || data.error_description || data.msg) throw new Error(data.error_description || data.msg || data.error || "Auth failed");
+      if (mode === "signup") {
+        setError("Check your email to confirm your account. If you do not see it within a few minutes, check your spam folder.");
+        setLoading(false);
+        return;
+      }
       const userId = data.user?.id; const userEmail = data.user?.email || email;
       const userName = name || data.user?.user_metadata?.name || email.split("@")[0];
       let plan: Plan = "free";
@@ -465,20 +450,6 @@ const AuthScreen = ({ onSignIn, onGuest, onOpenTerms }: { onSignIn: (user: User)
           const profiles = await pr.json();
           if (profiles?.[0]?.user_plan) plan = profiles[0].user_plan as Plan;
         } catch {}
-      }
-      if (mode === "signup") {
-        // Send welcome email regardless of userId - email is always available
-        fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_JWT_KEY}` },
-          body: JSON.stringify({ type: "welcome", email: userEmail, name: userName }),
-        }).catch((err) => console.error("Email error:", err));
-        if (userId) {
-          await saveProfile(userId, userName, userEmail, data.access_token, generateReferralCode(userName), referralCode);
-        }
-        setError("Check your email to confirm your account. If you don't see it within a few minutes, check your spam folder.");
-        setLoading(false);
-        return;
       }
       const userObj: User = { id: userId, email: userEmail, name: userName, plan };
       localStorage.setItem("solla_token", data.access_token);

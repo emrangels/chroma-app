@@ -1,6 +1,8 @@
 import "@supabase/functions-js/edge-runtime.d.ts"
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const supabaseAdmin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 const FROM = "Emma at Solla <hello@solla.com.au>";
 
 const corsHeaders = {
@@ -30,6 +32,19 @@ Deno.serve(async (req) => {
   }
   try {
     const { type, email, name, season } = await req.json();
+
+    if (type === "signup") {
+      const { password, refCode, enteredCode, seasonData } = await req.clone().json();
+      const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({ email, password, email_confirm: false, user_metadata: { name } });
+      if (createErr) return new Response(JSON.stringify({ error: createErr.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (created.user?.id) { await supabaseAdmin.from("profiles").insert({ id: created.user.id, name, user_plan: "free", referral_code: refCode, referred_by: enteredCode ? enteredCode.toUpperCase() : null, referral_count: 0, ...(seasonData ? { season_data: seasonData } : {}) }); }
+      const { data: linkData, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({ type: "signup", email, password });
+      if (linkErr) return new Response(JSON.stringify({ error: linkErr.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      const confirmUrl = linkData?.properties?.action_link;
+      const firstNameSignup = (name || "there").split(" ")[0];
+      await sendEmail(email, "Confirm your email to get started 🌸", base(`<h1 style="font-size:22px;font-weight:700;color:#1a1a2e;margin:0 0 12px;">Hi ${firstNameSignup} 👋</h1><p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 16px;">Welcome to Solla. Confirm your email to unlock your colour season.</p>${btn(confirmUrl, "Verify my email and get started →")}<p style="font-size:13px;color:#888;margin:16px 0 0;">Questions? Just reply to this email — I read every one.<br/>— Emma, founder of Solla</p>`));
+      return new Response(JSON.stringify({ ok: true, userId: created.user?.id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
     const firstName = (name || "there").split(" ")[0];
 
     if (type === "welcome") {
