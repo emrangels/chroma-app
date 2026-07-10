@@ -31,10 +31,9 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
   try {
-    const { type, email, name, season } = await req.json();
+    const { type, email, name, season, password, refCode, enteredCode, seasonData } = await req.json();
 
     if (type === "signup") {
-      const { password, refCode, enteredCode, seasonData } = await req.clone().json();
       const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({ email, password, email_confirm: false, user_metadata: { name } });
       if (createErr) return new Response(JSON.stringify({ error: createErr.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       if (created.user?.id) { await supabaseAdmin.from("profiles").insert({ id: created.user.id, name, user_plan: "free", referral_code: refCode, referred_by: enteredCode ? enteredCode.toUpperCase() : null, referral_count: 0, ...(seasonData ? { season_data: seasonData } : {}) }); }
