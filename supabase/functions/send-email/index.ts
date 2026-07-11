@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
       const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({ email, password, email_confirm: false, user_metadata: { name } });
       if (createErr) return new Response(JSON.stringify({ error: createErr.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       if (created.user?.id) { await supabaseAdmin.from("profiles").insert({ id: created.user.id, name, user_plan: "free", referral_code: refCode, referred_by: enteredCode ? enteredCode.toUpperCase() : null, referral_count: 0, ...(seasonData ? { season_data: seasonData } : {}) }); }
-      const { data: linkData, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({ type: "signup", email, password });
+      const { data: linkData, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({ type: "signup", email, password, options: { redirectTo: "https://solla.com.au?verified=true" } });
       if (linkErr) return new Response(JSON.stringify({ error: linkErr.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       const confirmUrl = linkData?.properties?.action_link;
       const firstNameSignup = (name || "there").split(" ")[0];

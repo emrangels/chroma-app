@@ -4845,6 +4845,13 @@ export default function App() {
 };
   useEffect(() => {
   refreshToken();
+  const urlVerified = new URLSearchParams(window.location.search).get("verified");
+  if (urlVerified === "true") {
+    window.history.replaceState({}, "", "/");
+    alert("Email verified! You can now sign in.");
+    update({ screen: "auth" });
+    return;
+  }
   const token = localStorage.getItem("solla_token");
   const cachedUser = localStorage.getItem("solla_user");
   if (token && cachedUser) {
