@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { removeBackground } from "@imgly/background-removal";
 import html2canvas from 'html2canvas';
 import { Analytics } from '@vercel/analytics/react';
+import { Browser } from '@capacitor/browser';
+import { App as CapacitorApp } from '@capacitor/app';
 
 const DS = {
   colors: {
@@ -808,13 +810,13 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
           no_trial: noTrial,
           user_id: user.id,
           email: user.email,
-          return_url: "https://solla.com.au",
+          return_url: "com.solla.app://checkout",
         }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       if (!data.url) throw new Error("No checkout URL returned");
-      window.location.href = data.url;
+      await Browser.open({ url: data.url });
     } catch (e) {
       console.error("Stripe error:", e);
       alert("Error: " + (e instanceof Error ? e.message : String(e)));
@@ -5014,6 +5016,38 @@ if (parsedUser.email && parsedSeason?.season) {
         .catch(() => {});
     } catch { update({ screen: "onboarding" }); }
   }
+}, []);
+
+useEffect(() => {
+  const listenerPromise = CapacitorApp.addListener('appUrlOpen', (event) => {
+    Browser.close().catch(() => {});
+    const url = new URL(event.url);
+    const checkout = url.searchParams.get("checkout");
+    const plan = url.searchParams.get("plan") as Plan | null;
+    const billing = url.searchParams.get("billing");
+    const token = localStorage.getItem("solla_token");
+    const cachedUser = localStorage.getItem("solla_user");
+    if (checkout === "success" && plan && token && cachedUser) {
+      const parsedUser = JSON.parse(cachedUser);
+      fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${parsedUser.id}`, {
+        method: "PATCH",
+        headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
+        body: JSON.stringify({ user_plan: plan, user_billing: billing || "monthly" }),
+      }).catch(() => {});
+      const updatedUser = { ...parsedUser, plan };
+      localStorage.setItem("solla_user", JSON.stringify(updatedUser));
+      const trialEnd = new Date();
+      trialEnd.setDate(trialEnd.getDate() + 7);
+      fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${parsedUser.id}`, {
+        method: "PATCH",
+        headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
+        body: JSON.stringify({ trial_end_date: trialEnd.toISOString() }),
+      }).catch(() => {});
+      const cachedSeason = localStorage.getItem(`solla_season_${parsedUser.id}`);
+      update({ screen: "main", user: updatedUser, seasonData: cachedSeason ? JSON.parse(cachedSeason) : null });
+    }
+  });
+  return () => { listenerPromise.then(l => l.remove()); };
 }, []);
 
   const resizeAndEncode = (file: File, maxDimension = 1024, quality = 0.85): Promise<string> =>

@@ -48,6 +48,17 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Solla needs camera access to analyze your colours and check items against your palette.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Solla needs photo library access so you can upload photos for colour analysis.</string>
+        <string>Solla needs photo library access so you can upload photos for colour analysis.</string>
+        <key>CFBundleURLTypes</key>
+        <array>
+                <dict>
+                        <key>CFBundleURLSchemes</key>
+                        <array>
+                                <string>com.solla.app</string>
+                        </array>
+                        <key>CFBundleURLName</key>
+                        <string>com.solla.app</string>
+                </dict>
+        </array>
 </dict>
 </plist>
