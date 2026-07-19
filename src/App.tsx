@@ -5006,7 +5006,7 @@ if (parsedUser.email && parsedSeason?.season) {
           headers: { ...supabaseHeaders, Authorization: `Bearer ${token}`, Prefer: "return=minimal" },
           body: JSON.stringify({ trial_end_date: trialEnd.toISOString() }),
         }).catch(() => {});
-        update({ screen: "main", user: updatedUser, seasonData: cachedSeason ? JSON.parse(cachedSeason) : null });
+        update({ screen: "main", user: updatedUser, seasonData: cachedSeason ? JSON.parse(cachedSeason) : null, activeSheet: null });
         window.history.replaceState({}, "", "/");
       }
 
@@ -5044,7 +5044,7 @@ useEffect(() => {
         body: JSON.stringify({ trial_end_date: trialEnd.toISOString() }),
       }).catch(() => {});
       const cachedSeason = localStorage.getItem(`solla_season_${parsedUser.id}`);
-      update({ screen: "main", user: updatedUser, seasonData: cachedSeason ? JSON.parse(cachedSeason) : null });
+      update({ screen: "main", user: updatedUser, seasonData: cachedSeason ? JSON.parse(cachedSeason) : null, activeSheet: null });
     }
   });
   return () => { listenerPromise.then(l => l.remove()); };
