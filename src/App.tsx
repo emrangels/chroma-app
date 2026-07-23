@@ -850,7 +850,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
           ) : (
             <>
               <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 4 }}>Try everything free for 7 days</h2>
-              <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>Experience the full Luxe plan free. Choose your plan on day 8.</p>
+              <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>Experience the full Luxe plan free. You will be charged for whichever plan you choose below, unless you cancel before day 8.</p>
               <div style={{ background: DS.colors.surface, borderRadius: DS.radius.md, padding: "12px 14px", marginBottom: 12, borderLeft: `3px solid ${DS.colors.accent}` }}>
                 <p style={{ margin: "0 0 4px", fontSize: 13, color: DS.colors.text, lineHeight: 1.6, fontStyle: "italic" }}>"I finally understand why some outfits just work and others don't. Game changer."</p>
                 <p style={{ margin: 0, fontSize: 11, color: DS.colors.textFaint, fontWeight: 500 }}>- Solla member</p>
@@ -921,7 +921,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
               </div>
 
               <p style={{ textAlign: "center", fontSize: 11, color: DS.colors.textFaint, marginBottom: 12, lineHeight: 1.5 }}>Cancel anytime before day 8 and you will not be charged a thing.
-               No questions asked. Choose your plan on day 8.</p>
+               No questions asked. You will be charged for the plan you select above unless you cancel by then.</p>
               <button onClick={onClose} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Maybe later</button>
             </>
           )}
@@ -4850,7 +4850,7 @@ export default function App() {
   const urlVerified = new URLSearchParams(window.location.search).get("verified");
   if (urlVerified === "true") {
     window.history.replaceState({}, "", "/");
-    alert("Email verified! You can now sign in.");
+    alert("Email verified. You can now sign in below.");
     update({ screen: "auth" });
     return;
   }
