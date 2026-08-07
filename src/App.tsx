@@ -850,10 +850,6 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
             <>
               <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 4 }}>Try everything free for 7 days</h2>
               <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>Experience the full Luxe plan free. You will be charged for whichever plan you choose below, unless you cancel before day 8.</p>
-              <div style={{ background: DS.colors.surface, borderRadius: DS.radius.md, padding: "12px 14px", marginBottom: 12, borderLeft: `3px solid ${DS.colors.accent}` }}>
-                <p style={{ margin: "0 0 4px", fontSize: 13, color: DS.colors.text, lineHeight: 1.6, fontStyle: "italic" }}>"I finally understand why some outfits just work and others don't. Game changer."</p>
-                <p style={{ margin: 0, fontSize: 11, color: DS.colors.textFaint, fontWeight: 500 }}>- Solla member</p>
-              </div>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#F0FDF4", padding: "4px 12px", borderRadius: DS.radius.full, marginBottom: 20 }}>
                 <Icon name="check" size={12} color={DS.colors.success} strokeWidth={2.5} />
                 <span style={{ fontSize: 12, color: DS.colors.success, fontWeight: 600 }}>7-day free trial - no charge until day 8</span>
@@ -921,6 +917,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
 
               <p style={{ textAlign: "center", fontSize: 11, color: DS.colors.textFaint, marginBottom: 12, lineHeight: 1.5 }}>Cancel anytime before day 8 and you will not be charged a thing.
                No questions asked. You will be charged for the plan you select above unless you cancel by then.</p>
+              <p style={{ textAlign: "center", fontSize: 11, color: DS.colors.textFaint, marginBottom: 12 }}><a href="https://solla.com.au/terms" target="_blank" rel="noopener noreferrer" style={{ color: DS.colors.textFaint, textDecoration: "underline" }}>Terms of Service</a> · <a href="https://solla.com.au/privacy" target="_blank" rel="noopener noreferrer" style={{ color: DS.colors.textFaint, textDecoration: "underline" }}>Privacy Policy</a></p>
               <button onClick={onClose} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Maybe later</button>
             </>
           )}
@@ -1121,7 +1118,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
           {[
             { q: "What information do we collect?", a: "We collect your name, email address, and password when you create an account. We also collect photos you upload for colour analysis, and wardrobe item photos and descriptions. We automatically collect log and usage data, and device information." },
             { q: "How do we use your information?", a: "We use your information to provide personalised AI-powered colour season analysis and styling recommendations, manage your account, process payments, respond to support enquiries, send service communications, and improve our services." },
-            { q: "Who do we share your information with?", a: "We share data with Anthropic (AI processing), Supabase (database), Stripe (payments), and Vercel (hosting and analytics). We do not sell your personal information to third parties." },
+            { q: "Who do we share your information with?", a: "We share data with Anthropic (AI processing), Supabase (database), Stripe (payments), Resend (transactional email), and Vercel (hosting and analytics). We do not sell your personal information to third parties." },
             { q: "How are photos handled?", a: "Photos you upload for colour analysis are transmitted securely to Anthropic for processing and are not stored permanently on our servers after analysis is complete." },
             { q: "How long do we keep your data?", a: "We retain your personal information for as long as you have an account with us. When you close your account we will delete or anonymise your information unless required by law." },
             { q: "What are your rights?", a: "Under the Australian Privacy Act 1988 you have the right to access, correct, or delete your personal information. Contact us at hello@solla.com.au to exercise these rights or to lodge a complaint." },
