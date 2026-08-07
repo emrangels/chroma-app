@@ -770,7 +770,6 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
 }) => {
   const [billing, setBilling] = useState<"monthly" | "annual">("annual");
   const [loading, setLoading] = useState(false);
-  const [userCount, setUserCount] = useState(16);
 
   useEffect(() => { trackEvent("paywall_viewed", { plan: currentPlan }); }, []);
 
@@ -842,7 +841,7 @@ const PaywallSheet = ({ currentPlan, onUpgrade, onClose, isGuest, onSignUp }: {
               <p style={{ fontSize: 14, color: DS.colors.textMuted, lineHeight: 1.6, marginBottom: 8 }}>Finally know your colours - and what to do with them. Your full palette, makeup guide, daily outfit engine and more, all personalised to your season. Try everything free for 7 days.</p>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: DS.colors.accentLight, padding: "4px 12px", borderRadius: DS.radius.full, marginBottom: 8 }}>
               <Icon name="sparkles" size={12} color={DS.colors.accent} />
-              <span style={{ fontSize: 12, color: DS.colors.accentDark, fontWeight: 600 }}>Join {userCount}+ people who finally know their colours 🌸</span>
+              <span style={{ fontSize: 12, color: DS.colors.accentDark, fontWeight: 600 }}>Join the people who finally know their colours 🌸</span>
               </div>
               <button onClick={() => onSignUp?.()} style={{ width: "100%", padding: "16px", borderRadius: DS.radius.lg, background: DS.colors.accent, color: DS.colors.white, fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Create free account</button>
               <button onClick={onClose} style={{ width: "100%", padding: "12px", fontSize: 14, color: DS.colors.textMuted, fontWeight: 500 }}>Maybe later</button>
@@ -1101,7 +1100,7 @@ const SheetOverlay = ({ activeSheet, seasonData, onClose }: { activeSheet: Sheet
             { q: "What is undertone?", a: "The subtle hue beneath your skin's surface. Warm undertones have golden or yellow hints. Cool undertones have pink or blue hints. Neutral is a mix of both. It's the single most important factor in colour analysis - it determines which metals, neutrals and colour families work best for you." },
             { q: "What is chroma?", a: "How clear or muted your colouring is. High chroma means vivid, saturated features - you suit bold colours. Low chroma means soft, blended features - you suit muted, toned-down shades. Wearing the wrong chroma is one of the most common reasons an outfit feels off." },
             { q: "What is contrast?", a: "The difference between your hair, skin and eye colour. High contrast suits bold colour combinations and strong patterns. Low contrast suits tonal, harmonious outfits where pieces are close in value. Wearing high contrast combinations with low contrast colouring - or vice versa - creates visual imbalance." },
-            { q: "What is the colour checker?", a: "The Checker tab lets you photograph anything and get an instant verdict against your season. Single mode checks one item at a time. Outfit mode analyses every piece in a full look. Makeup mode checks any product by name or photo - enter the product name for the most accurate result. Available on Glow and Luxe." },
+            { q: "What is the colour checker?", a: "The Checker tab lets you photograph anything and get an instant verdict against your season. Items mode checks one or more individual pieces at once, each colour is assessed separately. Outfit mode analyses every piece in a full look. Makeup mode checks any product by name or photo - enter the product name for the most accurate result. Available on Glow and Luxe." },
             { q: "How do I add items to my wardrobe?", a: "Go to the Wardrobe tab and tap the + button. Upload a photo of the item - Solla automatically identifies the colour and checks it against your season. Name the item, select a category and formality level, and save. You can add multiple items at once." },
             { q: "How do I edit or delete a wardrobe item?", a: "Tap the edit icon on any item to update the name, category or formality. Tap the trash icon to delete it." },
             { q: "What is the daily outfit suggestion?", a: "On your My Colours tab, Solla suggests a weather-aware, season-approved outfit each day. On Glow and Luxe it pulls from your actual wardrobe items. Allow location access for automatic weather, or enter your postcode if location is unavailable." },
@@ -1871,7 +1870,7 @@ const loadExtendedPalette = async () => {
           
           {/* Best colours */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 16 }}>
-            {(seasonData.palette?.best || []).map(colour => (
+            {(plan === "free" ? (seasonData.palette?.best || []).slice(0, 5) : (seasonData.palette?.best || [])).map(colour => (
   <button key={colour.hex} onClick={() => setSelectedColour(colour)} style={{ textAlign: "center", background: "none", border: "none", padding: 0 }}>
     <div style={{ width: "100%", aspectRatio: "1", borderRadius: 10, background: colour.hex, marginBottom: 4, border: colour.hex === "#FFFFFF" ? `1px solid ${DS.colors.border}` : "none" }} />
     <p style={{ margin: 0, fontSize: 9, color: DS.colors.textMuted, lineHeight: 1.3 }}>{colour.name}</p>
@@ -2237,7 +2236,7 @@ const CheckerTab = ({ seasonData, user, onUpgrade }: { seasonData: SeasonData | 
         <div style={{ display: "flex", background: DS.colors.surface, borderRadius: DS.radius.lg, padding: 4, marginBottom: 20, gap: 4 }}>
           {(["single", "outfit", "makeup"] as const).map(m => (
             <button key={m} onClick={() => { setMode(m); reset(); setMakeupResult(null); setMakeupPreview(null); setMakeupPreviews([]); setMakeupShadeHint(""); setMakeupProductName(""); }} style={{ flex: 1, padding: "8px 4px", borderRadius: DS.radius.md, fontSize: 13, fontWeight: mode === m ? 600 : 400, color: mode === m ? DS.colors.white : DS.colors.textMuted, background: mode === m ? DS.colors.accent : "transparent", transition: "all 0.2s" }}>
-              {m === "single" ? "Single" : m === "outfit" ? "Outfit" : "Makeup"}
+              {m === "single" ? "Items" : m === "outfit" ? "Outfit" : "Makeup"}
             </button>
           ))}
         </div>
@@ -4336,7 +4335,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
       {/* Plan Item Selector Sheet */}
       {planItemSelector && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={() => setPlanItemSelector(null)}>
-          <div style={{ width: "100%", maxHeight: "90vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
+          <div style={{ width: "100%", maxHeight: "85dvh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 80px" }} onClick={e => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
               <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
             </div>
@@ -4385,7 +4384,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
       {/* Add Item Sheet */}
       {showAddItem && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={() => setShowAddItem(false)}>
-          <div style={{ width: "100%", maxHeight: "90vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
+          <div style={{ width: "100%", maxHeight: "85dvh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 80px" }} onClick={e => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
               <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
             </div>
@@ -4458,7 +4457,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
       {/* Edit Outfit Sheet */}
       {editingOutfit && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={() => setEditingOutfit(null)}>
-          <div style={{ width: "100%", maxHeight: "90vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
+          <div style={{ width: "100%", maxHeight: "85dvh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 80px" }} onClick={e => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
               <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
             </div>
@@ -4503,7 +4502,7 @@ const text = data.reply || "I couldn't generate a response. Please try again.";
       {/* Add Outfit Sheet */}
       {showAddOutfit && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end" }} onClick={() => setShowAddOutfit(false)}>
-          <div style={{ width: "100%", maxHeight: "90vh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 48px" }} onClick={e => e.stopPropagation()}>
+          <div style={{ width: "100%", maxHeight: "85dvh", background: DS.colors.bg, borderRadius: `${DS.radius.xl} ${DS.radius.xl} 0 0`, overflowY: "auto", padding: "0 0 80px" }} onClick={e => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
               <div style={{ width: 36, height: 4, borderRadius: DS.radius.full, background: DS.colors.border }} />
             </div>
