@@ -12,6 +12,7 @@ on:
 jobs:
   inspect:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -20,11 +21,13 @@ jobs:
           node-version: '20'
 
       - name: Install Playwright
+        timeout-minutes: 5
         run: |
           npm install playwright@1.48
           npx playwright install --with-deps chromium
 
       - name: Run inspection script
+        timeout-minutes: 3
         run: node .github/scripts/tmp_gha_inspect.js
 
       - name: Upload artifacts
