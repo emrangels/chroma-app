@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch: {}
+  push:
+    branches:
+      - claude/gp-appointment-checker-pvhr5u
+    paths:
+      - '.github/workflows/check-appointments.yml'
+      - 'scripts/check_appointments.py'
 
 permissions:
   contents: write
