@@ -1,0 +1,19 @@
+name: tmp-ntfy-test
+
+on:
+  push:
+    branches:
+      - claude/ntfy-test
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Send test push to ntfy
+        run: |
+          curl -sS -i \
+            -H "Title: Test notification" \
+            -H "Tags: test_tube" \
+            -d "This is a test push from the GP appointment checker. If you see this on your lock screen, notifications are working." \
+            https://ntfy.sh/emma-gp-appt-x7f3k9
