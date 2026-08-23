@@ -2,6 +2,12 @@ name: tmp-inspect-easyvisit
 
 on:
   workflow_dispatch: {}
+  push:
+    branches:
+      - claude/gp-appointment-checker-pvhr5u
+    paths:
+      - '.github/workflows/tmp-inspect.yml'
+      - '.github/scripts/tmp_gha_inspect.js'
 
 jobs:
   inspect:
