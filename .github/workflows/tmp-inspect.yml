@@ -10,32 +10,14 @@ on:
       - '.github/scripts/tmp_gha_inspect.js'
 
 jobs:
-  inspect:
+  curl-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install Playwright
-        timeout-minutes: 5
+      - name: Plain curl (no browser, no special headers) against discovered API
         run: |
-          npm install playwright@1.48
-          npx playwright install --with-deps chromium
-
-      - name: Run inspection script
-        timeout-minutes: 3
-        run: node .github/scripts/tmp_gha_inspect.js
-
-      - name: Upload artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: inspect-output
-          path: |
-            screenshot.png
-            api_calls.json
-          if-no-files-found: ignore
+          echo "--- Attempt 1: minimal headers, default curl UA ---"
+          curl -sS -i "https://api.easyvisit.com.au/api/v1/Location/103/appointmenttypes/760/resources" | head -c 1500
+          echo ""
+          echo "--- Attempt 2: with Accept: application/json only ---"
+          curl -sS -i -H "Accept: application/json" "https://api.easyvisit.com.au/api/v1/Location/103/appointmenttypes/760/resources" | head -c 1500
