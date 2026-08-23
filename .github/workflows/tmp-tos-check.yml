@@ -1,0 +1,29 @@
+name: tmp-tos-check
+
+on:
+  push:
+    branches:
+      - claude/gp-appointment-checker-pvhr5u
+    paths:
+      - '.github/workflows/tmp-tos-check.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Check robots.txt and look for ToS links
+        run: |
+          echo "--- robots.txt for web.easyvisit.com.au ---"
+          curl -sS "https://web.easyvisit.com.au/robots.txt"
+          echo ""
+          echo "--- robots.txt for api.easyvisit.com.au ---"
+          curl -sS "https://api.easyvisit.com.au/robots.txt"
+          echo ""
+          echo "--- candidate terms URLs ---"
+          for u in "https://www.easyvisit.com.au/terms" "https://www.easyvisit.com.au/terms-and-conditions" "https://www.easyvisit.com.au/terms-of-use" "https://www.easyvisit.com.au/privacy-policy"; do
+            code=$(curl -sS -o /dev/null -w "%{http_code}" "$u")
+            echo "$u -> $code"
+          done
+          echo "--- easyvisit.com.au homepage footer links (grep for terms/privacy) ---"
+          curl -sS "https://www.easyvisit.com.au/" | grep -oE 'href="[^"]*"' | grep -iE 'term|privacy|polic' | sort -u
