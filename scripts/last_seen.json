@@ -1,11 +1,7 @@
 {
-  "checked_at": "2026-08-24T06:06:41.865911+00:00",
-  "slot_count": 1593,
+  "checked_at": "2026-08-24T07:16:13.645880+00:00",
+  "slot_count": 1586,
   "slots": {
-    "1415|2026-08-26T16:30:00": {
-      "dateTime": "2026-08-26T16:30:00",
-      "doctor": "James Farrent"
-    },
     "1415|2026-09-01T16:15:00": {
       "dateTime": "2026-09-01T16:15:00",
       "doctor": "James Farrent"
@@ -1186,10 +1182,6 @@
       "dateTime": "2026-09-05T10:15:00",
       "doctor": "Scott Spencer"
     },
-    "1416|2026-09-08T15:45:00": {
-      "dateTime": "2026-09-08T15:45:00",
-      "doctor": "Scott Spencer"
-    },
     "1416|2026-09-08T16:00:00": {
       "dateTime": "2026-09-08T16:00:00",
       "doctor": "Scott Spencer"
@@ -2290,10 +2282,6 @@
       "dateTime": "2026-09-02T09:15:00",
       "doctor": "Julian Monfries"
     },
-    "1417|2026-09-02T09:30:00": {
-      "dateTime": "2026-09-02T09:30:00",
-      "doctor": "Julian Monfries"
-    },
     "1417|2026-09-02T10:00:00": {
       "dateTime": "2026-09-02T10:00:00",
       "doctor": "Julian Monfries"
@@ -2722,14 +2710,6 @@
       "dateTime": "2026-08-28T13:45:00",
       "doctor": "Jasneet Ahuja"
     },
-    "1418|2026-08-28T14:00:00": {
-      "dateTime": "2026-08-28T14:00:00",
-      "doctor": "Jasneet Ahuja"
-    },
-    "1418|2026-08-28T14:15:00": {
-      "dateTime": "2026-08-28T14:15:00",
-      "doctor": "Jasneet Ahuja"
-    },
     "1418|2026-08-31T10:45:00": {
       "dateTime": "2026-08-31T10:45:00",
       "doctor": "Jasneet Ahuja"
@@ -2776,10 +2756,6 @@
     },
     "1418|2026-09-01T10:15:00": {
       "dateTime": "2026-09-01T10:15:00",
-      "doctor": "Jasneet Ahuja"
-    },
-    "1418|2026-09-01T10:30:00": {
-      "dateTime": "2026-09-01T10:30:00",
       "doctor": "Jasneet Ahuja"
     },
     "1418|2026-09-01T10:45:00": {
@@ -6160,10 +6136,6 @@
     },
     "7804|2026-09-07T09:45:00": {
       "dateTime": "2026-09-07T09:45:00",
-      "doctor": "Dr Gillian Douglass"
-    },
-    "7804|2026-09-07T11:30:00": {
-      "dateTime": "2026-09-07T11:30:00",
       "doctor": "Dr Gillian Douglass"
     },
     "7804|2026-09-09T09:30:00": {
