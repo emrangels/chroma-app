@@ -1,11 +1,7 @@
 {
-  "checked_at": "2026-08-25T02:32:51.999881+00:00",
-  "slot_count": 1537,
+  "checked_at": "2026-08-25T03:27:37.875729+00:00",
+  "slot_count": 1529,
   "slots": {
-    "1415|2026-09-01T14:15:00": {
-      "dateTime": "2026-09-01T14:15:00",
-      "doctor": "James Farrent"
-    },
     "1415|2026-09-02T11:45:00": {
       "dateTime": "2026-09-02T11:45:00",
       "doctor": "James Farrent"
@@ -1118,10 +1114,6 @@
       "dateTime": "2026-10-01T16:45:00",
       "doctor": "James Farrent"
     },
-    "1416|2026-09-05T09:30:00": {
-      "dateTime": "2026-09-05T09:30:00",
-      "doctor": "Scott Spencer"
-    },
     "1416|2026-09-05T09:45:00": {
       "dateTime": "2026-09-05T09:45:00",
       "doctor": "Scott Spencer"
@@ -2218,10 +2210,6 @@
       "dateTime": "2026-09-02T11:15:00",
       "doctor": "Julian Monfries"
     },
-    "1417|2026-09-02T11:45:00": {
-      "dateTime": "2026-09-02T11:45:00",
-      "doctor": "Julian Monfries"
-    },
     "1417|2026-09-04T08:00:00": {
       "dateTime": "2026-09-04T08:00:00",
       "doctor": "Julian Monfries"
@@ -2601,14 +2589,6 @@
     "1417|2026-09-18T11:15:00": {
       "dateTime": "2026-09-18T11:15:00",
       "doctor": "Julian Monfries"
-    },
-    "1418|2026-08-28T12:30:00": {
-      "dateTime": "2026-08-28T12:30:00",
-      "doctor": "Jasneet Ahuja"
-    },
-    "1418|2026-08-28T14:15:00": {
-      "dateTime": "2026-08-28T14:15:00",
-      "doctor": "Jasneet Ahuja"
     },
     "1418|2026-08-31T10:45:00": {
       "dateTime": "2026-08-31T10:45:00",
@@ -4678,10 +4658,6 @@
       "dateTime": "2026-10-01T14:45:00",
       "doctor": "Inge Van Leeuwen"
     },
-    "2741|2026-08-26T09:45:00": {
-      "dateTime": "2026-08-26T09:45:00",
-      "doctor": "Cee-Jon Ying"
-    },
     "2741|2026-08-26T15:45:00": {
       "dateTime": "2026-08-26T15:45:00",
       "doctor": "Cee-Jon Ying"
@@ -4772,14 +4748,6 @@
     },
     "2741|2026-09-03T12:45:00": {
       "dateTime": "2026-09-03T12:45:00",
-      "doctor": "Cee-Jon Ying"
-    },
-    "2741|2026-09-03T15:00:00": {
-      "dateTime": "2026-09-03T15:00:00",
-      "doctor": "Cee-Jon Ying"
-    },
-    "2741|2026-09-03T15:15:00": {
-      "dateTime": "2026-09-03T15:15:00",
       "doctor": "Cee-Jon Ying"
     },
     "2741|2026-09-03T16:15:00": {
