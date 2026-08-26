@@ -1,11 +1,7 @@
 {
-  "checked_at": "2026-08-26T02:24:51.123459+00:00",
-  "slot_count": 1468,
+  "checked_at": "2026-08-26T03:31:14.969584+00:00",
+  "slot_count": 1462,
   "slots": {
-    "1415|2026-08-27T09:45:00": {
-      "dateTime": "2026-08-27T09:45:00",
-      "doctor": "James Farrent"
-    },
     "1415|2026-09-02T12:00:00": {
       "dateTime": "2026-09-02T12:00:00",
       "doctor": "James Farrent"
@@ -1118,10 +1114,6 @@
       "dateTime": "2026-09-10T11:45:00",
       "doctor": "Scott Spencer"
     },
-    "1416|2026-09-10T16:00:00": {
-      "dateTime": "2026-09-10T16:00:00",
-      "doctor": "Scott Spencer"
-    },
     "1416|2026-09-10T16:45:00": {
       "dateTime": "2026-09-10T16:45:00",
       "doctor": "Scott Spencer"
@@ -2126,10 +2118,6 @@
       "dateTime": "2026-09-04T10:45:00",
       "doctor": "Julian Monfries"
     },
-    "1417|2026-09-04T11:15:00": {
-      "dateTime": "2026-09-04T11:15:00",
-      "doctor": "Julian Monfries"
-    },
     "1417|2026-09-04T11:45:00": {
       "dateTime": "2026-09-04T11:45:00",
       "doctor": "Julian Monfries"
@@ -2486,6 +2474,10 @@
       "dateTime": "2026-09-18T11:15:00",
       "doctor": "Julian Monfries"
     },
+    "1418|2026-08-27T14:15:00": {
+      "dateTime": "2026-08-27T14:15:00",
+      "doctor": "Jasneet Ahuja"
+    },
     "1418|2026-08-31T12:45:00": {
       "dateTime": "2026-08-31T12:45:00",
       "doctor": "Jasneet Ahuja"
@@ -2720,10 +2712,6 @@
     },
     "1418|2026-09-07T10:45:00": {
       "dateTime": "2026-09-07T10:45:00",
-      "doctor": "Jasneet Ahuja"
-    },
-    "1418|2026-09-07T11:00:00": {
-      "dateTime": "2026-09-07T11:00:00",
       "doctor": "Jasneet Ahuja"
     },
     "1418|2026-09-07T11:15:00": {
@@ -3950,14 +3938,6 @@
       "dateTime": "2026-10-02T14:45:00",
       "doctor": "Jasneet Ahuja"
     },
-    "1421|2026-08-27T09:00:00": {
-      "dateTime": "2026-08-27T09:00:00",
-      "doctor": "Leisha Williams"
-    },
-    "1421|2026-09-16T11:00:00": {
-      "dateTime": "2026-09-16T11:00:00",
-      "doctor": "Leisha Williams"
-    },
     "1421|2026-09-16T11:15:00": {
       "dateTime": "2026-09-16T11:15:00",
       "doctor": "Leisha Williams"
@@ -4464,10 +4444,6 @@
     },
     "2741|2026-09-02T17:15:00": {
       "dateTime": "2026-09-02T17:15:00",
-      "doctor": "Cee-Jon Ying"
-    },
-    "2741|2026-09-02T17:30:00": {
-      "dateTime": "2026-09-02T17:30:00",
       "doctor": "Cee-Jon Ying"
     },
     "2741|2026-09-03T09:15:00": {
