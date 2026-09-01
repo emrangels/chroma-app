@@ -1,7 +1,19 @@
 {
-  "checked_at": "2026-09-01T14:20:11.718628+00:00",
-  "slot_count": 1518,
+  "checked_at": "2026-09-01T17:52:17.135149+00:00",
+  "slot_count": 1528,
   "slots": {
+    "1415|2026-09-02T10:30:00": {
+      "dateTime": "2026-09-02T10:30:00",
+      "doctor": "James Farrent"
+    },
+    "1415|2026-09-02T12:00:00": {
+      "dateTime": "2026-09-02T12:00:00",
+      "doctor": "James Farrent"
+    },
+    "1415|2026-09-02T14:30:00": {
+      "dateTime": "2026-09-02T14:30:00",
+      "doctor": "James Farrent"
+    },
     "1415|2026-09-09T15:30:00": {
       "dateTime": "2026-09-09T15:30:00",
       "doctor": "James Farrent"
@@ -1110,6 +1122,14 @@
       "dateTime": "2026-10-12T16:45:00",
       "doctor": "James Farrent"
     },
+    "1416|2026-09-02T15:45:00": {
+      "dateTime": "2026-09-02T15:45:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-09-02T16:15:00": {
+      "dateTime": "2026-09-02T16:15:00",
+      "doctor": "Scott Spencer"
+    },
     "1416|2026-09-16T17:45:00": {
       "dateTime": "2026-09-16T17:45:00",
       "doctor": "Scott Spencer"
@@ -2066,16 +2086,16 @@
       "dateTime": "2026-10-12T16:30:00",
       "doctor": "Scott Spencer"
     },
+    "1417|2026-09-02T11:00:00": {
+      "dateTime": "2026-09-02T11:00:00",
+      "doctor": "Julian Monfries"
+    },
     "1417|2026-09-09T09:00:00": {
       "dateTime": "2026-09-09T09:00:00",
       "doctor": "Julian Monfries"
     },
     "1417|2026-09-09T10:00:00": {
       "dateTime": "2026-09-09T10:00:00",
-      "doctor": "Julian Monfries"
-    },
-    "1417|2026-09-09T11:45:00": {
-      "dateTime": "2026-09-09T11:45:00",
       "doctor": "Julian Monfries"
     },
     "1417|2026-09-11T08:00:00": {
@@ -4586,6 +4606,22 @@
       "dateTime": "2026-10-12T16:45:00",
       "doctor": "Inge Van Leeuwen"
     },
+    "2741|2026-09-02T09:30:00": {
+      "dateTime": "2026-09-02T09:30:00",
+      "doctor": "Cee-Jon Ying"
+    },
+    "2741|2026-09-02T10:45:00": {
+      "dateTime": "2026-09-02T10:45:00",
+      "doctor": "Cee-Jon Ying"
+    },
+    "2741|2026-09-02T11:15:00": {
+      "dateTime": "2026-09-02T11:15:00",
+      "doctor": "Cee-Jon Ying"
+    },
+    "2741|2026-09-02T15:30:00": {
+      "dateTime": "2026-09-02T15:30:00",
+      "doctor": "Cee-Jon Ying"
+    },
     "2741|2026-09-03T16:30:00": {
       "dateTime": "2026-09-03T16:30:00",
       "doctor": "Cee-Jon Ying"
@@ -5860,6 +5896,10 @@
     },
     "7804|2026-09-02T10:30:00": {
       "dateTime": "2026-09-02T10:30:00",
+      "doctor": "Dr Gillian Douglass"
+    },
+    "7804|2026-09-02T12:00:00": {
+      "dateTime": "2026-09-02T12:00:00",
       "doctor": "Dr Gillian Douglass"
     },
     "7804|2026-09-14T10:15:00": {
