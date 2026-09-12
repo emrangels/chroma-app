@@ -1,6 +1,6 @@
 {
-  "checked_at": "2026-09-12T13:05:13.074559+00:00",
-  "slot_count": 1713,
+  "checked_at": "2026-09-12T16:14:05.658751+00:00",
+  "slot_count": 1753,
   "slots": {
     "1415|2026-09-21T15:15:00": {
       "dateTime": "2026-09-21T15:15:00",
@@ -2194,6 +2194,78 @@
       "dateTime": "2026-10-22T17:00:00",
       "doctor": "Scott Spencer"
     },
+    "1416|2026-10-23T10:00:00": {
+      "dateTime": "2026-10-23T10:00:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-10-23T10:15:00": {
+      "dateTime": "2026-10-23T10:15:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-10-23T10:30:00": {
+      "dateTime": "2026-10-23T10:30:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-10-23T10:45:00": {
+      "dateTime": "2026-10-23T10:45:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-10-23T11:00:00": {
+      "dateTime": "2026-10-23T11:00:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-10-23T11:15:00": {
+      "dateTime": "2026-10-23T11:15:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-10-23T11:30:00": {
+      "dateTime": "2026-10-23T11:30:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-10-23T11:45:00": {
+      "dateTime": "2026-10-23T11:45:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-10-23T14:00:00": {
+      "dateTime": "2026-10-23T14:00:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-10-23T14:15:00": {
+      "dateTime": "2026-10-23T14:15:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-10-23T14:30:00": {
+      "dateTime": "2026-10-23T14:30:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-10-23T14:45:00": {
+      "dateTime": "2026-10-23T14:45:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-10-23T15:00:00": {
+      "dateTime": "2026-10-23T15:00:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-10-23T15:15:00": {
+      "dateTime": "2026-10-23T15:15:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-10-23T15:30:00": {
+      "dateTime": "2026-10-23T15:30:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-10-23T15:45:00": {
+      "dateTime": "2026-10-23T15:45:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-10-23T16:15:00": {
+      "dateTime": "2026-10-23T16:15:00",
+      "doctor": "Scott Spencer"
+    },
+    "1416|2026-10-23T16:30:00": {
+      "dateTime": "2026-10-23T16:30:00",
+      "doctor": "Scott Spencer"
+    },
     "1417|2026-09-18T08:15:00": {
       "dateTime": "2026-09-18T08:15:00",
       "doctor": "Julian Monfries"
@@ -2709,14 +2781,6 @@
     "1417|2026-10-21T11:45:00": {
       "dateTime": "2026-10-21T11:45:00",
       "doctor": "Julian Monfries"
-    },
-    "1418|2026-09-15T10:00:00": {
-      "dateTime": "2026-09-15T10:00:00",
-      "doctor": "Jasneet Ahuja"
-    },
-    "1418|2026-09-17T10:30:00": {
-      "dateTime": "2026-09-17T10:30:00",
-      "doctor": "Jasneet Ahuja"
     },
     "1418|2026-09-17T10:45:00": {
       "dateTime": "2026-09-17T10:45:00",
@@ -4194,6 +4258,94 @@
       "dateTime": "2026-10-22T14:45:00",
       "doctor": "Jasneet Ahuja"
     },
+    "1418|2026-10-23T09:00:00": {
+      "dateTime": "2026-10-23T09:00:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T09:15:00": {
+      "dateTime": "2026-10-23T09:15:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T09:30:00": {
+      "dateTime": "2026-10-23T09:30:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T09:45:00": {
+      "dateTime": "2026-10-23T09:45:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T10:00:00": {
+      "dateTime": "2026-10-23T10:00:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T10:15:00": {
+      "dateTime": "2026-10-23T10:15:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T10:30:00": {
+      "dateTime": "2026-10-23T10:30:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T10:45:00": {
+      "dateTime": "2026-10-23T10:45:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T11:00:00": {
+      "dateTime": "2026-10-23T11:00:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T11:15:00": {
+      "dateTime": "2026-10-23T11:15:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T11:30:00": {
+      "dateTime": "2026-10-23T11:30:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T11:45:00": {
+      "dateTime": "2026-10-23T11:45:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T12:00:00": {
+      "dateTime": "2026-10-23T12:00:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T12:15:00": {
+      "dateTime": "2026-10-23T12:15:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T12:30:00": {
+      "dateTime": "2026-10-23T12:30:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T12:45:00": {
+      "dateTime": "2026-10-23T12:45:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T13:30:00": {
+      "dateTime": "2026-10-23T13:30:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T13:45:00": {
+      "dateTime": "2026-10-23T13:45:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T14:00:00": {
+      "dateTime": "2026-10-23T14:00:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T14:15:00": {
+      "dateTime": "2026-10-23T14:15:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T14:30:00": {
+      "dateTime": "2026-10-23T14:30:00",
+      "doctor": "Jasneet Ahuja"
+    },
+    "1418|2026-10-23T14:45:00": {
+      "dateTime": "2026-10-23T14:45:00",
+      "doctor": "Jasneet Ahuja"
+    },
     "1421|2026-10-02T15:15:00": {
       "dateTime": "2026-10-02T15:15:00",
       "doctor": "Leisha Williams"
@@ -4588,6 +4740,14 @@
     },
     "1421|2026-10-22T11:45:00": {
       "dateTime": "2026-10-22T11:45:00",
+      "doctor": "Leisha Williams"
+    },
+    "1421|2026-10-23T14:00:00": {
+      "dateTime": "2026-10-23T14:00:00",
+      "doctor": "Leisha Williams"
+    },
+    "1421|2026-10-23T14:30:00": {
+      "dateTime": "2026-10-23T14:30:00",
       "doctor": "Leisha Williams"
     },
     "1422|2026-10-01T12:45:00": {
