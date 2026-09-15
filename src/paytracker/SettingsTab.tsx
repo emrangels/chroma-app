@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { PaySettings, RosterDay } from './types';
-import { WEEKDAY_NAMES } from './utils';
+import { PaySettings } from './types';
+import { WEEKDAY_NAMES, formatTimeRange, newId } from './utils';
 
 interface Props {
   settings: PaySettings;
@@ -17,11 +17,6 @@ export default function SettingsTab({ settings, onChange, onExportAll, onImportF
 
   function set<K extends keyof PaySettings>(key: K, value: PaySettings[K]) {
     onChange({ ...settings, [key]: value });
-  }
-
-  function setRosterDay(index: number, patch: Partial<RosterDay>) {
-    const roster = settings.roster.map((d, i) => (i === index ? { ...d, ...patch } : d));
-    set('roster', roster);
   }
 
   function addHoliday() {
@@ -161,47 +156,101 @@ export default function SettingsTab({ settings, onChange, onExportAll, onImportF
       </div>
 
       <div className="pt-card">
-        <h2>Usual roster</h2>
-        <div className="pt-helptext" style={{ marginTop: -4 }}>Set your normal expected shift per weekday, so "Same as usual" on a shift can auto-fill it.</div>
-        {WEEKDAY_NAMES.map((name, i) => {
-          const day = settings.roster[i];
-          return (
-            <div key={name} style={{ borderBottom: '1px solid #f0f1f4', paddingBottom: 10, marginBottom: 10 }}>
-              <label className="pt-checkbox">
-                <input type="checkbox" checked={day.enabled} onChange={(e) => setRosterDay(i, { enabled: e.target.checked })} />
-                {name}
-              </label>
-              {day.enabled && (
-                <>
-                  <div className="pt-row-2">
-                    <div className="pt-field">
-                      <label>Start</label>
-                      <input type="time" value={day.start} onChange={(e) => setRosterDay(i, { start: e.target.value })} />
-                    </div>
-                    <div className="pt-field">
-                      <label>End</label>
-                      <input type="time" value={day.end} onChange={(e) => setRosterDay(i, { end: e.target.value })} />
-                    </div>
-                  </div>
-                  <div className="pt-row-2">
-                    <div className="pt-field">
-                      <label>Break (mins)</label>
-                      <input type="number" value={day.breakMinutes} onChange={(e) => setRosterDay(i, { breakMinutes: Number(e.target.value) })} />
-                    </div>
-                    <label className="pt-checkbox" style={{ alignSelf: 'center', marginTop: 18 }}>
-                      <input type="checkbox" checked={day.paidBreak} onChange={(e) => setRosterDay(i, { paidBreak: e.target.checked })} />
-                      Break paid
-                    </label>
-                  </div>
-                  <label className="pt-checkbox">
-                    <input type="checkbox" checked={day.parkingCharged} onChange={(e) => setRosterDay(i, { parkingCharged: e.target.checked })} />
-                    Usually charged for parking (amount set in the Parking section below)
-                  </label>
-                </>
-              )}
+        <h2>Usual work days</h2>
+        <div className="pt-helptext" style={{ marginTop: -4 }}>For reference only — which weekdays you're usually rostered on.</div>
+        <div className="pt-btn-row">
+          {WEEKDAY_NAMES.map((name, i) => {
+            const active = settings.usualWorkDays.includes(i);
+            return (
+              <button
+                key={name}
+                type="button"
+                className={`pt-btn pt-btn-sm ${active ? 'pt-btn-primary' : 'pt-btn-secondary'}`}
+                onClick={() => set('usualWorkDays', active ? settings.usualWorkDays.filter((d) => d !== i) : [...settings.usualWorkDays, i].sort())}
+              >
+                {name.slice(0, 3)}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="pt-card">
+        <h2>Shift presets</h2>
+        <div className="pt-helptext" style={{ marginTop: -4 }}>
+          Your standard rostered shift times. When logging a shift, tap one to fill in the expected start/end/break instantly — handy since which shift you're on can change week to week.
+        </div>
+        {settings.shiftPresets.map((preset, i) => (
+          <div key={preset.id} style={{ borderBottom: '1px solid #f0f1f4', paddingBottom: 10, marginBottom: 10 }}>
+            <div className="pt-row-2">
+              <div className="pt-field">
+                <label>Start</label>
+                <input
+                  type="time"
+                  value={preset.start}
+                  onChange={(e) => {
+                    const start = e.target.value;
+                    const presets = settings.shiftPresets.map((p, idx) => (idx === i ? { ...p, start, label: formatTimeRange(start, p.end) } : p));
+                    set('shiftPresets', presets);
+                  }}
+                />
+              </div>
+              <div className="pt-field">
+                <label>End</label>
+                <input
+                  type="time"
+                  value={preset.end}
+                  onChange={(e) => {
+                    const end = e.target.value;
+                    const presets = settings.shiftPresets.map((p, idx) => (idx === i ? { ...p, end, label: formatTimeRange(p.start, end) } : p));
+                    set('shiftPresets', presets);
+                  }}
+                />
+              </div>
             </div>
-          );
-        })}
+            <div className="pt-row-2">
+              <div className="pt-field">
+                <label>Break (mins)</label>
+                <input
+                  type="number"
+                  value={preset.breakMinutes}
+                  onChange={(e) => {
+                    const breakMinutes = Number(e.target.value);
+                    set('shiftPresets', settings.shiftPresets.map((p, idx) => (idx === i ? { ...p, breakMinutes } : p)));
+                  }}
+                />
+              </div>
+              <label className="pt-checkbox" style={{ alignSelf: 'center', marginTop: 18 }}>
+                <input
+                  type="checkbox"
+                  checked={preset.paidBreak}
+                  onChange={(e) => {
+                    const paidBreak = e.target.checked;
+                    set('shiftPresets', settings.shiftPresets.map((p, idx) => (idx === i ? { ...p, paidBreak } : p)));
+                  }}
+                />
+                Break paid
+              </label>
+            </div>
+            <button
+              className="pt-btn pt-btn-danger pt-btn-sm"
+              onClick={() => set('shiftPresets', settings.shiftPresets.filter((_, idx) => idx !== i))}
+            >
+              Remove this preset
+            </button>
+          </div>
+        ))}
+        <button
+          className="pt-btn pt-btn-secondary pt-btn-block"
+          onClick={() =>
+            set('shiftPresets', [
+              ...settings.shiftPresets,
+              { id: newId(), label: formatTimeRange('09:00', '17:00'), start: '09:00', end: '17:00', breakMinutes: settings.mealBreak.defaultMinutes, paidBreak: settings.mealBreak.paidByDefault },
+            ])
+          }
+        >
+          + Add a shift preset
+        </button>
       </div>
 
       <div className="pt-card">
