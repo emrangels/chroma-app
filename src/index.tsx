@@ -2,14 +2,18 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
+import PayTrackerApp from './paytracker/PayTrackerApp';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+
+const isPayTrackerRoute = window.location.pathname.replace(/\/+$/, '') === '/pay-tracker';
+
 root.render(
   <React.StrictMode>
-    <App />
+    {isPayTrackerRoute ? <PayTrackerApp /> : <App />}
   </React.StrictMode>
 );
 
