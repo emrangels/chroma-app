@@ -2,6 +2,8 @@ export type DayType = 'weekday' | 'saturday' | 'sunday' | 'publicHoliday';
 
 export type LeaveType = 'annual' | 'personal' | 'unpaid' | 'other';
 
+export type WeekdayShiftCategory = 'ordinary' | 'afternoon' | 'night';
+
 export interface TimeBlock {
   start: string; // "09:00"
   end: string; // "17:00" (may be past midnight conceptually, but we assume same-day shifts)
@@ -15,24 +17,28 @@ export interface RosterDay {
   end: string;
   breakMinutes: number;
   paidBreak: boolean;
-  parkingPaid: boolean;
+  parkingCharged: boolean;
   parkingAmount: number;
 }
 
 export interface OvertimeRules {
   dailyThresholdHours: number | null;
-  dailyMultiplier: number;
   fortnightThresholdHours: number | null;
-  fortnightMultiplier: number;
+  weekdaySaturdayTier1Multiplier: number; // first block of OT, Mon-Sat
+  weekdaySaturdayTier1Hours: number; // size of that first block, e.g. 2 hours
+  weekdaySaturdayTier2Multiplier: number; // OT beyond the first block, Mon-Sat
+  sundayMultiplier: number; // flat OT rate on Sunday
+  publicHolidayMultiplier: number; // flat OT rate on a public holiday
 }
 
 export interface LeaveSettings {
   annualAccrualHoursPerHourWorked: number;
   personalAccrualHoursPerHourWorked: number;
+  annualLeaveLoadingPercent: number;
   openingAnnualBalanceHours: number;
   openingPersonalBalanceHours: number;
   openingBalanceAsOfDate: string; // ISO date
-  accrueOnLeaveHours: boolean;
+  accrueOnLeaveHoursTaken: boolean;
 }
 
 export interface PaySettings {
@@ -44,9 +50,10 @@ export interface PaySettings {
     saturday: number;
     sunday: number;
     publicHoliday: number;
-    evening: number;
+    afternoonShift: number;
+    nightShift: number;
   };
-  eveningStartTime: string | null; // e.g. "18:00", null disables evening rate
+  /** Afternoon/night shift loadings only apply Mon-Fri; disable by setting both to 1. */
   overtime: OvertimeRules;
   mealBreak: {
     defaultMinutes: number;
@@ -69,8 +76,10 @@ export interface ShiftEntry {
   notWorked: boolean;
   expected: TimeBlock | null;
   worked: TimeBlock | null;
+  /** Hours worked through/instead of an unpaid meal break because the employee wasn't released (EBA cl.30.2) */
+  missedMealHours: number;
   leave: { type: LeaveType; hours: number } | null;
-  parkingPaid: boolean;
+  parkingCharged: boolean;
   parkingAmount: number;
   notes: string;
 }
@@ -93,27 +102,32 @@ export interface PayslipRecord {
 
 export interface HourBreakdown {
   ordinaryHours: number;
-  eveningHours: number;
+  afternoonHours: number;
+  nightHours: number;
   saturdayHours: number;
   sundayHours: number;
   publicHolidayHours: number;
-  /** Subset of the hours above that exceed the daily OT threshold (informational, used to add an OT premium). */
-  dailyOvertimeHours: number;
-  /** Subset of hours in this shift attributed to fortnightly OT once the fortnight threshold is crossed. */
-  fortnightOvertimeHours: number;
+  /** Hours worked through a meal break without release, paid at the OT rate but still "ordinary hours" for leave accrual. */
+  missedMealOvertimeHours: number;
+  /** Hours in excess of the daily/fortnightly ordinary-hours cap, paid at the OT rate and excluded from leave accrual. */
+  overtimeHours: number;
   totalPaidHours: number;
 }
 
 export interface ShiftCalculation {
   shift: ShiftEntry;
   dayType: DayType;
+  weekdayCategory: WeekdayShiftCategory | null;
   hours: HourBreakdown;
-  basePay: number;
-  overtimePremiumPay: number;
+  ordinaryPay: number;
+  overtimePay: number;
+  missedMealPay: number;
   wagePay: number;
-  allowancePay: number;
-  totalPay: number;
+  parkingDeduction: number;
   leaveHours: number;
   leavePay: number;
+  /** Hours counted toward leave accrual from this shift (excludes true overtime hours). */
+  accrualHours: number;
+  totalPay: number;
   varianceMinutes: number | null; // difference between expected and worked, if both present
 }

@@ -1,5 +1,5 @@
 import { PaySettings, ShiftEntry } from './types';
-import { calculateShift, dateToISO, FortnightPeriod, getFortnightPeriod, parseISODate } from './calculations';
+import { calculateShift, dateToISO, FortnightPeriod, getFortnightPeriod, parseISODate, round2 } from './calculations';
 
 export interface LeavePeriodLedger {
   period: FortnightPeriod;
@@ -14,10 +14,6 @@ export interface LeavePeriodLedger {
   unpaidLeaveHours: number;
 }
 
-function round2(n: number): number {
-  return Math.round(n * 100) / 100;
-}
-
 function periodForIndex(index: number, anchorIso: string): FortnightPeriod {
   const anchor = parseISODate(anchorIso);
   const dayMs = 24 * 60 * 60 * 1000;
@@ -28,7 +24,9 @@ function periodForIndex(index: number, anchorIso: string): FortnightPeriod {
 
 /**
  * Builds a running fortnight-by-fortnight leave ledger from the opening balance
- * date through to the latest shift (or today, whichever is later).
+ * date through to the latest shift (or today, whichever is later). Accrual is based
+ * on ordinary hours worked or paid as leave (EBA cl.34.1(c)) — this excludes true
+ * overtime hours but includes missed-meal-break hours, matching real payslip figures.
  */
 export function buildLeaveLedger(shifts: ShiftEntry[], settings: PaySettings): LeavePeriodLedger[] {
   const anchor = settings.payCycleAnchorDate;
@@ -64,11 +62,8 @@ export function buildLeaveLedger(shifts: ShiftEntry[], settings: PaySettings): L
 
     for (const shift of periodShifts) {
       const calc = calculateShift(shift, settings);
-      hoursForAccrual += calc.hours.totalPaidHours;
+      hoursForAccrual += calc.accrualHours;
       if (shift.leave) {
-        if (settings.leave.accrueOnLeaveHours && shift.leave.type !== 'unpaid') {
-          hoursForAccrual += shift.leave.hours;
-        }
         if (shift.leave.type === 'annual') annualTaken += shift.leave.hours;
         else if (shift.leave.type === 'personal') personalTaken += shift.leave.hours;
         else if (shift.leave.type === 'unpaid') unpaidLeaveHours += shift.leave.hours;

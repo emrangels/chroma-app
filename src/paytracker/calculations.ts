@@ -5,6 +5,7 @@ import {
   ShiftCalculation,
   ShiftEntry,
   TimeBlock,
+  WeekdayShiftCategory,
 } from './types';
 
 export function timeToMinutes(time: string): number {
@@ -12,8 +13,12 @@ export function timeToMinutes(time: string): number {
   return h * 60 + (m || 0);
 }
 
+export function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
 export function minutesToHours(mins: number): number {
-  return Math.round((mins / 60) * 100) / 100;
+  return round2(mins / 60);
 }
 
 /** Duration of a shift in minutes, handling a shift that runs past midnight. */
@@ -52,204 +57,216 @@ export function classifyDayType(iso: string, settings: PaySettings, override: Da
 }
 
 /**
- * Splits the paid minutes of a weekday shift across ordinary vs. evening-rate
- * time, based on settings.eveningStartTime. Non-weekday day types are paid
- * as a single flat category and don't need splitting.
+ * Classifies a whole weekday shift per EBA cl.32.1: afternoon shift = starts >=12:00
+ * and finishes after 18:00 same day; night shift = starts >=18:00 (and, given shifts
+ * are capped at ~12hrs, necessarily finishes well before 7:30am the next day).
  */
-function splitWeekdayMinutes(block: TimeBlock, settings: PaySettings): { ordinaryMin: number; eveningMin: number } {
+export function classifyWeekdayShift(block: TimeBlock): WeekdayShiftCategory {
   const startMin = timeToMinutes(block.start);
   let endMin = timeToMinutes(block.end);
   if (endMin <= startMin) endMin += 24 * 60;
 
-  if (!settings.eveningStartTime) {
-    const paidMin = blockPaidMinutes(block);
-    return { ordinaryMin: paidMin, eveningMin: 0 };
-  }
-
-  const eveningStart = timeToMinutes(settings.eveningStartTime);
-  const workedEveningMin = Math.max(0, endMin - Math.max(startMin, eveningStart));
-  const workedOrdinaryMin = Math.max(0, endMin - startMin) - workedEveningMin;
-
-  // Remove unpaid break time proportionally isn't precise enough; instead
-  // deduct the unpaid break from ordinary time first, then evening, since
-  // breaks are most commonly scheduled during ordinary hours.
-  const unpaidBreak = block.paidBreak ? 0 : block.breakMinutes;
-  let remainingBreak = unpaidBreak;
-  let ordinaryMin = workedOrdinaryMin;
-  let eveningMin = workedEveningMin;
-  const takeFromOrdinary = Math.min(remainingBreak, ordinaryMin);
-  ordinaryMin -= takeFromOrdinary;
-  remainingBreak -= takeFromOrdinary;
-  const takeFromEvening = Math.min(remainingBreak, eveningMin);
-  eveningMin -= takeFromEvening;
-
-  return { ordinaryMin: Math.max(0, ordinaryMin), eveningMin: Math.max(0, eveningMin) };
+  if (startMin >= 18 * 60) return 'night';
+  if (startMin >= 12 * 60 && endMin > 18 * 60) return 'afternoon';
+  return 'ordinary';
 }
 
-export function computeHourBreakdown(block: TimeBlock, dayType: DayType, settings: PaySettings): HourBreakdown {
-  const breakdown: HourBreakdown = {
+function emptyHours(): HourBreakdown {
+  return {
     ordinaryHours: 0,
-    eveningHours: 0,
+    afternoonHours: 0,
+    nightHours: 0,
     saturdayHours: 0,
     sundayHours: 0,
     publicHolidayHours: 0,
-    dailyOvertimeHours: 0,
-    fortnightOvertimeHours: 0,
+    missedMealOvertimeHours: 0,
+    overtimeHours: 0,
     totalPaidHours: 0,
   };
-
-  if (dayType === 'weekday') {
-    const { ordinaryMin, eveningMin } = splitWeekdayMinutes(block, settings);
-    breakdown.ordinaryHours = minutesToHours(ordinaryMin);
-    breakdown.eveningHours = minutesToHours(eveningMin);
-  } else if (dayType === 'saturday') {
-    breakdown.saturdayHours = minutesToHours(blockPaidMinutes(block));
-  } else if (dayType === 'sunday') {
-    breakdown.sundayHours = minutesToHours(blockPaidMinutes(block));
-  } else {
-    breakdown.publicHolidayHours = minutesToHours(blockPaidMinutes(block));
-  }
-
-  breakdown.totalPaidHours =
-    breakdown.ordinaryHours + breakdown.eveningHours + breakdown.saturdayHours + breakdown.sundayHours + breakdown.publicHolidayHours;
-
-  const dailyThreshold = settings.overtime.dailyThresholdHours;
-  if (dailyThreshold != null && breakdown.totalPaidHours > dailyThreshold) {
-    breakdown.dailyOvertimeHours = Math.round((breakdown.totalPaidHours - dailyThreshold) * 100) / 100;
-  }
-
-  return breakdown;
 }
 
-/** Base wage pay (before any overtime premium) for a single hour breakdown. */
-export function computeBasePay(hours: HourBreakdown, settings: PaySettings): number {
+/** The single per-hour multiplier that applies to this shift's non-overtime, non-missed-meal hours. */
+export function categoryMultiplier(dayType: DayType, weekdayCategory: WeekdayShiftCategory | null, settings: PaySettings): number {
+  if (dayType === 'saturday') return settings.multipliers.saturday;
+  if (dayType === 'sunday') return settings.multipliers.sunday;
+  if (dayType === 'publicHoliday') return settings.multipliers.publicHoliday;
+  if (weekdayCategory === 'afternoon') return settings.multipliers.afternoonShift;
+  if (weekdayCategory === 'night') return settings.multipliers.nightShift;
+  return 1;
+}
+
+function categoryHours(hours: HourBreakdown): number {
+  return hours.ordinaryHours + hours.afternoonHours + hours.nightHours + hours.saturdayHours + hours.sundayHours + hours.publicHolidayHours;
+}
+
+function setCategoryHours(hours: HourBreakdown, dayType: DayType, weekdayCategory: WeekdayShiftCategory | null, value: number): HourBreakdown {
+  const next = { ...hours, ordinaryHours: 0, afternoonHours: 0, nightHours: 0, saturdayHours: 0, sundayHours: 0, publicHolidayHours: 0 };
+  if (dayType === 'saturday') next.saturdayHours = value;
+  else if (dayType === 'sunday') next.sundayHours = value;
+  else if (dayType === 'publicHoliday') next.publicHolidayHours = value;
+  else if (weekdayCategory === 'afternoon') next.afternoonHours = value;
+  else if (weekdayCategory === 'night') next.nightHours = value;
+  else next.ordinaryHours = value;
+  return next;
+}
+
+/**
+ * EBA cl.31.1: overtime is 150% for the first 2 hours then 200% beyond on Mon-Sat,
+ * a flat 200% on Sunday, and a flat 250% on a public holiday. Applied fresh per shift.
+ */
+export function overtimeRatePay(hours: number, dayType: DayType, settings: PaySettings): number {
+  if (hours <= 0) return 0;
   const rate = settings.baseHourlyRate;
-  const casual = settings.employmentType === 'casual';
-  const ordinaryLoading = casual ? 1 + settings.casualLoadingPercent / 100 : 1;
-  const penaltyLoading = casual && settings.applyCasualLoadingToPenalties ? 1 + settings.casualLoadingPercent / 100 : 1;
-
-  const ordinaryPay = hours.ordinaryHours * rate * ordinaryLoading;
-  const eveningPay = hours.eveningHours * rate * settings.multipliers.evening * penaltyLoading;
-  const saturdayPay = hours.saturdayHours * rate * settings.multipliers.saturday * penaltyLoading;
-  const sundayPay = hours.sundayHours * rate * settings.multipliers.sunday * penaltyLoading;
-  const publicHolidayPay = hours.publicHolidayHours * rate * settings.multipliers.publicHoliday * penaltyLoading;
-
-  return ordinaryPay + eveningPay + saturdayPay + sundayPay + publicHolidayPay;
+  const ot = settings.overtime;
+  if (dayType === 'sunday') return hours * rate * ot.sundayMultiplier;
+  if (dayType === 'publicHoliday') return hours * rate * ot.publicHolidayMultiplier;
+  const tier1Hours = Math.min(hours, ot.weekdaySaturdayTier1Hours);
+  const tier2Hours = Math.max(0, hours - ot.weekdaySaturdayTier1Hours);
+  return tier1Hours * rate * ot.weekdaySaturdayTier1Multiplier + tier2Hours * rate * ot.weekdaySaturdayTier2Multiplier;
 }
 
-/** Extra premium paid on top of base pay for hours beyond the daily OT threshold. */
-export function computeDailyOvertimePremium(hours: HourBreakdown, settings: PaySettings): number {
-  if (hours.dailyOvertimeHours <= 0) return 0;
-  const extraMultiplier = Math.max(0, settings.overtime.dailyMultiplier - 1);
-  return hours.dailyOvertimeHours * settings.baseHourlyRate * extraMultiplier;
-}
-
-/** Extra premium paid on top of base pay for hours beyond the fortnightly OT threshold. */
-export function computeFortnightOvertimePremium(fortnightOvertimeHours: number, settings: PaySettings): number {
-  if (fortnightOvertimeHours <= 0) return 0;
-  const extraMultiplier = Math.max(0, settings.overtime.fortnightMultiplier - 1);
-  return fortnightOvertimeHours * settings.baseHourlyRate * extraMultiplier;
+function casualLoadingFactor(settings: PaySettings, isPenaltyRate: boolean): number {
+  if (settings.employmentType !== 'casual') return 1;
+  if (isPenaltyRate && !settings.applyCasualLoadingToPenalties) return 1;
+  return 1 + settings.casualLoadingPercent / 100;
 }
 
 export function shiftVarianceMinutes(shift: ShiftEntry): number | null {
   if (!shift.expected || !shift.worked) return null;
-  const expectedMin = blockPaidMinutes(shift.expected);
-  const workedMin = blockPaidMinutes(shift.worked);
-  return workedMin - expectedMin;
+  return blockPaidMinutes(shift.worked) - blockPaidMinutes(shift.expected);
 }
 
-/**
- * Calculates a single shift in isolation (no cross-shift fortnightly OT applied yet;
- * see applyFortnightOvertime for the second pass across a whole period).
- */
+/** Calculates a single shift (before any fortnight-level overtime reallocation). */
 export function calculateShift(shift: ShiftEntry, settings: PaySettings): ShiftCalculation {
   const dayType = classifyDayType(shift.date, settings, shift.dayTypeOverride);
-  const emptyHours: HourBreakdown = {
-    ordinaryHours: 0,
-    eveningHours: 0,
-    saturdayHours: 0,
-    sundayHours: 0,
-    publicHolidayHours: 0,
-    dailyOvertimeHours: 0,
-    fortnightOvertimeHours: 0,
-    totalPaidHours: 0,
-  };
 
   const leaveHours = shift.leave?.hours ?? 0;
-  const leavePay = shift.leave && shift.leave.type !== 'unpaid' ? leaveHours * settings.baseHourlyRate : 0;
+  let leavePay = 0;
+  if (shift.leave) {
+    if (shift.leave.type === 'annual') leavePay = leaveHours * settings.baseHourlyRate * (1 + settings.leave.annualLeaveLoadingPercent / 100);
+    else if (shift.leave.type === 'personal' || shift.leave.type === 'other') leavePay = leaveHours * settings.baseHourlyRate;
+    // unpaid leave: $0
+  }
+  const accrualLeaveHours = settings.leave.accrueOnLeaveHoursTaken && shift.leave && shift.leave.type !== 'unpaid' ? leaveHours : 0;
 
   if (shift.notWorked || !shift.worked) {
-    const allowancePay = 0;
     return {
       shift,
       dayType,
-      hours: emptyHours,
-      basePay: 0,
-      overtimePremiumPay: 0,
+      weekdayCategory: null,
+      hours: emptyHours(),
+      ordinaryPay: 0,
+      overtimePay: 0,
+      missedMealPay: 0,
       wagePay: 0,
-      allowancePay,
-      totalPay: leavePay,
+      parkingDeduction: 0,
       leaveHours,
       leavePay,
+      accrualHours: accrualLeaveHours,
+      totalPay: leavePay,
       varianceMinutes: null,
     };
   }
 
-  const hours = computeHourBreakdown(shift.worked, dayType, settings);
-  const basePay = computeBasePay(hours, settings);
-  const dailyOtPremium = computeDailyOvertimePremium(hours, settings);
-  const allowancePay = shift.parkingPaid ? shift.parkingAmount : 0;
+  const weekdayCategory = dayType === 'weekday' ? classifyWeekdayShift(shift.worked) : null;
+  const totalPaidMinutes = blockPaidMinutes(shift.worked);
+  const totalPaidHours = minutesToHours(totalPaidMinutes);
+
+  const missedMealHours = Math.min(Math.max(0, shift.missedMealHours || 0), totalPaidHours);
+  let dayCategoryHours = round2(totalPaidHours - missedMealHours);
+
+  // EBA cl.24.2: shifts longer than the daily threshold are overtime for the excess.
+  let overtimeHours = 0;
+  const dailyThreshold = settings.overtime.dailyThresholdHours;
+  if (dailyThreshold != null && totalPaidHours > dailyThreshold) {
+    overtimeHours = round2(Math.min(dayCategoryHours, totalPaidHours - dailyThreshold));
+    dayCategoryHours = round2(dayCategoryHours - overtimeHours);
+  }
+
+  let hours = setCategoryHours(emptyHours(), dayType, weekdayCategory, dayCategoryHours);
+  hours.missedMealOvertimeHours = missedMealHours;
+  hours.overtimeHours = overtimeHours;
+  hours.totalPaidHours = totalPaidHours;
+
+  const mult = categoryMultiplier(dayType, weekdayCategory, settings);
+  const isPenaltyCategory = mult !== 1;
+  const ordinaryPay = dayCategoryHours * settings.baseHourlyRate * mult * casualLoadingFactor(settings, isPenaltyCategory);
+  const missedMealPay = overtimeRatePay(missedMealHours, dayType, settings) * casualLoadingFactor(settings, true);
+  const overtimePay = overtimeRatePay(overtimeHours, dayType, settings) * casualLoadingFactor(settings, true);
+
+  const parkingDeduction = shift.parkingCharged ? shift.parkingAmount : 0;
+  const accrualHours = round2(dayCategoryHours + missedMealHours + accrualLeaveHours);
 
   return {
     shift,
     dayType,
+    weekdayCategory,
     hours,
-    basePay,
-    overtimePremiumPay: dailyOtPremium,
-    wagePay: basePay + dailyOtPremium,
-    allowancePay,
-    totalPay: basePay + dailyOtPremium + allowancePay + leavePay,
+    ordinaryPay: round2(ordinaryPay),
+    overtimePay: round2(overtimePay),
+    missedMealPay: round2(missedMealPay),
+    wagePay: round2(ordinaryPay + overtimePay + missedMealPay),
+    parkingDeduction,
     leaveHours,
-    leavePay,
+    leavePay: round2(leavePay),
+    accrualHours,
+    totalPay: round2(ordinaryPay + overtimePay + missedMealPay + leavePay),
     varianceMinutes: shiftVarianceMinutes(shift),
   };
 }
 
 /**
- * Second pass: once all shifts in a fortnight are calculated, check whether total
- * paid hours exceed the fortnightly OT threshold and, if so, attribute the excess
- * (taken from the chronologically-last hours worked) as fortnight OT and add the premium.
+ * Second pass: EBA cl.24.1 also caps ordinary hours at 76/fortnight. Once all shifts in a
+ * fortnight are calculated, reallocate any hours above that cap (taken from the
+ * chronologically-last shifts) from their day-type category into overtime.
  */
 export function applyFortnightOvertime(calcs: ShiftCalculation[], settings: PaySettings): ShiftCalculation[] {
   const threshold = settings.overtime.fortnightThresholdHours;
   if (threshold == null) return calcs;
 
-  const totalPaidHours = calcs.reduce((sum, c) => sum + c.hours.totalPaidHours, 0);
-  let excess = Math.round((totalPaidHours - threshold) * 100) / 100;
+  const nonOvertimeTotal = calcs.reduce((sum, c) => sum + categoryHours(c.hours), 0);
+  let excess = round2(nonOvertimeTotal - threshold);
   if (excess <= 0) return calcs;
 
-  // Walk shifts latest-first, attributing excess hours to fortnight OT.
   const sorted = [...calcs].sort((a, b) => (a.shift.date < b.shift.date ? 1 : -1));
-  const updates = new Map<string, number>();
+  const takeMap = new Map<string, number>();
   for (const c of sorted) {
     if (excess <= 0) break;
-    const take = Math.min(excess, c.hours.totalPaidHours);
+    const available = categoryHours(c.hours);
+    const take = round2(Math.min(excess, available));
     if (take > 0) {
-      updates.set(c.shift.id, take);
-      excess = Math.round((excess - take) * 100) / 100;
+      takeMap.set(c.shift.id, take);
+      excess = round2(excess - take);
     }
   }
 
   return calcs.map((c) => {
-    const fortnightOvertimeHours = updates.get(c.shift.id) ?? 0;
-    if (fortnightOvertimeHours <= 0) return c;
-    const premium = computeFortnightOvertimePremium(fortnightOvertimeHours, settings);
+    const take = takeMap.get(c.shift.id) ?? 0;
+    if (take <= 0) return c;
+
+    const mult = categoryMultiplier(c.dayType, c.weekdayCategory, settings);
+    const isPenaltyCategory = mult !== 1;
+    const removedOrdinaryPay = take * settings.baseHourlyRate * mult * casualLoadingFactor(settings, isPenaltyCategory);
+
+    const newCategoryHours = round2(categoryHours(c.hours) - take);
+    const newOvertimeHours = round2(c.hours.overtimeHours + take);
+    const hours = setCategoryHours(c.hours, c.dayType, c.weekdayCategory, newCategoryHours);
+    hours.missedMealOvertimeHours = c.hours.missedMealOvertimeHours;
+    hours.overtimeHours = newOvertimeHours;
+    hours.totalPaidHours = c.hours.totalPaidHours;
+
+    const newOvertimePay = round2(overtimeRatePay(newOvertimeHours, c.dayType, settings) * casualLoadingFactor(settings, true));
+    const ordinaryPay = round2(c.ordinaryPay - removedOrdinaryPay);
+    const accrualHours = round2(c.accrualHours - take);
+
     return {
       ...c,
-      hours: { ...c.hours, fortnightOvertimeHours },
-      overtimePremiumPay: c.overtimePremiumPay + premium,
-      wagePay: c.wagePay + premium,
-      totalPay: c.totalPay + premium,
+      hours,
+      ordinaryPay,
+      overtimePay: newOvertimePay,
+      wagePay: round2(ordinaryPay + newOvertimePay + c.missedMealPay),
+      accrualHours,
+      totalPay: round2(ordinaryPay + newOvertimePay + c.missedMealPay + c.leavePay),
     };
   });
 }
@@ -269,8 +286,4 @@ export function getFortnightPeriod(iso: string, anchorIso: string): FortnightPer
   const startDate = new Date(anchor.getTime() + index * 14 * dayMs);
   const endDate = new Date(startDate.getTime() + 13 * dayMs);
   return { index, start: dateToISO(startDate), end: dateToISO(endDate) };
-}
-
-export function isSameOrAfter(a: string, b: string): boolean {
-  return a >= b;
 }

@@ -36,19 +36,26 @@ export default function FortnightsTab({ shifts, settings, payslips, onSavePaysli
     return calcs.reduce(
       (acc, c) => ({
         ordinary: acc.ordinary + c.hours.ordinaryHours,
-        evening: acc.evening + c.hours.eveningHours,
+        afternoon: acc.afternoon + c.hours.afternoonHours,
+        night: acc.night + c.hours.nightHours,
         saturday: acc.saturday + c.hours.saturdayHours,
         sunday: acc.sunday + c.hours.sundayHours,
         publicHoliday: acc.publicHoliday + c.hours.publicHolidayHours,
-        overtime: acc.overtime + c.hours.dailyOvertimeHours + c.hours.fortnightOvertimeHours,
+        missedMeal: acc.missedMeal + c.hours.missedMealOvertimeHours,
+        overtime: acc.overtime + c.hours.overtimeHours,
         totalPaidHours: acc.totalPaidHours + c.hours.totalPaidHours,
         leaveHours: acc.leaveHours + c.leaveHours,
-        wagePay: acc.wagePay + c.wagePay,
-        allowancePay: acc.allowancePay + c.allowancePay,
+        ordinaryPay: acc.ordinaryPay + c.ordinaryPay,
+        overtimePay: acc.overtimePay + c.overtimePay,
+        missedMealPay: acc.missedMealPay + c.missedMealPay,
         leavePay: acc.leavePay + c.leavePay,
+        parkingDeduction: acc.parkingDeduction + c.parkingDeduction,
         totalPay: acc.totalPay + c.totalPay,
       }),
-      { ordinary: 0, evening: 0, saturday: 0, sunday: 0, publicHoliday: 0, overtime: 0, totalPaidHours: 0, leaveHours: 0, wagePay: 0, allowancePay: 0, leavePay: 0, totalPay: 0 }
+      {
+        ordinary: 0, afternoon: 0, night: 0, saturday: 0, sunday: 0, publicHoliday: 0, missedMeal: 0, overtime: 0,
+        totalPaidHours: 0, leaveHours: 0, ordinaryPay: 0, overtimePay: 0, missedMealPay: 0, leavePay: 0, parkingDeduction: 0, totalPay: 0,
+      }
     );
   }, [calcs]);
 
@@ -74,15 +81,17 @@ export default function FortnightsTab({ shifts, settings, payslips, onSavePaysli
   }
 
   function exportCSV() {
-    const header = ['Date', 'Day type', 'Expected', 'Worked', 'Paid hours', 'Leave', 'Parking', 'Total pay'];
+    const header = ['Date', 'Day type', 'Expected', 'Worked', 'Paid hours', 'Missed meal hrs', 'OT hrs', 'Leave', 'Parking charge', 'Gross pay'];
     const rows = calcs.map((c) => [
       c.shift.date,
       dayTypeLabel(c.dayType),
       c.shift.expected ? `${c.shift.expected.start}-${c.shift.expected.end}` : '',
       c.shift.worked ? `${c.shift.worked.start}-${c.shift.worked.end}` : 'Not worked',
       c.hours.totalPaidHours.toString(),
+      c.hours.missedMealOvertimeHours.toString(),
+      c.hours.overtimeHours.toString(),
       c.shift.leave ? `${c.shift.leave.hours}h ${c.shift.leave.type}` : '',
-      c.shift.parkingPaid ? c.shift.parkingAmount.toString() : '',
+      c.shift.parkingCharged ? c.shift.parkingAmount.toString() : '',
       c.totalPay.toFixed(2),
     ]);
     const csv = [header, ...rows].map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
@@ -112,14 +121,22 @@ export default function FortnightsTab({ shifts, settings, payslips, onSavePaysli
       <div className="pt-card">
         <h2>Breakdown</h2>
         <div className="pt-row"><span>Ordinary hours</span><span>{formatHours(totals.ordinary)}</span></div>
-        <div className="pt-row"><span>Evening hours</span><span>{formatHours(totals.evening)}</span></div>
+        <div className="pt-row"><span>Afternoon shift hours</span><span>{formatHours(totals.afternoon)}</span></div>
+        <div className="pt-row"><span>Night shift hours</span><span>{formatHours(totals.night)}</span></div>
         <div className="pt-row"><span>Saturday hours</span><span>{formatHours(totals.saturday)}</span></div>
         <div className="pt-row"><span>Sunday hours</span><span>{formatHours(totals.sunday)}</span></div>
         <div className="pt-row"><span>Public holiday hours</span><span>{formatHours(totals.publicHoliday)}</span></div>
-        <div className="pt-row"><span>Wages (incl. OT premium)</span><span>{formatMoney(totals.wagePay)}</span></div>
-        <div className="pt-row"><span>Allowances (parking etc.)</span><span>{formatMoney(totals.allowancePay)}</span></div>
+        <div className="pt-row"><span>Missed meal break hours</span><span>{formatHours(totals.missedMeal)}</span></div>
+        <div className="pt-row"><span>Overtime hours</span><span>{formatHours(totals.overtime)}</span></div>
+        <div className="pt-divider" />
+        <div className="pt-row"><span>Ordinary + shift/weekend pay</span><span>{formatMoney(totals.ordinaryPay)}</span></div>
+        <div className="pt-row"><span>Missed meal break pay</span><span>{formatMoney(totals.missedMealPay)}</span></div>
+        <div className="pt-row"><span>Overtime pay</span><span>{formatMoney(totals.overtimePay)}</span></div>
         <div className="pt-row"><span>Leave paid</span><span>{formatMoney(totals.leavePay)}</span></div>
         <div className="pt-row"><strong>Total estimated gross</strong><strong>{formatMoney(totals.totalPay)}</strong></div>
+        {totals.parkingDeduction > 0 && (
+          <div className="pt-row"><span>Parking charged (not part of gross)</span><span>-{formatMoney(totals.parkingDeduction)}</span></div>
+        )}
       </div>
 
       <div className="pt-card">
@@ -129,7 +146,7 @@ export default function FortnightsTab({ shifts, settings, payslips, onSavePaysli
           <input type="number" step="0.01" value={actualPay} onChange={(e) => setActualPay(e.target.value)} onBlur={savePayslipAmount} placeholder="e.g. 2450.30" />
         </div>
         {variance != null && (
-          <div className={Math.abs(variance) < 1 ? 'pt-inline-note' : 'pt-inline-note'} style={{ background: Math.abs(variance) < 1 ? '#dcfce7' : '#fdeceb', color: Math.abs(variance) < 1 ? '#166534' : '#b42318' }}>
+          <div className="pt-inline-note" style={{ background: Math.abs(variance) < 1 ? '#dcfce7' : '#fdeceb', color: Math.abs(variance) < 1 ? '#166534' : '#b42318' }}>
             {Math.abs(variance) < 1
               ? 'Matches your estimate — looks correct.'
               : `Payslip is ${variance > 0 ? formatMoney(variance) + ' more' : formatMoney(-variance) + ' less'} than estimated. Worth checking your payslip line items against the breakdown above.`}

@@ -7,7 +7,7 @@ function defaultRosterDay(): RosterDay {
     end: '17:00',
     breakMinutes: 30,
     paidBreak: false,
-    parkingPaid: false,
+    parkingCharged: false,
     parkingAmount: 0,
   };
 }
@@ -25,6 +25,7 @@ export const DEFAULT_PUBLIC_HOLIDAYS: string[] = [
   '2025-01-27', // Australia Day (observed)
   '2025-04-18', // Good Friday
   '2025-04-19', // Easter Saturday
+  '2025-04-20', // Easter Sunday
   '2025-04-21', // Easter Monday
   '2025-04-25', // Anzac Day
   '2025-12-25', // Christmas Day
@@ -33,30 +34,39 @@ export const DEFAULT_PUBLIC_HOLIDAYS: string[] = [
   '2026-01-26', // Australia Day
   '2026-04-03', // Good Friday
   '2026-04-04', // Easter Saturday
+  '2026-04-05', // Easter Sunday
   '2026-04-06', // Easter Monday
   '2026-04-25', // Anzac Day (Saturday)
   '2026-12-25', // Christmas Day
   '2026-12-28', // Boxing Day (observed)
 ];
 
+/**
+ * Defaults are set to the Eastwood Private Hospital Enterprise Agreement 2025
+ * (clauses 24, 29, 31, 32, 34, 35, 37) as confirmed against real payslips.
+ * Everything below is still editable in Settings.
+ */
 export function defaultSettings(): PaySettings {
   return {
     employmentType: 'permanent',
-    baseHourlyRate: 35,
+    baseHourlyRate: 51.38,
     casualLoadingPercent: 25,
     applyCasualLoadingToPenalties: false,
     multipliers: {
-      saturday: 1.25,
-      sunday: 1.5,
-      publicHoliday: 2.5,
-      evening: 1.125,
+      saturday: 1.5, // EBA cl.29.1
+      sunday: 1.75, // EBA cl.29.2
+      publicHoliday: 2.0, // EBA cl.35.1(a) — ordinary hours worked on a public holiday
+      afternoonShift: 1.125, // EBA cl.32.2 — shift starts >=12pm and finishes after 6pm, Mon-Fri
+      nightShift: 1.15, // EBA cl.32.3 — shift starts >=6pm and finishes before 7:30am, Mon-Fri
     },
-    eveningStartTime: '18:00',
     overtime: {
-      dailyThresholdHours: 10,
-      dailyMultiplier: 1.5,
-      fortnightThresholdHours: 76,
-      fortnightMultiplier: 1.5,
+      dailyThresholdHours: 10, // EBA cl.24.2 — max ordinary hours per shift
+      fortnightThresholdHours: 76, // EBA cl.24.1
+      weekdaySaturdayTier1Multiplier: 1.5, // EBA cl.31.1(a)(i) — first 2 hours, Mon-Sat
+      weekdaySaturdayTier1Hours: 2,
+      weekdaySaturdayTier2Multiplier: 2.0, // EBA cl.31.1(a)(i) — beyond 2 hours, Mon-Sat
+      sundayMultiplier: 2.0, // EBA cl.31.1(a)(ii)
+      publicHolidayMultiplier: 2.5, // EBA cl.31.1(a)(iii)
     },
     mealBreak: {
       defaultMinutes: 30,
@@ -66,14 +76,18 @@ export function defaultSettings(): PaySettings {
       defaultAmount: 0,
     },
     leave: {
-      // NES defaults: 4 weeks annual leave/yr = 4/52 hours accrued per hour worked;
-      // 10 days personal leave/yr = 2/52 hours accrued per hour worked.
-      annualAccrualHoursPerHourWorked: 4 / 52,
+      // EBA cl.34.1: 5 weeks/yr (190h) for a day worker, 6 weeks/yr (228h) for a shiftworker
+      // (rostered 7 days/wk and regularly works weekends) — change to 6/52 if that applies to you.
+      annualAccrualHoursPerHourWorked: 5 / 52,
+      // EBA cl.37.1: 10 days personal/carer's leave per year.
       personalAccrualHoursPerHourWorked: 2 / 52,
+      annualLeaveLoadingPercent: 17.5, // EBA cl.34.5
       openingAnnualBalanceHours: 0,
       openingPersonalBalanceHours: 0,
       openingBalanceAsOfDate: new Date().toISOString().slice(0, 10),
-      accrueOnLeaveHours: false,
+      // EBA cl.34.1(c)/NES: leave accrues on ordinary hours, which includes hours
+      // paid while on leave — confirmed against real payslip accrual figures.
+      accrueOnLeaveHoursTaken: true,
     },
     payCycleAnchorDate: '2025-01-06',
     publicHolidays: DEFAULT_PUBLIC_HOLIDAYS,
@@ -83,7 +97,7 @@ export function defaultSettings(): PaySettings {
 
 export function emptyData(): PayTrackerData {
   return {
-    version: 1,
+    version: 2,
     settings: defaultSettings(),
     shifts: [],
     payslips: [],

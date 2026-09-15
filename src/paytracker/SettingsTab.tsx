@@ -40,7 +40,7 @@ export default function SettingsTab({ settings, onChange, onExportAll, onImportF
       <div className="pt-card">
         <h2>Pay rates</h2>
         <div className="pt-inline-note">
-          These start as generic defaults. Update them from your payslip and EBA so calculations match exactly — every rate below is editable.
+          Defaults below match the Eastwood Private Hospital Enterprise Agreement (cl.24, 29, 31, 32, 34, 35, 37), cross-checked against real payslips. Every rate is still editable if your award/EBA differs or changes.
         </div>
         <div className="pt-field">
           <label>Employment type</label>
@@ -68,7 +68,8 @@ export default function SettingsTab({ settings, onChange, onExportAll, onImportF
           </label>
         )}
 
-        <h3>Penalty rate multipliers</h3>
+        <h3>Weekend & public holiday rates (cl.29, 35.1)</h3>
+        <div className="pt-helptext" style={{ marginTop: -4 }}>These flat rates replace any shift loading below — they don't stack with afternoon/night loadings.</div>
         <div className="pt-row-3">
           <div className="pt-field">
             <label>Saturday</label>
@@ -84,26 +85,25 @@ export default function SettingsTab({ settings, onChange, onExportAll, onImportF
           </div>
         </div>
 
+        <h3>Weekday shift loadings (cl.32)</h3>
+        <div className="pt-helptext" style={{ marginTop: -4 }}>
+          Applies to the whole shift when it qualifies — afternoon = starts at/after 12pm and finishes after 6pm; night = starts at/after 6pm. Mon-Fri only.
+        </div>
         <div className="pt-row-2">
           <div className="pt-field">
-            <label>Evening rate starts at</label>
-            <input
-              type="time"
-              value={settings.eveningStartTime ?? ''}
-              onChange={(e) => set('eveningStartTime', e.target.value || null)}
-            />
+            <label>Afternoon shift multiplier</label>
+            <input type="number" step="0.001" value={settings.multipliers.afternoonShift} onChange={(e) => set('multipliers', { ...settings.multipliers, afternoonShift: Number(e.target.value) })} />
           </div>
           <div className="pt-field">
-            <label>Evening multiplier</label>
-            <input type="number" step="0.01" value={settings.multipliers.evening} onChange={(e) => set('multipliers', { ...settings.multipliers, evening: Number(e.target.value) })} />
+            <label>Night shift multiplier</label>
+            <input type="number" step="0.001" value={settings.multipliers.nightShift} onChange={(e) => set('multipliers', { ...settings.multipliers, nightShift: Number(e.target.value) })} />
           </div>
         </div>
-        <div className="pt-helptext">Leave "evening rate starts at" blank if your EBA has no weeknight evening loading.</div>
 
-        <h3>Overtime</h3>
+        <h3>Overtime (cl.31)</h3>
         <div className="pt-row-2">
           <div className="pt-field">
-            <label>Daily OT threshold (hrs)</label>
+            <label>Daily OT threshold (hrs/shift)</label>
             <input
               type="number"
               step="0.1"
@@ -111,12 +111,6 @@ export default function SettingsTab({ settings, onChange, onExportAll, onImportF
               onChange={(e) => set('overtime', { ...settings.overtime, dailyThresholdHours: e.target.value === '' ? null : Number(e.target.value) })}
             />
           </div>
-          <div className="pt-field">
-            <label>Daily OT multiplier</label>
-            <input type="number" step="0.01" value={settings.overtime.dailyMultiplier} onChange={(e) => set('overtime', { ...settings.overtime, dailyMultiplier: Number(e.target.value) })} />
-          </div>
-        </div>
-        <div className="pt-row-2">
           <div className="pt-field">
             <label>Fortnight OT threshold (hrs)</label>
             <input
@@ -126,12 +120,35 @@ export default function SettingsTab({ settings, onChange, onExportAll, onImportF
               onChange={(e) => set('overtime', { ...settings.overtime, fortnightThresholdHours: e.target.value === '' ? null : Number(e.target.value) })}
             />
           </div>
+        </div>
+        <div className="pt-helptext">Hours beyond either threshold are paid as overtime instead of the day's normal rate. Leave a threshold blank to disable that rule.</div>
+        <div className="pt-row-3">
           <div className="pt-field">
-            <label>Fortnight OT multiplier</label>
-            <input type="number" step="0.01" value={settings.overtime.fortnightMultiplier} onChange={(e) => set('overtime', { ...settings.overtime, fortnightMultiplier: Number(e.target.value) })} />
+            <label>Mon-Sat OT: first N hours</label>
+            <input type="number" step="0.5" value={settings.overtime.weekdaySaturdayTier1Hours} onChange={(e) => set('overtime', { ...settings.overtime, weekdaySaturdayTier1Hours: Number(e.target.value) })} />
+          </div>
+          <div className="pt-field">
+            <label>...at multiplier</label>
+            <input type="number" step="0.01" value={settings.overtime.weekdaySaturdayTier1Multiplier} onChange={(e) => set('overtime', { ...settings.overtime, weekdaySaturdayTier1Multiplier: Number(e.target.value) })} />
+          </div>
+          <div className="pt-field">
+            <label>Then multiplier</label>
+            <input type="number" step="0.01" value={settings.overtime.weekdaySaturdayTier2Multiplier} onChange={(e) => set('overtime', { ...settings.overtime, weekdaySaturdayTier2Multiplier: Number(e.target.value) })} />
           </div>
         </div>
-        <div className="pt-helptext">Leave a threshold blank to disable that overtime rule entirely.</div>
+        <div className="pt-row-2">
+          <div className="pt-field">
+            <label>Sunday OT multiplier (flat)</label>
+            <input type="number" step="0.01" value={settings.overtime.sundayMultiplier} onChange={(e) => set('overtime', { ...settings.overtime, sundayMultiplier: Number(e.target.value) })} />
+          </div>
+          <div className="pt-field">
+            <label>Public holiday OT multiplier (flat)</label>
+            <input type="number" step="0.01" value={settings.overtime.publicHolidayMultiplier} onChange={(e) => set('overtime', { ...settings.overtime, publicHolidayMultiplier: Number(e.target.value) })} />
+          </div>
+        </div>
+        <div className="pt-helptext">
+          A missed/interrupted meal break (cl.30.2) is also paid at these overtime rates for the hours worked through it — logged per shift, not here.
+        </div>
       </div>
 
       <div className="pt-card">
@@ -177,12 +194,12 @@ export default function SettingsTab({ settings, onChange, onExportAll, onImportF
                     </label>
                   </div>
                   <label className="pt-checkbox">
-                    <input type="checkbox" checked={day.parkingPaid} onChange={(e) => setRosterDay(i, { parkingPaid: e.target.checked })} />
-                    Usually paid for parking
+                    <input type="checkbox" checked={day.parkingCharged} onChange={(e) => setRosterDay(i, { parkingCharged: e.target.checked })} />
+                    Usually charged for parking
                   </label>
-                  {day.parkingPaid && (
+                  {day.parkingCharged && (
                     <div className="pt-field">
-                      <label>Usual parking amount ($)</label>
+                      <label>Usual parking charge ($)</label>
                       <input type="number" step="0.01" value={day.parkingAmount} onChange={(e) => setRosterDay(i, { parkingAmount: Number(e.target.value) })} />
                     </div>
                   )}
@@ -212,18 +229,25 @@ export default function SettingsTab({ settings, onChange, onExportAll, onImportF
       </div>
 
       <div className="pt-card">
-        <h2>Leave accrual</h2>
+        <h2>Leave accrual (cl.34, 37)</h2>
         <div className="pt-row-2">
           <div className="pt-field">
-            <label>Annual leave accrual (hrs per hr worked)</label>
+            <label>Annual leave accrual (hrs per ordinary hr)</label>
             <input type="number" step="0.0001" value={settings.leave.annualAccrualHoursPerHourWorked} onChange={(e) => set('leave', { ...settings.leave, annualAccrualHoursPerHourWorked: Number(e.target.value) })} />
           </div>
           <div className="pt-field">
-            <label>Personal leave accrual (hrs per hr worked)</label>
+            <label>Personal leave accrual (hrs per ordinary hr)</label>
             <input type="number" step="0.0001" value={settings.leave.personalAccrualHoursPerHourWorked} onChange={(e) => set('leave', { ...settings.leave, personalAccrualHoursPerHourWorked: Number(e.target.value) })} />
           </div>
         </div>
-        <div className="pt-helptext">Defaults use the NES standard (4 weeks annual / 10 days personal leave per year, full-time). Adjust to match your EBA.</div>
+        <div className="pt-helptext">
+          Default is 5 weeks (190h) annual leave per year for a day worker — set to 6/52 (0.1154) for 6 weeks (228h) if you're a shiftworker under cl.34.1(b) (rostered 7 days/week and regularly work weekends). Personal leave defaults to 10 days/year. Both accrue on ordinary hours (including shift-loaded and missed-meal hours) but not true overtime.
+        </div>
+        <div className="pt-field">
+          <label>Annual leave loading (%)</label>
+          <input type="number" step="0.1" value={settings.leave.annualLeaveLoadingPercent} onChange={(e) => set('leave', { ...settings.leave, annualLeaveLoadingPercent: Number(e.target.value) })} />
+        </div>
+        <div className="pt-helptext">Paid on top of ordinary pay for annual leave taken (cl.34.5). Personal leave has no loading.</div>
 
         <h3>Opening balances (from a recent payslip)</h3>
         <div className="pt-row-2">
@@ -241,8 +265,8 @@ export default function SettingsTab({ settings, onChange, onExportAll, onImportF
           <input type="date" value={settings.leave.openingBalanceAsOfDate} onChange={(e) => set('leave', { ...settings.leave, openingBalanceAsOfDate: e.target.value })} />
         </div>
         <label className="pt-checkbox">
-          <input type="checkbox" checked={settings.leave.accrueOnLeaveHours} onChange={(e) => set('leave', { ...settings.leave, accrueOnLeaveHours: e.target.checked })} />
-          Leave taken still counts toward future leave accrual
+          <input type="checkbox" checked={settings.leave.accrueOnLeaveHoursTaken} onChange={(e) => set('leave', { ...settings.leave, accrueOnLeaveHoursTaken: e.target.checked })} />
+          Paid leave taken still counts toward future leave accrual
         </label>
       </div>
 
@@ -258,6 +282,7 @@ export default function SettingsTab({ settings, onChange, onExportAll, onImportF
             Paid by default
           </label>
         </div>
+        <div className="pt-helptext">EBA cl.30.1: shifts over 5 hours get an unpaid break of 30-60 minutes, usually taken between the 4th and 6th hour.</div>
       </div>
 
       <div className="pt-card">

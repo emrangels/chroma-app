@@ -25,8 +25,9 @@ export default function ShiftForm({ date, existing, settings, onSave, onDelete, 
   const [dayTypeOverride, setDayTypeOverride] = useState<DayType | ''>(existing?.dayTypeOverride ?? '');
   const [expected, setExpected] = useState<TimeBlock>(existing?.expected ?? blankBlock(settings));
   const [worked, setWorked] = useState<TimeBlock>(existing?.worked ?? blankBlock(settings));
-  const [parkingPaid, setParkingPaid] = useState(existing?.parkingPaid ?? roster.parkingPaid);
+  const [parkingCharged, setParkingCharged] = useState(existing?.parkingCharged ?? roster.parkingCharged);
   const [parkingAmount, setParkingAmount] = useState(existing?.parkingAmount ?? (roster.parkingAmount || settings.parking.defaultAmount));
+  const [missedMealHours, setMissedMealHours] = useState(existing?.missedMealHours ?? 0);
   const [leaveEnabled, setLeaveEnabled] = useState(!!existing?.leave);
   const [leaveType, setLeaveType] = useState<LeaveType>(existing?.leave?.type ?? 'annual');
   const [leaveHours, setLeaveHours] = useState(existing?.leave?.hours ?? 7.6);
@@ -38,7 +39,7 @@ export default function ShiftForm({ date, existing, settings, onSave, onDelete, 
     setUsedTemplate(checked);
     if (checked && roster.enabled) {
       setExpected({ start: roster.start, end: roster.end, breakMinutes: roster.breakMinutes, paidBreak: roster.paidBreak });
-      setParkingPaid(roster.parkingPaid);
+      setParkingCharged(roster.parkingCharged);
       setParkingAmount(roster.parkingAmount);
     }
   }
@@ -57,8 +58,9 @@ export default function ShiftForm({ date, existing, settings, onSave, onDelete, 
       notWorked,
       expected,
       worked: notWorked ? null : worked,
+      missedMealHours: notWorked ? 0 : Number(missedMealHours) || 0,
       leave: leaveEnabled ? { type: leaveType, hours: Number(leaveHours) || 0 } : null,
-      parkingPaid,
+      parkingCharged,
       parkingAmount: Number(parkingAmount) || 0,
       notes,
     };
@@ -150,18 +152,29 @@ export default function ShiftForm({ date, existing, settings, onSave, onDelete, 
             Copy from expected shift
           </button>
 
+          <div className="pt-field">
+            <label>Hours worked through your meal break (not released)</label>
+            <input type="number" min={0} step="0.1" value={missedMealHours} onChange={(e) => setMissedMealHours(Number(e.target.value))} />
+          </div>
+          <div className="pt-helptext">
+            If you weren't released for your break, that time is paid at the overtime rate — leave at 0 if you got your break as normal.
+          </div>
+
           <div className="pt-divider" />
 
           <label className="pt-checkbox">
-            <input type="checkbox" checked={parkingPaid} onChange={(e) => setParkingPaid(e.target.checked)} />
-            Paid for parking today
+            <input type="checkbox" checked={parkingCharged} onChange={(e) => setParkingCharged(e.target.checked)} />
+            Charged for parking today
           </label>
-          {parkingPaid && (
+          {parkingCharged && (
             <div className="pt-field">
-              <label>Parking amount ($)</label>
+              <label>Parking charge ($)</label>
               <input type="number" min={0} step="0.01" value={parkingAmount} onChange={(e) => setParkingAmount(Number(e.target.value))} />
             </div>
           )}
+          <div className="pt-helptext">
+            Tracked as a deduction from your net pay — it doesn't reduce your gross pay estimate.
+          </div>
         </>
       )}
 
