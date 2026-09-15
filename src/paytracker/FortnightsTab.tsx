@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { applyFortnightOvertime, calculateShift, dateToISO, getFortnightPeriod, parseISODate } from './calculations';
+import { recognizePayslipImage } from './payslipOcr';
 import { downloadCSV } from './storage';
 import { PaySettings, PayslipRecord, ShiftEntry } from './types';
 import { dayTypeLabel, formatDateLabel, formatHours, formatMoney, newId } from './utils';
@@ -80,6 +81,46 @@ export default function FortnightsTab({ shifts, settings, payslips, onSavePaysli
     });
   }
 
+  const [ocrStatus, setOcrStatus] = useState<'idle' | 'reading' | 'done' | 'error'>('idle');
+  const [ocrMessage, setOcrMessage] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handlePayslipUpload(file: File) {
+    setOcrStatus('reading');
+    setOcrMessage('Reading payslip…');
+    try {
+      const parsed = await recognizePayslipImage(file);
+      if (parsed.grossPay == null && parsed.periodStart == null) {
+        setOcrStatus('error');
+        setOcrMessage("Couldn't read this clearly — try a clearer photo, or enter the gross pay manually below.");
+        return;
+      }
+
+      const targetPeriodStart = parsed.periodStart ?? period.start;
+      const existing = payslips.find((p) => p.periodStart === targetPeriodStart) ?? null;
+      onSavePayslip({
+        id: existing?.id ?? newId(),
+        periodStart: targetPeriodStart,
+        actualGrossPay: parsed.grossPay,
+        actualAnnualLeaveBalance: existing?.actualAnnualLeaveBalance ?? null,
+        actualPersonalLeaveBalance: existing?.actualPersonalLeaveBalance ?? null,
+        notes: existing?.notes ?? '',
+      });
+
+      if (parsed.periodStart) {
+        setPeriodIndex(getFortnightPeriod(parsed.periodStart, settings.payCycleAnchorDate).index);
+      }
+
+      setOcrStatus('done');
+      const periodText = parsed.periodStart && parsed.periodEnd ? `${formatDateLabel(parsed.periodStart)} – ${formatDateLabel(parsed.periodEnd)}` : "this fortnight (couldn't read the period dates)";
+      const grossText = parsed.grossPay != null ? formatMoney(parsed.grossPay) : "couldn't read the gross pay";
+      setOcrMessage(`Read payslip for ${periodText}: gross pay ${grossText}.`);
+    } catch {
+      setOcrStatus('error');
+      setOcrMessage("Something went wrong reading that image — enter the gross pay manually below.");
+    }
+  }
+
   function exportCSV() {
     const header = ['Date', 'Day type', 'Expected', 'Worked', 'Paid hours', 'Missed meal hrs', 'OT hrs', 'Leave', 'Parking charge', 'Gross pay'];
     const rows = calcs.map((c) => [
@@ -141,6 +182,40 @@ export default function FortnightsTab({ shifts, settings, payslips, onSavePaysli
 
       <div className="pt-card">
         <h2>Compare against your payslip</h2>
+
+        <div className="pt-field">
+          <label>Upload a payslip screenshot or photo</label>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handlePayslipUpload(file);
+              e.target.value = '';
+            }}
+          />
+        </div>
+        {ocrStatus !== 'idle' && (
+          <div
+            className="pt-inline-note"
+            style={
+              ocrStatus === 'error'
+                ? { background: '#fdeceb', color: '#b42318' }
+                : ocrStatus === 'done'
+                ? { background: '#dcfce7', color: '#166534' }
+                : undefined
+            }
+          >
+            {ocrMessage}
+          </div>
+        )}
+        <div className="pt-helptext" style={{ marginTop: -4 }}>
+          Reads the pay period and gross pay straight off the photo and fills them in below — runs entirely in your browser, the photo itself is never uploaded anywhere.
+        </div>
+
+        <div className="pt-divider" />
+
         <div className="pt-field">
           <label>Actual gross pay from payslip ($)</label>
           <input type="number" step="0.01" value={actualPay} onChange={(e) => setActualPay(e.target.value)} onBlur={savePayslipAmount} placeholder="e.g. 2450.30" />
