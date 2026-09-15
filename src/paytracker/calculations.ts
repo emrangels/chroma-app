@@ -56,6 +56,13 @@ export function classifyDayType(iso: string, settings: PaySettings, override: Da
   return 'weekday';
 }
 
+/** Parking charge for a shift starting at `start`, based on the before/from-threshold rule in Settings. */
+export function parkingAmountForStart(start: string, settings: PaySettings): number {
+  return timeToMinutes(start) < timeToMinutes(settings.parking.thresholdTime)
+    ? settings.parking.beforeThresholdAmount
+    : settings.parking.fromThresholdAmount;
+}
+
 /**
  * Classifies a whole weekday shift per EBA cl.32.1: afternoon shift = starts >=12:00
  * and finishes after 18:00 same day; night shift = starts >=18:00 (and, given shifts

@@ -8,7 +8,6 @@ function defaultRosterDay(): RosterDay {
     breakMinutes: 30,
     paidBreak: false,
     parkingCharged: false,
-    parkingAmount: 0,
   };
 }
 
@@ -73,7 +72,9 @@ export function defaultSettings(): PaySettings {
       paidByDefault: false,
     },
     parking: {
-      defaultAmount: 0,
+      beforeThresholdAmount: 12,
+      fromThresholdAmount: 3,
+      thresholdTime: '12:00',
     },
     leave: {
       // EBA cl.34.1: 5 weeks/yr (190h) for a day worker, 6 weeks/yr (228h) for a shiftworker

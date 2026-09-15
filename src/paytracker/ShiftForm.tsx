@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { classifyDayType } from './calculations';
+import { classifyDayType, parkingAmountForStart } from './calculations';
 import { DayType, LeaveType, PaySettings, ShiftEntry, TimeBlock } from './types';
 import { dayTypeLabel, newId } from './utils';
 
@@ -26,7 +26,7 @@ export default function ShiftForm({ date, existing, settings, onSave, onDelete, 
   const [expected, setExpected] = useState<TimeBlock>(existing?.expected ?? blankBlock(settings));
   const [worked, setWorked] = useState<TimeBlock>(existing?.worked ?? blankBlock(settings));
   const [parkingCharged, setParkingCharged] = useState(existing?.parkingCharged ?? roster.parkingCharged);
-  const [parkingAmount, setParkingAmount] = useState(existing?.parkingAmount ?? (roster.parkingAmount || settings.parking.defaultAmount));
+  const [parkingAmount, setParkingAmount] = useState(existing?.parkingAmount ?? parkingAmountForStart(worked.start, settings));
   const [missedMealHours, setMissedMealHours] = useState(existing?.missedMealHours ?? 0);
   const [manualOvertimeHours, setManualOvertimeHours] = useState(existing?.manualOvertimeHours ?? 0);
   const [leaveEnabled, setLeaveEnabled] = useState(!!existing?.leave);
@@ -41,12 +41,25 @@ export default function ShiftForm({ date, existing, settings, onSave, onDelete, 
     if (checked && roster.enabled) {
       setExpected({ start: roster.start, end: roster.end, breakMinutes: roster.breakMinutes, paidBreak: roster.paidBreak });
       setParkingCharged(roster.parkingCharged);
-      setParkingAmount(roster.parkingAmount);
+      setParkingAmount(parkingAmountForStart(roster.start, settings));
     }
+  }
+
+  function handleParkingToggle(checked: boolean) {
+    setParkingCharged(checked);
+    if (checked) {
+      setParkingAmount(parkingAmountForStart(worked.start, settings));
+    }
+  }
+
+  function setWorkedStart(start: string) {
+    setWorked({ ...worked, start });
+    if (parkingCharged) setParkingAmount(parkingAmountForStart(start, settings));
   }
 
   function copyExpectedToWorked() {
     setWorked({ ...expected });
+    if (parkingCharged) setParkingAmount(parkingAmountForStart(expected.start, settings));
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -131,7 +144,7 @@ export default function ShiftForm({ date, existing, settings, onSave, onDelete, 
           <div className="pt-row-2">
             <div className="pt-field">
               <label>Start</label>
-              <input type="time" value={worked.start} onChange={(e) => setWorked({ ...worked, start: e.target.value })} />
+              <input type="time" value={worked.start} onChange={(e) => setWorkedStart(e.target.value)} />
             </div>
             <div className="pt-field">
               <label>End</label>
@@ -173,7 +186,7 @@ export default function ShiftForm({ date, existing, settings, onSave, onDelete, 
           <div className="pt-divider" />
 
           <label className="pt-checkbox">
-            <input type="checkbox" checked={parkingCharged} onChange={(e) => setParkingCharged(e.target.checked)} />
+            <input type="checkbox" checked={parkingCharged} onChange={(e) => handleParkingToggle(e.target.checked)} />
             Charged for parking today
           </label>
           {parkingCharged && (
@@ -183,7 +196,7 @@ export default function ShiftForm({ date, existing, settings, onSave, onDelete, 
             </div>
           )}
           <div className="pt-helptext">
-            Tracked as a deduction from your net pay — it doesn't reduce your gross pay estimate.
+            Auto-filled from your start time (before {settings.parking.thresholdTime} = ${settings.parking.beforeThresholdAmount}, from {settings.parking.thresholdTime} = ${settings.parking.fromThresholdAmount}) — edit it if today was different. Tracked as a deduction from your net pay, not part of your gross pay estimate.
           </div>
         </>
       )}

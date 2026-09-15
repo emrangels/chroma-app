@@ -195,14 +195,8 @@ export default function SettingsTab({ settings, onChange, onExportAll, onImportF
                   </div>
                   <label className="pt-checkbox">
                     <input type="checkbox" checked={day.parkingCharged} onChange={(e) => setRosterDay(i, { parkingCharged: e.target.checked })} />
-                    Usually charged for parking
+                    Usually charged for parking (amount set in the Parking section below)
                   </label>
-                  {day.parkingCharged && (
-                    <div className="pt-field">
-                      <label>Usual parking charge ($)</label>
-                      <input type="number" step="0.01" value={day.parkingAmount} onChange={(e) => setRosterDay(i, { parkingAmount: Number(e.target.value) })} />
-                    </div>
-                  )}
                 </>
               )}
             </div>
@@ -283,6 +277,27 @@ export default function SettingsTab({ settings, onChange, onExportAll, onImportF
           </label>
         </div>
         <div className="pt-helptext">EBA cl.30.1: shifts over 5 hours get an unpaid break of 30-60 minutes, usually taken between the 4th and 6th hour.</div>
+      </div>
+
+      <div className="pt-card">
+        <h2>Parking</h2>
+        <div className="pt-helptext" style={{ marginTop: -4 }}>
+          When you mark a shift as charged for parking, the amount auto-fills based on its start time — edit it on the shift if a particular day was different.
+        </div>
+        <div className="pt-row-2">
+          <div className="pt-field">
+            <label>Shift starts before threshold ($)</label>
+            <input type="number" step="0.01" value={settings.parking.beforeThresholdAmount} onChange={(e) => set('parking', { ...settings.parking, beforeThresholdAmount: Number(e.target.value) })} />
+          </div>
+          <div className="pt-field">
+            <label>Shift starts at/after threshold ($)</label>
+            <input type="number" step="0.01" value={settings.parking.fromThresholdAmount} onChange={(e) => set('parking', { ...settings.parking, fromThresholdAmount: Number(e.target.value) })} />
+          </div>
+        </div>
+        <div className="pt-field">
+          <label>Threshold time</label>
+          <input type="time" value={settings.parking.thresholdTime} onChange={(e) => set('parking', { ...settings.parking, thresholdTime: e.target.value })} />
+        </div>
       </div>
 
       <div className="pt-card">

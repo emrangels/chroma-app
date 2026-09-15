@@ -18,7 +18,6 @@ export interface RosterDay {
   breakMinutes: number;
   paidBreak: boolean;
   parkingCharged: boolean;
-  parkingAmount: number;
 }
 
 export interface OvertimeRules {
@@ -60,7 +59,11 @@ export interface PaySettings {
     paidByDefault: boolean;
   };
   parking: {
-    defaultAmount: number;
+    /** Charge for a shift starting before thresholdTime. */
+    beforeThresholdAmount: number;
+    /** Charge for a shift starting at/after thresholdTime. */
+    fromThresholdAmount: number;
+    thresholdTime: string; // e.g. "12:00"
   };
   leave: LeaveSettings;
   payCycleAnchorDate: string; // ISO date known to be the FIRST day of a fortnight
