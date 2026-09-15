@@ -176,12 +176,16 @@ export function calculateShift(shift: ShiftEntry, settings: PaySettings): ShiftC
   let dayCategoryHours = round2(totalPaidHours - missedMealHours);
 
   // EBA cl.24.2: shifts longer than the daily threshold are overtime for the excess.
-  let overtimeHours = 0;
+  let autoOvertimeHours = 0;
   const dailyThreshold = settings.overtime.dailyThresholdHours;
   if (dailyThreshold != null && totalPaidHours > dailyThreshold) {
-    overtimeHours = round2(Math.min(dayCategoryHours, totalPaidHours - dailyThreshold));
-    dayCategoryHours = round2(dayCategoryHours - overtimeHours);
+    autoOvertimeHours = round2(Math.min(dayCategoryHours, totalPaidHours - dailyThreshold));
   }
+  // Hours you were told/rostered as overtime (e.g. asked to stay back, or an extra shift) —
+  // takes priority over the auto-detected threshold excess rather than stacking with it.
+  const manualOvertimeHours = Math.min(Math.max(0, shift.manualOvertimeHours || 0), dayCategoryHours);
+  const overtimeHours = round2(Math.max(autoOvertimeHours, manualOvertimeHours));
+  dayCategoryHours = round2(dayCategoryHours - overtimeHours);
 
   let hours = setCategoryHours(emptyHours(), dayType, weekdayCategory, dayCategoryHours);
   hours.missedMealOvertimeHours = missedMealHours;

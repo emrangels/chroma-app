@@ -28,6 +28,7 @@ export default function ShiftForm({ date, existing, settings, onSave, onDelete, 
   const [parkingCharged, setParkingCharged] = useState(existing?.parkingCharged ?? roster.parkingCharged);
   const [parkingAmount, setParkingAmount] = useState(existing?.parkingAmount ?? (roster.parkingAmount || settings.parking.defaultAmount));
   const [missedMealHours, setMissedMealHours] = useState(existing?.missedMealHours ?? 0);
+  const [manualOvertimeHours, setManualOvertimeHours] = useState(existing?.manualOvertimeHours ?? 0);
   const [leaveEnabled, setLeaveEnabled] = useState(!!existing?.leave);
   const [leaveType, setLeaveType] = useState<LeaveType>(existing?.leave?.type ?? 'annual');
   const [leaveHours, setLeaveHours] = useState(existing?.leave?.hours ?? 7.6);
@@ -59,6 +60,7 @@ export default function ShiftForm({ date, existing, settings, onSave, onDelete, 
       expected,
       worked: notWorked ? null : worked,
       missedMealHours: notWorked ? 0 : Number(missedMealHours) || 0,
+      manualOvertimeHours: notWorked ? 0 : Number(manualOvertimeHours) || 0,
       leave: leaveEnabled ? { type: leaveType, hours: Number(leaveHours) || 0 } : null,
       parkingCharged,
       parkingAmount: Number(parkingAmount) || 0,
@@ -151,6 +153,14 @@ export default function ShiftForm({ date, existing, settings, onSave, onDelete, 
           <button type="button" className="pt-btn pt-btn-secondary pt-btn-sm" onClick={copyExpectedToWorked}>
             Copy from expected shift
           </button>
+
+          <div className="pt-field">
+            <label>Overtime hours (if you were told/rostered this shift included OT)</label>
+            <input type="number" min={0} step="0.1" value={manualOvertimeHours} onChange={(e) => setManualOvertimeHours(Number(e.target.value))} />
+          </div>
+          <div className="pt-helptext">
+            Only needed if it's not already obvious from the times above (e.g. an extra shift, or being asked to stay back) — leave at 0 otherwise. A shift over {settings.overtime.dailyThresholdHours ?? 10}h is detected as overtime automatically.
+          </div>
 
           <div className="pt-field">
             <label>Hours worked through your meal break (not released)</label>

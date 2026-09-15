@@ -78,6 +78,8 @@ export interface ShiftEntry {
   worked: TimeBlock | null;
   /** Hours worked through/instead of an unpaid meal break because the employee wasn't released (EBA cl.30.2) */
   missedMealHours: number;
+  /** Hours of this shift you were told/rostered as overtime, beyond whatever the daily/fortnight thresholds auto-detect. */
+  manualOvertimeHours: number;
   leave: { type: LeaveType; hours: number } | null;
   parkingCharged: boolean;
   parkingAmount: number;

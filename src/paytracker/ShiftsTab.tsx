@@ -76,6 +76,7 @@ export default function ShiftsTab({ shifts, settings, onSave, onDelete, pendingA
                     ? `Not worked — ${shift.leave.hours}h ${shift.leave.type} leave`
                     : 'Not worked'
                   : `${shift.worked?.start}–${shift.worked?.end} · ${formatHours(calc.hours.totalPaidHours)} paid`}
+                {calc.hours.overtimeHours > 0 && ` · ${formatHours(calc.hours.overtimeHours)} OT`}
                 {shift.missedMealHours > 0 && ` · ${shift.missedMealHours}h missed meal`}
                 {shift.parkingCharged && ` · Parking -${formatMoney(shift.parkingAmount)}`}
                 {variance != null && variance !== 0 && (
