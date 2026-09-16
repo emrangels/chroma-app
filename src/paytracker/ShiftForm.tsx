@@ -36,8 +36,12 @@ export default function ShiftForm({ date, existing, settings, onSave, onDelete, 
   function applyPreset(presetId: string) {
     const preset = settings.shiftPresets.find((p) => p.id === presetId);
     if (!preset) return;
+    const block = { start: preset.start, end: preset.end, breakMinutes: preset.breakMinutes, paidBreak: preset.paidBreak };
     setExpectedPresetId(presetId);
-    setExpected({ start: preset.start, end: preset.end, breakMinutes: preset.breakMinutes, paidBreak: preset.paidBreak });
+    setExpected(block);
+    // Rostered shift is the best guess for what you'll actually work — edit "Actually worked" below if it differs.
+    setWorked(block);
+    if (parkingCharged) setParkingAmount(parkingAmountForStart(preset.start, settings));
   }
 
   function handleParkingToggle(checked: boolean) {
@@ -95,6 +99,7 @@ export default function ShiftForm({ date, existing, settings, onSave, onDelete, 
 
       <div className="pt-field">
         <label>Rostered shift</label>
+        <div className="pt-helptext" style={{ marginBottom: 6 }}>Tap one to fill in both the expected and actually worked shift below — then just edit "Actually worked" if it turned out different.</div>
         {settings.shiftPresets.length === 0 && (
           <div className="pt-helptext">No shift presets set up yet — add your standard shift times in Settings to fill this in with one tap.</div>
         )}
