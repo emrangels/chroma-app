@@ -1,19 +1,21 @@
-import { PaySettings, PayTrackerData, RosterDay } from './types';
+import { PaySettings, PayTrackerData, ShiftPreset } from './types';
+import { formatTimeRange } from './utils';
 
-function defaultRosterDay(): RosterDay {
-  return {
-    enabled: false,
-    start: '09:00',
-    end: '17:00',
+export function defaultShiftPresets(): ShiftPreset[] {
+  const times: [string, string][] = [
+    ['06:30', '14:30'],
+    ['07:00', '15:00'],
+    ['12:00', '20:00'],
+    ['12:30', '20:30'],
+  ];
+  return times.map(([start, end], i) => ({
+    id: `preset-${i}`,
+    label: formatTimeRange(start, end),
+    start,
+    end,
     breakMinutes: 30,
     paidBreak: false,
-    parkingCharged: false,
-  };
-}
-
-// Index 0 = Sunday ... 6 = Saturday, matching Date.getDay()
-export function defaultRoster(): RosterDay[] {
-  return Array.from({ length: 7 }, () => defaultRosterDay());
+  }));
 }
 
 // A small starter set of Australian national public holidays. State-specific
@@ -92,7 +94,8 @@ export function defaultSettings(): PaySettings {
     },
     payCycleAnchorDate: '2025-01-06',
     publicHolidays: DEFAULT_PUBLIC_HOLIDAYS,
-    roster: defaultRoster(),
+    shiftPresets: defaultShiftPresets(),
+    usualWorkDays: [1, 2, 3], // Monday, Tuesday, Wednesday
   };
 }
 

@@ -22,6 +22,17 @@ export function formatDateLabel(iso: string): string {
   return `${WEEKDAY_SHORT[date.getDay()]} ${d}/${m}/${y}`;
 }
 
+function formatTime12h(time: string): string {
+  const [h, m] = time.split(':').map(Number);
+  const period = h < 12 ? 'am' : 'pm';
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return m === 0 ? `${hour12}${period}` : `${hour12}:${String(m).padStart(2, '0')}${period}`;
+}
+
+export function formatTimeRange(start: string, end: string): string {
+  return `${formatTime12h(start)}–${formatTime12h(end)}`;
+}
+
 export function dayTypeLabel(dayType: string): string {
   switch (dayType) {
     case 'saturday':

@@ -11,13 +11,13 @@ export interface TimeBlock {
   paidBreak: boolean;
 }
 
-export interface RosterDay {
-  enabled: boolean;
+export interface ShiftPreset {
+  id: string;
+  label: string;
   start: string;
   end: string;
   breakMinutes: number;
   paidBreak: boolean;
-  parkingCharged: boolean;
 }
 
 export interface OvertimeRules {
@@ -68,13 +68,17 @@ export interface PaySettings {
   leave: LeaveSettings;
   payCycleAnchorDate: string; // ISO date known to be the FIRST day of a fortnight
   publicHolidays: string[]; // ISO dates
-  roster: RosterDay[]; // length 7, index 0 = Sunday .. 6 = Saturday (matches Date.getDay())
+  /** Standard rostered shift times to pick from when logging a shift — since which of these you're on can vary day to day. */
+  shiftPresets: ShiftPreset[];
+  /** Weekdays (0 = Sunday .. 6 = Saturday) you're usually rostered on, for reference only. */
+  usualWorkDays: number[];
 }
 
 export interface ShiftEntry {
   id: string;
   date: string; // ISO yyyy-mm-dd
-  usedTemplate: boolean;
+  /** Which shift preset (if any) was used to fill in the expected shift. */
+  expectedPresetId: string | null;
   dayTypeOverride: DayType | null;
   notWorked: boolean;
   expected: TimeBlock | null;

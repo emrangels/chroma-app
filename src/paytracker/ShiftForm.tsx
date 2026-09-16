@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { classifyDayType, parkingAmountForStart } from './calculations';
 import { DayType, LeaveType, PaySettings, ShiftEntry, TimeBlock } from './types';
 import { dayTypeLabel, newId } from './utils';
@@ -17,15 +17,12 @@ function blankBlock(settings: PaySettings): TimeBlock {
 }
 
 export default function ShiftForm({ date, existing, settings, onSave, onDelete, onCancel }: Props) {
-  const weekday = useMemo(() => new Date(date + 'T00:00:00').getDay(), [date]);
-  const roster = settings.roster[weekday];
-
-  const [usedTemplate, setUsedTemplate] = useState(existing?.usedTemplate ?? false);
+  const [expectedPresetId, setExpectedPresetId] = useState<string | null>(existing?.expectedPresetId ?? null);
   const [notWorked, setNotWorked] = useState(existing?.notWorked ?? false);
   const [dayTypeOverride, setDayTypeOverride] = useState<DayType | ''>(existing?.dayTypeOverride ?? '');
   const [expected, setExpected] = useState<TimeBlock>(existing?.expected ?? blankBlock(settings));
   const [worked, setWorked] = useState<TimeBlock>(existing?.worked ?? blankBlock(settings));
-  const [parkingCharged, setParkingCharged] = useState(existing?.parkingCharged ?? roster.parkingCharged);
+  const [parkingCharged, setParkingCharged] = useState(existing?.parkingCharged ?? false);
   const [parkingAmount, setParkingAmount] = useState(existing?.parkingAmount ?? parkingAmountForStart(worked.start, settings));
   const [missedMealHours, setMissedMealHours] = useState(existing?.missedMealHours ?? 0);
   const [manualOvertimeHours, setManualOvertimeHours] = useState(existing?.manualOvertimeHours ?? 0);
@@ -36,13 +33,15 @@ export default function ShiftForm({ date, existing, settings, onSave, onDelete, 
 
   const autoDayType = classifyDayType(date, settings, null);
 
-  function applyTemplate(checked: boolean) {
-    setUsedTemplate(checked);
-    if (checked && roster.enabled) {
-      setExpected({ start: roster.start, end: roster.end, breakMinutes: roster.breakMinutes, paidBreak: roster.paidBreak });
-      setParkingCharged(roster.parkingCharged);
-      setParkingAmount(parkingAmountForStart(roster.start, settings));
-    }
+  function applyPreset(presetId: string) {
+    const preset = settings.shiftPresets.find((p) => p.id === presetId);
+    if (!preset) return;
+    const block = { start: preset.start, end: preset.end, breakMinutes: preset.breakMinutes, paidBreak: preset.paidBreak };
+    setExpectedPresetId(presetId);
+    setExpected(block);
+    // Rostered shift is the best guess for what you'll actually work — edit "Actually worked" below if it differs.
+    setWorked(block);
+    if (parkingCharged) setParkingAmount(parkingAmountForStart(preset.start, settings));
   }
 
   function handleParkingToggle(checked: boolean) {
@@ -67,7 +66,7 @@ export default function ShiftForm({ date, existing, settings, onSave, onDelete, 
     const shift: ShiftEntry = {
       id: existing?.id ?? newId(),
       date,
-      usedTemplate,
+      expectedPresetId,
       dayTypeOverride: dayTypeOverride || null,
       notWorked,
       expected,
@@ -98,34 +97,45 @@ export default function ShiftForm({ date, existing, settings, onSave, onDelete, 
         </select>
       </div>
 
-      <label className="pt-checkbox">
-        <input
-          type="checkbox"
-          checked={usedTemplate}
-          onChange={(e) => applyTemplate(e.target.checked)}
-        />
-        Same as usual roster {!roster.enabled && '(no usual roster set for this day in Settings)'}
-      </label>
+      <div className="pt-field">
+        <label>Rostered shift</label>
+        <div className="pt-helptext" style={{ marginBottom: 6 }}>Tap one to fill in both the expected and actually worked shift below — then just edit "Actually worked" if it turned out different.</div>
+        {settings.shiftPresets.length === 0 && (
+          <div className="pt-helptext">No shift presets set up yet — add your standard shift times in Settings to fill this in with one tap.</div>
+        )}
+        <div className="pt-btn-row">
+          {settings.shiftPresets.map((preset) => (
+            <button
+              key={preset.id}
+              type="button"
+              className={`pt-btn pt-btn-sm ${expectedPresetId === preset.id ? 'pt-btn-primary' : 'pt-btn-secondary'}`}
+              onClick={() => applyPreset(preset.id)}
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <h3>Expected shift</h3>
       <div className="pt-row-2">
         <div className="pt-field">
           <label>Start</label>
-          <input type="time" value={expected.start} onChange={(e) => setExpected({ ...expected, start: e.target.value })} />
+          <input type="time" value={expected.start} onChange={(e) => { setExpected({ ...expected, start: e.target.value }); setExpectedPresetId(null); }} />
         </div>
         <div className="pt-field">
           <label>End</label>
-          <input type="time" value={expected.end} onChange={(e) => setExpected({ ...expected, end: e.target.value })} />
+          <input type="time" value={expected.end} onChange={(e) => { setExpected({ ...expected, end: e.target.value }); setExpectedPresetId(null); }} />
         </div>
       </div>
       <div className="pt-row-2">
         <div className="pt-field">
           <label>Break (mins)</label>
-          <input type="number" min={0} value={expected.breakMinutes} onChange={(e) => setExpected({ ...expected, breakMinutes: Number(e.target.value) })} />
+          <input type="number" min={0} value={expected.breakMinutes} onChange={(e) => { setExpected({ ...expected, breakMinutes: Number(e.target.value) }); setExpectedPresetId(null); }} />
         </div>
         <div className="pt-field" style={{ display: 'flex', alignItems: 'flex-end' }}>
           <label className="pt-checkbox" style={{ marginBottom: 10 }}>
-            <input type="checkbox" checked={expected.paidBreak} onChange={(e) => setExpected({ ...expected, paidBreak: e.target.checked })} />
+            <input type="checkbox" checked={expected.paidBreak} onChange={(e) => { setExpected({ ...expected, paidBreak: e.target.checked }); setExpectedPresetId(null); }} />
             Break is paid
           </label>
         </div>
